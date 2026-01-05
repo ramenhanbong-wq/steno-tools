@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 단락 분할기 v13</title>
+    <style>
+        body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; background-color: #f0f2f5; padding: 30px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h2 { margin-top: 0; color: #1a1a1a; font-size: 28px; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 30px; font-size: 15px; background: #fff3cd; display: inline-block; padding: 5px 15px; border-radius: 5px; color: #856404; font-weight: bold; line-height: 1.5; }
+
+        .controls { 
+            display: flex; gap: 15px; align-items: center; margin-bottom: 30px; 
+            background: #eef2f5; padding: 20px; border-radius: 12px; flex-wrap: wrap;
+        }
+        .input-group { display: flex; align-items: center; gap: 10px; }
+        .input-group label { font-weight: bold; font-size: 16px; }
+        .input-group input[type="number"] { 
+            width: 80px; padding: 10px; border: 2px solid #ddd; border-radius: 6px; 
+            font-size: 16px; text-align: center; font-weight: bold; color: #2c3e50;
+        }
+
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; display: flex; align-items: center; gap: 5px; }
+        .btn-primary { background-color: #2980b9; color: white; }
+        .btn-primary:hover { background-color: #1c5980; }
+        .btn-success { background-color: #27ae60; color: white; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.3); }
+        .btn-success:hover { background-color: #219150; transform: translateY(-2px); }
+        .btn-secondary { background-color: #7f8c8d; color: white; }
+
+        .input-area { 
+            width: 100%; height: 120px; padding: 20px; 
+            border: 2px solid #e1e4e8; border-radius: 12px; 
+            font-size: 16px; margin-bottom: 30px; resize: vertical; line-height: 1.6;
+            font-family: inherit; box-sizing: border-box;
+        }
+        
+        #result-container { display: flex; flex-direction: column; gap: 15px; }
+        
+        .paragraph-card { 
+            border: 1px solid #e1e4e8; border-radius: 12px; padding: 20px; 
+            background: #fff; position: relative; transition: all 0.3s ease;
+        }
+        .paragraph-card.locked { border: 2px solid #27ae60; background-color: #f6fffa; }
+        .paragraph-card.locked textarea { background-color: #f6fffa; }
+
+        .paragraph-card.overflow { border: 2px dashed #bdc3c7; background-color: #f8f9fa; }
+        .paragraph-card.overflow .card-header { color: #7f8c8d; }
+        .paragraph-card.overflow textarea { background-color: #f8f9fa; color: #555; }
+
+        .card-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 10px; font-size: 14px; color: #666; 
+        }
+
+        .status-badge { padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 12px; margin-left: 10px; }
+        .status-good { background: #d4edda; color: #155724; }
+        .status-warn { background: #f8d7da; color: #721c24; }
+        
+        .count-label { font-weight: bold; color: #2980b9; margin-left: 10px; font-size: 14px; }
+        .text-content { 
+            width: 100%; min-height: 80px; padding: 12px; 
+            border: 1px solid #ccc; border-radius: 8px; 
+            font-size: 17px; line-height: 1.7; resize: vertical; box-sizing: border-box;
+            font-family: inherit; overflow: hidden;
+        }
+
+        .lock-btn {
+            background: white; border: 1px solid #ccc; padding: 6px 12px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold;
+        }
+        .paragraph-card.locked .lock-btn { background: #27ae60; color: white; border-color: #27ae60; }
+
+        .total-counter {
+            position: fixed; bottom: 20px; right: 20px; 
+            background: #2c3e50; color: white; padding: 12px 20px; 
+            border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-size: 15px; font-weight: bold; z-index: 100;
+        }
+        
+        .hint { font-size: 12px; color: #999; margin-left: 5px; font-weight: normal; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📝 스마트 단락 분할기 v13 (줄바꿈 표기)</h2>
+    <div class="subtitle">
+        ⚠️ 계산 기준: <b>한글, 영어, 숫자</b>만 1글자로 칩니다.<br>
+        (공백, 줄바꿈, 마침표, 따옴표 등 모든 특수문자는 0글자 취급)
+    </div>
+    
+    <textarea id="sourceText" class="input-area" placeholder="여기에 원본 텍스트를 붙여넣으세요..."></textarea>
+
+    <div class="controls">
+        <div class="input-group">
+            <label>줄당(순수):</label>
+            <input type="number" id="paraTarget" value="50">
+            <span>(±3)</span>
+        </div>
+        <div class="input-group">
+            <label>총제한(순수):</label>
+            <input type="number" id="totalLimit" value="1500">
+        </div>
+        
+        <button class="btn btn-secondary" onclick="firstRun()">🚀 초기화</button>
+        <button class="btn btn-primary" onclick="reDistribute()">🔄 재분배</button>
+        <button class="btn btn-success" onclick="copyAll()">📋 최종 복사 (버리는 글 제외)</button>
+    </div>
+
+    <div id="result-container"></div>
+</div>
+
+<div class="total-counter" id="stickyCounter">유효: 0자 / 제한: 0자</div>
+
+<script>
+    const TOLERANCE = 3; 
+    const CIRCLE_NUMS = ['①', '②', '③', '④', '⑤']; 
+
+    // 순수 글자(한글/영어/숫자) 길이 측정
+    function getPureLen(str) {
+        if (!str) return 0;
+        const matches = str.match(/[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]/g);
+        return matches ? matches.length : 0;
+    }
+
+    function firstRun() {
+        const text = document.getElementById('sourceText').value;
+        const paraTarget = parseInt(document.getElementById('paraTarget').value);
+        const totalLimit = parseInt(document.getElementById('totalLimit').value);
+        
+        if (!text.trim()) { alert("텍스트를 입력해주세요."); return; }
+
+        const cutResult = cutTextByPureLimit(text, totalLimit);
+        const blocks = generateParagraphs(cutResult.valid, paraTarget);
+        if (cutResult.remainder) {
+            blocks.push({ content: cutResult.remainder, locked: false, isOverflow: true });
+        }
+        renderParagraphs(blocks, paraTarget);
+    }
+
+    function reDistribute() {
+        const container = document.getElementById('result-container');
+        const cards = container.querySelectorAll('.paragraph-card');
+        const paraTarget = parseInt(document.getElementById('paraTarget').value);
+        const totalLimit = parseInt(document.getElementById('totalLimit').value);
+        
+        let finalBlocks = [];
+        let unlockedBuffer = "";
+        
+        cards.forEach(card => {
+            const content = card.querySelector('.text-content').value;
+            const isLocked = card.classList.contains('locked');
+
+            if (isLocked) {
+                if (unlockedBuffer.trim().length > 0) {
+                    processBuffer(unlockedBuffer, finalBlocks, paraTarget, totalLimit);
+                    unlockedBuffer = "";
+                }
+                finalBlocks.push({ content: content, locked: true, isOverflow: false });
+            } else {
+                unlockedBuffer += content + " ";
+            }
+        });
+
+        if (unlockedBuffer.trim().length > 0) {
+            processBuffer(unlockedBuffer, finalBlocks, paraTarget, totalLimit);
+        }
+
+        finalBlocks = mergeConsecutiveOverflows(finalBlocks);
+        renderParagraphs(finalBlocks, paraTarget);
+    }
+
+    function processBuffer(buffer, blockArray, target, limit) {
+        let currentUsed = blockArray.reduce((acc, b) => acc + (b.isOverflow ? 0 : getPureLen(b.content)), 0);
+        let spaceLeft = limit - currentUsed;
+
+        if (spaceLeft <= 0) {
+            blockArray.push({ content: buffer.trim(), locked: false, isOverflow: true });
+        } else {
+            const cut = cutTextByPureLimit(buffer, spaceLeft);
+            const newParts = generateParagraphs(cut.valid, target);
+            newParts.forEach(p => blockArray.push(p));
+            if (cut.remainder) {
+                blockArray.push({ content: cut.remainder.trim(), locked: false, isOverflow: true });
+            }
+        }
+    }
+
+    window.handleKey = function(e, textarea) {
+        const paraTarget = parseInt(document.getElementById('paraTarget').value);
+        const currentCard = textarea.closest('.paragraph-card');
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const cursor = textarea.selectionStart;
+            const text = textarea.value;
+            const before = text.substring(0, cursor).trim();
+            const after = text.substring(cursor).trim();
+            
+            if (after.length === 0) return;
+
+            textarea.value = before;
+            const nextCard = currentCard.nextElementSibling;
+            
+            if (nextCard && !nextCard.classList.contains('locked') && !nextCard.classList.contains('overflow')) {
+                const nextTa = nextCard.querySelector('.text-content');
+                nextTa.value = after + " " + nextTa.value;
+                nextTa.focus();
+                nextTa.setSelectionRange(0, 0);
+            } else {
+                const newBlock = { content: after, locked: false, isOverflow: false };
+                const newCard = createCardDOM(newBlock, paraTarget);
+                currentCard.after(newCard);
+                const newTa = newCard.querySelector('.text-content');
+                newTa.focus();
+            }
+            updateAllCounts();
+        }
+
+        if (e.key === 'Backspace') {
+            if (textarea.selectionStart === 0 && textarea.selectionEnd === 0) {
+                const prevCard = currentCard.previousElementSibling;
+                if (prevCard && !prevCard.classList.contains('locked')) {
+                    e.preventDefault();
+                    const prevTa = prevCard.querySelector('.text-content');
+                    const currentText = textarea.value;
+                    const prevLen = prevTa.value.length; 
+
+                    prevTa.value = prevTa.value + " " + currentText;
+                    currentCard.remove();
+                    
+                    prevTa.focus();
+                    prevTa.setSelectionRange(prevLen + 1, prevLen + 1);
+                    
+                    updateAllCounts();
+                }
+            }
+        }
+    }
+
+    function createCardDOM(block, target) {
+        const card = document.createElement('div');
+        const len = getPureLen(block.content); 
+
+        if (block.isOverflow) {
+            card.className = `paragraph-card overflow`;
+            card.innerHTML = `
+                <div class="card-header">
+                    <strong>📦 나머지 (버리는 글)</strong>
+                    <span class="status-badge" style="background:#ddd; color:#555;">순수 ${len}자</span>
+                </div>
+                <textarea class="text-content" oninput="updateAllCounts()" onkeydown="handleKey(event, this)">${block.content}</textarea>
+            `;
+        } else {
+            card.className = `paragraph-card ${block.locked ? 'locked' : ''}`;
+            const diff = Math.abs(len - target);
+            const statusClass = diff <= TOLERANCE ? 'status-good' : 'status-warn';
+            
+            card.innerHTML = `
+                <div class="card-header">
+                    <div style="display:flex; align-items:center;">
+                        <strong class="index-label">#</strong>
+                        <span class="status-badge ${statusClass}">순수 ${len}자</span>
+                        <span class="count-label"></span> <span class="hint">(엔터/백스페이스 가능)</span>
+                    </div>
+                    <button class="lock-btn" onclick="toggleLock(this)">
+                        ${block.locked ? '🔒 잠금됨' : '🔓 잠금해제'}
+                    </button>
+                </div>
+                <textarea class="text-content" oninput="updateAllCounts()" onkeydown="handleKey(event, this)">${block.content}</textarea>
+            `;
+        }
+        
+        setTimeout(() => autoResize(card.querySelector('textarea')), 0);
+        return card;
+    }
+
+    function renderParagraphs(blocks, target) {
+        const container = document.getElementById('result-container');
+        container.innerHTML = ''; 
+        blocks.forEach(block => container.appendChild(createCardDOM(block, target)));
+        updateAllCounts();
+    }
+
+    window.updateAllCounts = function() {
+        const paraTarget = parseInt(document.getElementById('paraTarget').value);
+        const totalLimit = parseInt(document.getElementById('totalLimit').value);
+        const cards = document.querySelectorAll('.paragraph-card');
+        
+        let validCards = [];
+        let totalLen = 0;
+
+        cards.forEach(card => {
+            const ta = card.querySelector('.text-content');
+            autoResize(ta);
+            const pureLen = getPureLen(ta.value);
+            
+            if (!card.classList.contains('overflow')) {
+                validCards.push({ card: card, length: pureLen });
+                totalLen += pureLen;
+                
+                const badge = card.querySelector('.status-badge');
+                const diff = Math.abs(pureLen - paraTarget);
+                badge.className = `status-badge ${diff <= TOLERANCE ? 'status-good' : 'status-warn'}`;
+                badge.innerText = `순수 ${pureLen}자`;
+            } else {
+                card.querySelector('.status-badge').innerText = `순수 ${pureLen}자`;
+            }
+        });
+
+        validCards.forEach((item, index) => {
+            const card = item.card;
+            const reverseIndex = validCards.length - index; 
+            const labelSpan = card.querySelector('.count-label');
+            const indexStrong = card.querySelector('.index-label');
+            
+            indexStrong.innerText = `#${index + 1}`; 
+
+            if (reverseIndex >= 1 && reverseIndex <= 5) {
+                const circleIndex = 5 - reverseIndex; 
+                const circleChar = CIRCLE_NUMS[circleIndex];
+                
+                labelSpan.innerText = `${circleChar}-${item.length}`;
+                card.dataset.copyLabel = `${circleChar}-${item.length}`;
+            } else {
+                labelSpan.innerText = "";
+                delete card.dataset.copyLabel;
+            }
+        });
+
+        const counter = document.getElementById('stickyCounter');
+        counter.innerText = `유효(순수): ${totalLen}자 / 제한: ${totalLimit}자`;
+        counter.style.background = totalLen > totalLimit ? '#e74c3c' : '#2c3e50';
+    }
+
+    // ★ 수정된 복사 로직 (줄바꿈 추가)
+    window.copyAll = function() {
+        const cards = document.querySelectorAll('.paragraph-card');
+        let copyText = "";
+
+        cards.forEach(card => {
+            if (card.classList.contains('overflow')) return;
+
+            const text = card.querySelector('.text-content').value.trim();
+            if (!text) return;
+            
+            copyText += text;
+            if (card.dataset.copyLabel) {
+                 // ★ 핵심 수정: 줄바꿈(\n) 후 라벨 추가
+                 copyText += `\n${card.dataset.copyLabel}`;
+            }
+            copyText += "\n\n";
+        });
+
+        navigator.clipboard.writeText(copyText).then(() => {
+            alert("복사 완료! (버리는 글 제외, 줄바꿈 적용)");
+        });
+    }
+
+    function cutTextByPureLimit(text, limit) {
+        text = text.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+        let pureCount = 0;
+        let cutIndex = text.length;
+
+        for (let i = 0; i < text.length; i++) {
+            if (/[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]/.test(text[i])) {
+                pureCount++;
+            }
+            if (pureCount > limit) {
+                cutIndex = i;
+                break;
+            }
+        }
+        return { valid: text.substring(0, cutIndex), remainder: text.substring(cutIndex) };
+    }
+
+    function generateParagraphs(text, target) {
+        if (!text) return [];
+        const words = text.split(' ');
+        let result = [];
+        let currentLine = "";
+        
+        words.forEach(word => {
+            const nextLine = currentLine ? (currentLine + " " + word) : word;
+            const currentLen = getPureLen(currentLine);
+            const nextLen = getPureLen(nextLine);
+            let shouldBreak = false;
+            
+            if (nextLen > target + TOLERANCE) {
+                shouldBreak = true;
+            }
+            else if (nextLen >= target - TOLERANCE && currentLine.length > 0) {
+                 if (Math.abs(nextLen - target) > Math.abs(currentLen - target)) {
+                     shouldBreak = true;
+                 }
+            }
+            if (shouldBreak) { 
+                result.push({ content: currentLine, locked: false, isOverflow: false }); 
+                currentLine = word; 
+            } else { 
+                currentLine = nextLine; 
+            }
+        });
+        if (currentLine) result.push({ content: currentLine, locked: false, isOverflow: false });
+        return result;
+    }
+
+    function mergeConsecutiveOverflows(blocks) {
+        let merged = [];
+        let currentOverflow = null;
+        blocks.forEach(block => {
+            if (block.isOverflow) {
+                if (currentOverflow) currentOverflow.content += " " + block.content;
+                else currentOverflow = block;
+            } else {
+                if (currentOverflow) { merged.push(currentOverflow); currentOverflow = null; }
+                merged.push(block);
+            }
+        });
+        if (currentOverflow) merged.push(currentOverflow);
+        return merged;
+    }
+
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = (textarea.scrollHeight + 2) + 'px';
+    }
+
+    window.toggleLock = function(btn) {
+        const card = btn.closest('.paragraph-card');
+        card.classList.toggle('locked');
+        btn.innerText = card.classList.contains('locked') ? '🔒 잠금됨' : '🔓 잠금해제';
+    }
+</script>
+
+</body>
+</html>
