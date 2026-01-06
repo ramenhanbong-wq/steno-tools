@@ -3,202 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>속기용 텍스트 변환기 (심플 버전)</title>
+    <title>텍스트 정제기 - 쉽게 가자</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        body {
-            font-family: 'Malgun Gothic', sans-serif;
-            background-color: #f4f6f8;
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        :root {
+            /* 전체 테마: 크림색 + 파스텔 */
+            --bg-cream: #fdfbf7;
+            --card-white: #ffffff;
+            --main-pink: #ffb7b2;     
+            --text-main: #4a4a4a;
+            --text-sub: #666666; 
+            --border-line: #f0ebeb; 
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
+        body {
+            font-family: 'Gowun Dodum', 'Pretendard', sans-serif;
+            margin: 0;
+            background-color: var(--bg-cream);
+            color: var(--text-main);
+            padding-top: 90px; /* 메뉴바 공간 확보 */
+            padding-bottom: 50px;
         }
-        h2 { margin: 0; color: #333; }
+
+        /* --- [요청하신 상단 메뉴바 디자인] --- */
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            background: rgba(255, 255, 255, 0.98); 
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; box-sizing: border-box; z-index: 1000;
+            border-bottom: 1px solid #eee;
+        }
+        
+        /* 왼쪽 로고 영역 (이미지 속 문구 그대로) */
+        .logo {
+            font-size: 1.15rem; color: #555; text-decoration: none;
+            display: flex; align-items: center; gap: 8px; font-weight: bold;
+            letter-spacing: -0.5px;
+        }
+        
+        /* 오른쪽 네비게이션 */
+        .nav-links { display: flex; gap: 5px; align-items: center; }
+        
+        .nav-item {
+            text-decoration: none; color: #888; font-weight: 600; 
+            padding: 8px 16px; font-size: 0.95rem;
+            border-radius: 20px; /* 둥근 알약 모양 */
+            display: flex; align-items: center; gap: 6px;
+            transition: all 0.2s;
+        }
+        
+        /* 마우스 올렸을 때 */
+        .nav-item:hover { color: #333; background-color: #f5f5f5; }
+
+        /* 현재 페이지 활성화 (핑크색 알약) */
+        .nav-item.active {
+            background-color: #ffe3e3; /* 연한 핑크 배경 */
+            color: #d63384;            /* 진한 핑크 글씨 */
+            font-weight: 700;
+        }
+
+        /* --- [메인 컨테이너] --- */
+        .container {
+            max-width: 900px; margin: 0 auto;
+            background: var(--card-white);
+            padding: 40px;
+            border-radius: 25px;
+            border: 2px solid var(--border-line);
+            box-shadow: 0 8px 20px rgba(200, 200, 200, 0.1);
+        }
+
+        .header-area {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; padding-bottom: 15px;
+            border-bottom: 2px dashed var(--border-line);
+        }
+        .header-area h2 { margin: 0; color: var(--text-main); font-size: 1.8rem; letter-spacing: -1px; }
+        
+        .btn-dict-open {
+            background-color: #e2f0cb; color: #5d7a36;
+            padding: 8px 18px; border-radius: 15px; border: none; font-weight: bold;
+            cursor: pointer; transition: 0.2s; font-family: 'Gowun Dodum'; font-size: 0.95rem;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .btn-dict-open:hover { transform: translateY(-2px); filter: brightness(0.95); }
+
+        /* --- [입력/출력 영역] --- */
+        .label-area {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; margin-top: 10px;
+        }
+        label { font-weight: bold; color: var(--text-main); font-size: 1.1rem; display: flex; align-items: center; gap: 5px;}
+        
+        .char-count { 
+            font-size: 0.85rem; color: #ff9aa2; font-weight: bold; 
+            background: #fff0f0; padding: 5px 12px; border-radius: 12px;
+        }
 
         textarea {
-            width: 100%;
-            height: 250px;
-            margin-bottom: 10px;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            line-height: 1.6;
-            box-sizing: border-box;
-            resize: vertical;
+            width: 100%; height: 200px;
+            padding: 20px; margin-bottom: 20px;
+            border: 2px solid var(--border-line); border-radius: 15px;
+            font-size: 16px; line-height: 1.6; color: #555;
+            box-sizing: border-box; resize: vertical;
+            font-family: 'Pretendard', sans-serif;
+            transition: all 0.2s; outline: none;
         }
-        
-        .label-area {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 8px;
-        }
-        label { font-weight: bold; color: #555; font-size: 1.1em; margin: 0;}
-        
-        /* 글자 수 표시 스타일 */
-        .char-count { 
-            font-size: 0.9em; 
-            color: #27ae60; 
-            font-weight: bold; 
-            background: #e8f5e9;
-            padding: 4px 10px;
-            border-radius: 15px;
-        }
+        textarea:focus { border-color: var(--main-pink); box-shadow: 0 0 0 4px rgba(255, 183, 178, 0.1); }
 
-        button {
-            padding: 12px;
-            font-size: 15px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: opacity 0.2s;
-            color: white;
-        }
-        button:hover { opacity: 0.9; }
-
-        .btn-group { display: flex; gap: 10px; margin-bottom: 25px; }
-        .btn-clean { background-color: #e67e22; flex: 1; font-size: 1.1em; }
-        .btn-convert { background-color: #2980b9; flex: 1; font-size: 1.1em; }
-        .btn-reset { background-color: #95a5a6; width: 100px; padding: 10px;}
+        /* --- [버튼 그룹] --- */
+        .btn-group { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; }
         
-        .btn-dict-open { background-color: #27ae60; padding: 8px 15px; font-size: 14px;}
+        .action-btn {
+            flex: 1; padding: 15px; font-size: 1.05rem; cursor: pointer; border: none;
+            border-radius: 15px; font-weight: bold; transition: all 0.2s;
+            font-family: 'Gowun Dodum', sans-serif; color: white;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .action-btn:hover { transform: translateY(-2px); opacity: 0.9; }
 
-        /* 유틸리티 버튼 그룹 */
+        .btn-clean { background-color: #ffb7b2; color: #fff; } /* 핑크 */
+        .btn-convert { background-color: #a2c2ff; color: #fff; } /* 블루 */
+        .btn-reset { background-color: #e0e0e0; color: #777; width: 100px; flex: none; }
+
+        /* --- [유틸리티 바] --- */
         .utility-bar {
-            background: #f1f2f6;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            background: #f8f9fa; padding: 15px; border-radius: 15px;
+            margin-bottom: 15px; display: flex; gap: 10px;
         }
-        .btn-util { padding: 10px 15px; font-size: 14px; background-color: #34495e; color: white;}
-        
-        .btn-copy { background-color: #8e44ad; flex-grow: 1; } 
-        .btn-save { background-color: #2c3e50; flex-grow: 0.5; }
-        
+        .btn-util {
+            padding: 10px 20px; font-size: 0.95rem; cursor: pointer; border: none;
+            border-radius: 10px; font-weight: bold; font-family: 'Pretendard';
+            transition: 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .btn-copy { background-color: #95e1d3; color: #2d5a50; flex: 1; justify-content: center;}
+        .btn-save { background-color: #5d5d5d; color: white; flex: 0.4; justify-content: center;}
+        .btn-util:hover { transform: translateY(-2px); filter: brightness(0.95); }
 
-        /* --- 모달 스타일 --- */
+        /* --- [모달] --- */
         .modal {
-            display: none; position: fixed; z-index: 1000; left: 0; top: 0;
-            width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(5px);
         }
         .modal-content {
-            background-color: white; margin: 5% auto; padding: 25px;
-            border-radius: 10px; width: 90%; max-width: 500px;
-            position: relative; max-height: 80vh; display: flex; flex-direction: column;
+            background-color: white; margin: 8% auto; padding: 30px;
+            border-radius: 20px; width: 90%; max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid #f0ebeb;
+            position: relative; display: flex; flex-direction: column;
+            max-height: 80vh;
         }
-        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color:#aaa;}
-        .dict-form { margin-bottom: 15px; background: #f9f9f9; padding: 15px; border-radius: 5px;}
-        .dict-form input { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid #ddd; box-sizing: border-box;}
-        .btn-add { background-color: #27ae60; width: 100%; margin-top: 5px;}
-        .dict-list-container { flex-grow: 1; overflow-y: auto; border: 1px solid #eee; margin-bottom: 15px; padding: 5px;}
-        .dict-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 8px 10px; font-size: 14px;}
-        .btn-delete { background-color: #c0392b; font-size: 12px; padding: 5px 10px; margin-left: 10px;}
-        .backup-area { display: flex; gap: 5px; border-top: 1px solid #eee; padding-top: 15px; }
-        .btn-backup { background-color: #34495e; flex: 1; font-size: 13px; }
+        .close-btn { position: absolute; top: 20px; right: 25px; font-size: 28px; cursor: pointer; color:#ccc;}
+        .close-btn:hover { color: var(--main-pink); }
 
+        .dict-form { margin-bottom: 20px; background: #fff0f0; padding: 20px; border-radius: 15px; }
+        .dict-form input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ffdbd9; border-radius: 8px; box-sizing: border-box;}
+        .btn-add { background-color: #ff9aa2; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;}
+
+        .dict-list-container { flex-grow: 1; overflow-y: auto; border: 1px solid #eee; margin-bottom: 15px; padding: 10px; border-radius: 10px; height: 300px;}
+        .dict-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f5f5f5; padding: 10px; font-size: 14px;}
+        .btn-delete { background-color: #ffdede; color: #d63384; border: none; border-radius: 5px; font-size: 12px; padding: 5px 10px; cursor: pointer;}
+        
+        .backup-area { display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 20px; }
+        .btn-backup { background-color: #f0f0f0; color: #555; flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;}
+        
+        @media (max-width: 600px) {
+            .navbar { padding: 0 15px; height: 60px; }
+            .nav-item span { display: none; }
+            .container { padding: 20px; }
+            .btn-group { flex-direction: column; }
+            .btn-reset { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
+<nav class="navbar">
+    <a href="index.html" class="logo">
+        <span style="font-size: 1.2rem;">☁️</span> 왜 일 은 한번에 몰려오는 걸까요? <span style="font-size: 1.2rem;">🌸</span>
+    </a>
+    
+    <div class="nav-links">
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>홈</span></a>
+        <a href="cleaner.html" class="nav-item active"><i class="fa-solid fa-broom"></i><span>정제</span></a>
+        <a href="marker.html" class="nav-item"><i class="fa-solid fa-highlighter"></i><span>자료</span></a>
+        <a href="splitter.html" class="nav-item"><i class="fa-solid fa-align-left"></i><span>분할</span></a>
+    </div>
+</nav>
+
 <div class="container">
-    <div class="header">
-        <h2>📝 텍스트 변환기</h2>
-        <button class="btn-dict-open" onclick="openModal()">📚 단어장 관리</button>
+    <div class="header-area">
+        <h2>📝 텍스트 정제기</h2>
+        <button class="btn-dict-open" onclick="openModal()"><i class="fa-solid fa-book"></i> 단어장 관리</button>
     </div>
 
     <div class="label-area">
-        <label for="inputText">1. 원본 텍스트</label>
+        <label for="inputText"><i class="fa-regular fa-file-lines"></i> 1. 원본 텍스트</label>
         <span class="char-count" id="inputCount">순수 글자수: 0자</span>
     </div>
-    <textarea id="inputText" placeholder="여기에 텍스트를 붙여넣으세요..." oninput="updateCount('inputText', 'inputCount')"></textarea>
+    <textarea id="inputText" placeholder="여기에 지저분한 원본 텍스트를 붙여넣으세요... (특수문자, 줄바꿈 등 포함)" oninput="updateCount('inputText', 'inputCount')"></textarea>
 
     <div class="btn-group">
-        <button class="btn-clean" onclick="runStage1()">1차 정제 (특수문자 제거)</button>
-        <button class="btn-convert" onclick="runStage2()">2차 변환 (한글/숫자 변환)</button>
-        <button class="btn-reset" onclick="resetAll()">초기화</button>
+        <button class="action-btn btn-clean" onclick="runStage1()">
+            <i class="fa-solid fa-soap"></i> 1차 정제 (특수문자 제거)
+        </button>
+        <button class="action-btn btn-convert" onclick="runStage2()">
+            <i class="fa-solid fa-language"></i> 2차 변환 (한글/숫자)
+        </button>
+        <button class="action-btn btn-reset" onclick="resetAll()">
+            <i class="fa-solid fa-rotate-left"></i> 초기화
+        </button>
     </div>
 
     <div class="label-area">
-        <label for="outputText">2. 결과물</label>
+        <label for="outputText"><i class="fa-solid fa-file-signature"></i> 2. 변환 결과물</label>
         <span class="char-count" id="outputCount">순수 글자수: 0자</span>
     </div>
     
     <div class="utility-bar">
-        <button class="btn-util btn-copy" onclick="copyToClipboard()">📋 결과 복사하기</button>
-        <button class="btn-util btn-save" onclick="saveTextFile()">💾 .txt 파일 저장</button>
+        <button class="btn-util btn-copy" onclick="copyToClipboard()"><i class="fa-regular fa-copy"></i> 결과 복사하기</button>
+        <button class="btn-util btn-save" onclick="saveTextFile()"><i class="fa-solid fa-download"></i> 파일 저장</button>
     </div>
 
-    <textarea id="outputText" placeholder="결과가 여기에 표시됩니다." oninput="updateCount('outputText', 'outputCount')"></textarea>
+    <textarea id="outputText" placeholder="버튼을 누르면 이곳에 깔끔한 결과가 나옵니다." oninput="updateCount('outputText', 'outputCount')"></textarea>
 </div>
 
 <div id="dictModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeModal()">&times;</span>
-        <h3 style="margin-top:0;">📚 단어장 관리</h3>
+        <h3 style="margin-top:0; color:#444;">📚 나만의 단어장</h3>
+        <p style="font-size:13px; color:#888; margin-bottom:15px;">자주 나오는 영어/숫자를 미리 등록해두세요.</p>
+        
         <div class="dict-form">
-            <input type="text" id="newKey" placeholder="영어 (예: Email)">
-            <input type="text" id="newVal" placeholder="한글 (예: 이메일)">
-            <button class="btn-add" onclick="addWord()">단어 추가</button>
+            <input type="text" id="newKey" placeholder="변환 전 (예: Email)">
+            <input type="text" id="newVal" placeholder="변환 후 (예: 이메일)">
+            <button class="btn-add" onclick="addWord()">단어 추가하기</button>
         </div>
+        
         <div class="dict-list-container" id="dictList"></div>
+        
         <div class="backup-area">
-            <button class="btn-backup" onclick="exportData()">💾 백업 저장</button>
-            <button class="btn-backup" onclick="importData()">📂 백업 불러오기</button>
+            <button class="btn-backup" onclick="exportData()"><i class="fa-solid fa-floppy-disk"></i> 백업 저장</button>
+            <button class="btn-backup" onclick="importData()"><i class="fa-solid fa-folder-open"></i> 백업 불러오기</button>
             <input type="file" id="fileInput" style="display: none;" onchange="loadFile(this)">
         </div>
     </div>
 </div>
 
 <script>
-    // --- [1] 순수 글자 수 카운트 ---
+    // --- [기능은 기존 로직 100% 유지] ---
+    
     function updateCount(id, spanId) {
         const text = document.getElementById(id).value;
         const pureLength = text.replace(/[^a-zA-Z0-9가-힣]/g, "").length;
         document.getElementById(spanId).innerText = "순수 글자수: " + pureLength + "자";
     }
 
-    // --- [2] 유틸리티 (복사, 저장) ---
     function copyToClipboard() {
         const copyText = document.getElementById("outputText");
         if (copyText.value === "") { alert("복사할 내용이 없습니다."); return; }
-        
         copyText.select();
         document.execCommand("copy");
         
         const btn = document.querySelector('.btn-copy');
-        const originalText = btn.innerText;
-        btn.innerText = "✅ 복사 완료!";
+        const originalHtml = btn.innerHTML; 
+        btn.innerHTML = "<i class='fa-solid fa-check'></i> 복사 완료!";
         btn.style.backgroundColor = "#27ae60";
+        btn.style.color = "#fff";
         setTimeout(() => {
-            btn.innerText = originalText;
-            btn.style.backgroundColor = "#8e44ad";
+            btn.innerHTML = originalHtml;
+            btn.style.backgroundColor = "#95e1d3";
+            btn.style.color = "#2d5a50";
         }, 1500);
     }
 
     function saveTextFile() {
         const text = document.getElementById("outputText").value;
         if(text === "") { alert("저장할 내용이 없습니다."); return; }
-        
         const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
         const anchor = document.createElement("a");
         anchor.href = URL.createObjectURL(blob);
@@ -207,7 +291,7 @@
         URL.revokeObjectURL(anchor.href);
     }
 
-    // --- [3] 모달 및 단어장 ---
+    // 모달 및 단어장
     const modal = document.getElementById("dictModal");
     function openModal() { modal.style.display = "block"; renderDictList(); document.getElementById('newKey').focus(); }
     function closeModal() { modal.style.display = "none"; }
@@ -231,10 +315,10 @@
     function renderDictList() {
         const listDiv = document.getElementById('dictList'); listDiv.innerHTML = "";
         const keys = Object.keys(myDict).sort();
-        if (keys.length === 0) { listDiv.innerHTML = "<div style='text-align:center;color:#999;padding:20px;'>단어 없음</div>"; return; }
+        if (keys.length === 0) { listDiv.innerHTML = "<div style='text-align:center;color:#999;padding:20px; font-size:14px;'>등록된 단어가 없습니다.</div>"; return; }
         keys.forEach(key => {
             const item = document.createElement('div'); item.className = 'dict-item';
-            item.innerHTML = `<span><b>${key}</b> → ${myDict[key]}</span><button class="btn-delete" onclick="deleteWord('${key}')">삭제</button>`;
+            item.innerHTML = `<span><b>${key}</b> → ${myDict[key]}</span><button class="btn-delete" onclick="deleteWord('${key}')"><i class="fa-solid fa-trash"></i></button>`;
             listDiv.appendChild(item);
         });
     }
@@ -253,7 +337,7 @@
         }; reader.readAsText(file); input.value = '';
     }
 
-    // --- [4] 변환 로직 ---
+    // 변환 로직
     const alphabetMap = { 'A':'에이','B':'비','C':'씨','D':'디','E':'이','F':'에프','G':'지','H':'에이치','I':'아이','J':'제이','K':'케이','L':'엘','M':'엠','N':'엔','O':'오','P':'피','Q':'큐','R':'알','S':'에스','T':'티','U':'유','V':'브이','W':'더블유','X':'엑스','Y':'와이','Z':'제트'};
     const digitMap = { '0':'영','1':'일','2':'이','3':'삼','4':'사','5':'오','6':'육','7':'칠','8':'팔','9':'구'};
 
@@ -278,10 +362,10 @@
 
     function runStage1() {
         let text = document.getElementById('inputText').value;
-        text = text.replace(/\([^)]*\)/g, ""); // 괄호 제거
-        text = text.replace(/\n/g, " "); // 줄바꿈 제거
-        text = text.replace(/[^a-zA-Z0-9가-힣\s.,?%]/g, ""); // 특수문자 제거
-        text = text.replace(/\s+/g, " ").trim(); // 공백 정리
+        text = text.replace(/\([^)]*\)/g, ""); 
+        text = text.replace(/\n/g, " "); 
+        text = text.replace(/[^a-zA-Z0-9가-힣\s.,?%]/g, ""); 
+        text = text.replace(/\s+/g, " ").trim(); 
         document.getElementById('outputText').value = text;
         updateCount('outputText', 'outputCount');
     }
@@ -290,15 +374,11 @@
         let text = document.getElementById('outputText').value || document.getElementById('inputText').value;
         text = text.replace(/\([^)]*\)/g, "");
         text = text.replace(/6\.25/g, "육이오");
-
-        // 단어장 적용
         const sortedKeys = Object.keys(myDict).sort((a,b)=>b.length-a.length);
         for(const eng of sortedKeys) {
             text = text.replace(new RegExp(`\\b${eng}\\b`,'g'), myDict[eng]);
         }
-        // 영어 약어 (알파벳 읽기)
         text = text.replace(/\b[A-Z]+\b/g, (m) => /[가-힣]/.test(m)?m:[...m].map(c=>alphabetMap[c]||c).join(''));
-        // 숫자 변환
         text = text.replace(/([0-9]+)(\.[0-9]+)?/g, (m, p1, p2) => {
             let korInt = convertNumberToKorean(p1);
             let korDec = p2 ? "점" + [...p2.substring(1)].map(c=>digitMap[c]).join('') : "";
