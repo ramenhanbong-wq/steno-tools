@@ -9,28 +9,21 @@
     
     <style>
         :root {
-            /* 요청하신 따뜻한 크림색 배경 복구 */
-            --bg-cream: #fdfbf7;
-            --card-white: #ffffff;
-            
-            /* 파스텔톤이지만 눈에 잘 들어오게 채도 조절 */
-            --pastel-pink: #ffb7b2;  /* 핑크 */
-            --pastel-blue: #a2c2ff;  /* 블루 */
-            --pastel-mint: #95e1d3;  /* 민트 */
-
-            /* 글자색: 흐릿한 회색 대신 진한 초코색/검정으로 잡아 눈 피로 감소 */
-            --text-main: #4a4a4a;
-            --text-sub: #666666; 
-            
-            /* 테두리: 흐릿함을 없애주는 선명한 라인 */
-            --border-line: #f0ebeb; 
+            var(--bg-cream: #fdfbf7);
+            var(--card-white: #ffffff);
+            var(--pastel-pink: #ffb7b2);
+            var(--pastel-blue: #a2c2ff);
+            var(--pastel-mint: #95e1d3);
+            var(--text-main: #4a4a4a);
+            var(--text-sub: #666666); 
+            var(--border-line: #f0ebeb); 
         }
 
         body {
             font-family: 'Gowun Dodum', 'Pretendard', sans-serif;
             margin: 0;
-            background-color: var(--bg-cream);
-            color: var(--text-main);
+            background-color: #fdfbf7;
+            color: #4a4a4a;
             padding-top: 80px;
         }
 
@@ -42,14 +35,13 @@
             backdrop-filter: blur(5px);
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 30px; box-sizing: border-box; z-index: 1000;
-            /* 테두리를 넣어 경계 명확화 */
             border-bottom: 2px solid #fff0f0;
             box-shadow: 0 4px 15px rgba(230, 210, 200, 0.1); 
         }
         
         .logo {
             font-size: 1.3rem;
-            color: var(--text-main);
+            color: #4a4a4a;
             text-decoration: none;
             display: flex; align-items: center; gap: 8px;
             font-weight: bold;
@@ -85,12 +77,11 @@
 
         /* --- [카드 디자인] --- */
         .tool-card {
-            background: var(--card-white);
+            background: #ffffff;
             border-radius: 25px;
             padding: 35px 30px;
             text-align: left;
-            /* 흐릿함을 잡기 위해 얇은 테두리 추가 */
-            border: 2px solid var(--border-line);
+            border: 2px solid #f0ebeb;
             box-shadow: 0 8px 20px rgba(200, 200, 200, 0.1);
             transition: all 0.3s ease;
             position: relative;
@@ -100,25 +91,21 @@
 
         .tool-card:hover {
             transform: translateY(-8px);
-            /* 호버 시 테두리 색상 변경 */
             border-color: #ffe0e0;
             box-shadow: 0 15px 30px rgba(255, 183, 178, 0.2);
         }
 
-        /* 아이콘 원형 박스 */
         .icon-circle {
             width: 55px; height: 55px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-size: 24px; margin-bottom: 20px;
         }
 
-        /* 테마별 색상 (파스텔톤 유지) */
-        .cleaner-theme .icon-circle { background-color: #fff0f0; color: #ff9aa2; }
+        /* 테마별 색상 */
         .marker-theme .icon-circle { background-color: #f0f4ff; color: #a2c2ff; }
         .splitter-theme .icon-circle { background-color: #f0fff4; color: #95e1d3; }
 
         .tool-card h3 { margin: 0 0 10px 0; font-size: 1.35rem; color: #333; font-weight: bold; }
-        /* 본문 글자색을 진하게(#666) 변경하여 눈 피로 줄임 */
         .tool-card p { margin: 0; color: #666; font-size: 0.95rem; line-height: 1.55; word-break: keep-all; }
         
         .launch-btn {
@@ -133,8 +120,6 @@
             transition: 0.2s;
         }
 
-        /* 버튼 배경색 (파스텔) */
-        .cleaner-theme .launch-btn { background: #fff0f0; color: #ff9aa2; }
         .marker-theme .launch-btn { background: #f0f4ff; color: #8cb6ff; }
         .splitter-theme .launch-btn { background: #f0fff4; color: #71d8c4; }
 
@@ -157,7 +142,6 @@
         </a>
         <div class="nav-links">
             <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>홈</span></a>
-            <a href="cleaner.html" class="nav-item"><i class="fa-solid fa-broom"></i><span>정제</span></a>
             <a href="marker.html" class="nav-item"><i class="fa-solid fa-highlighter"></i><span>약어표시</span></a>
             <a href="splitter.html" class="nav-item"><i class="fa-solid fa-align-left"></i><span>분할</span></a>
         </div>
@@ -169,15 +153,6 @@
 
     <div class="grid-container">
         
-        <div class="tool-card cleaner-theme" onclick="location.href='cleaner.html'" style="cursor: pointer;">
-            <div>
-                <div class="icon-circle"><i class="fa-solid fa-broom"></i></div>
-                <h3>텍스트 정제하기</h3>
-                <p>특수문자를 털어내고 영어랑 숫자를 한글 발음으로 예쁘게 바꿔드려요.</p>
-            </div>
-            <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
-        </div>
-
         <div class="tool-card marker-theme" onclick="location.href='marker.html'" style="cursor: pointer;">
             <div>
                 <div class="icon-circle"><i class="fa-solid fa-highlighter"></i></div>
@@ -200,5 +175,3 @@
 
 </body>
 </html>
-
-
