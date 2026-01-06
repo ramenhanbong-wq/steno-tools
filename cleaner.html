@@ -9,13 +9,20 @@
     
     <style>
         :root {
-            /* 전체 테마: 크림색 + 파스텔 */
+            /* 기본 배경: 크림색 */
             --bg-cream: #fdfbf7;
             --card-white: #ffffff;
-            --main-pink: #ffb7b2;     
+            
+            /* [통일된 테마 컬러] 핑크 계열 */
+            --theme-main: #ffb7b2;      /* 메인 핑크 */
+            --theme-deep: #ff8fab;      /* 진한 핑크 (강조) */
+            --theme-light: #fff0f0;     /* 연한 배경용 */
+
+            /* 텍스트 & 테두리 */
             --text-main: #4a4a4a;
-            --text-sub: #666666; 
+            --text-sub: #777777; 
             --border-line: #f0ebeb; 
+            --btn-gray: #f0f0f0;        /* 회색 버튼 배경 */
         }
 
         body {
@@ -23,11 +30,11 @@
             margin: 0;
             background-color: var(--bg-cream);
             color: var(--text-main);
-            padding-top: 90px; /* 메뉴바 공간 확보 */
+            padding-top: 90px;
             padding-bottom: 50px;
         }
 
-        /* --- [요청하신 상단 메뉴바 디자인] --- */
+        /* --- [메뉴바: 차분하게 통일] --- */
         .navbar {
             position: fixed; top: 0; left: 0; width: 100%; height: 70px;
             background: rgba(255, 255, 255, 0.98); 
@@ -36,42 +43,38 @@
             border-bottom: 1px solid #eee;
         }
         
-        /* 왼쪽 로고 영역 (이미지 속 문구 그대로) */
         .logo {
             font-size: 1.15rem; color: #555; text-decoration: none;
             display: flex; align-items: center; gap: 8px; font-weight: bold;
             letter-spacing: -0.5px;
         }
         
-        /* 오른쪽 네비게이션 */
         .nav-links { display: flex; gap: 5px; align-items: center; }
         
+        /* 메뉴 아이템: 기본은 얌전한 회색 */
         .nav-item {
-            text-decoration: none; color: #888; font-weight: 600; 
+            text-decoration: none; color: #999; font-weight: 600; 
             padding: 8px 16px; font-size: 0.95rem;
-            border-radius: 20px; /* 둥근 알약 모양 */
-            display: flex; align-items: center; gap: 6px;
+            border-radius: 20px; display: flex; align-items: center; gap: 6px;
             transition: all 0.2s;
         }
-        
-        /* 마우스 올렸을 때 */
-        .nav-item:hover { color: #333; background-color: #f5f5f5; }
+        .nav-item:hover { color: #555; background-color: #f8f8f8; }
 
-        /* 현재 페이지 활성화 (핑크색 알약) */
+        /* 활성화된 메뉴만 핑크색 포인트 */
         .nav-item.active {
-            background-color: #ffe3e3; /* 연한 핑크 배경 */
-            color: #d63384;            /* 진한 핑크 글씨 */
+            background-color: var(--theme-light);
+            color: var(--theme-deep);
             font-weight: 700;
         }
 
-        /* --- [메인 컨테이너] --- */
+        /* --- [컨테이너] --- */
         .container {
             max-width: 900px; margin: 0 auto;
             background: var(--card-white);
             padding: 40px;
             border-radius: 25px;
             border: 2px solid var(--border-line);
-            box-shadow: 0 8px 20px rgba(200, 200, 200, 0.1);
+            box-shadow: 0 8px 20px rgba(200, 200, 200, 0.05); /* 그림자도 은은하게 */
         }
 
         .header-area {
@@ -81,15 +84,16 @@
         }
         .header-area h2 { margin: 0; color: var(--text-main); font-size: 1.8rem; letter-spacing: -1px; }
         
+        /* 단어장 버튼: 튀지 않는 웜그레이 */
         .btn-dict-open {
-            background-color: #e2f0cb; color: #5d7a36;
+            background-color: #f2f2f2; color: #666;
             padding: 8px 18px; border-radius: 15px; border: none; font-weight: bold;
             cursor: pointer; transition: 0.2s; font-family: 'Gowun Dodum'; font-size: 0.95rem;
             display: flex; align-items: center; gap: 6px;
         }
-        .btn-dict-open:hover { transform: translateY(-2px); filter: brightness(0.95); }
+        .btn-dict-open:hover { background-color: #e5e5e5; color: #333; }
 
-        /* --- [입력/출력 영역] --- */
+        /* --- [입력/출력 레이블] --- */
         .label-area {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 10px; margin-top: 10px;
@@ -97,8 +101,8 @@
         label { font-weight: bold; color: var(--text-main); font-size: 1.1rem; display: flex; align-items: center; gap: 5px;}
         
         .char-count { 
-            font-size: 0.85rem; color: #ff9aa2; font-weight: bold; 
-            background: #fff0f0; padding: 5px 12px; border-radius: 12px;
+            font-size: 0.85rem; color: #aaa; font-weight: bold; 
+            background: #f8f9fa; padding: 5px 12px; border-radius: 12px;
         }
 
         textarea {
@@ -108,11 +112,11 @@
             font-size: 16px; line-height: 1.6; color: #555;
             box-sizing: border-box; resize: vertical;
             font-family: 'Pretendard', sans-serif;
-            transition: all 0.2s; outline: none;
+            transition: all 0.2s; outline: none; background: #fafafa;
         }
-        textarea:focus { border-color: var(--main-pink); box-shadow: 0 0 0 4px rgba(255, 183, 178, 0.1); }
+        textarea:focus { border-color: var(--theme-main); background: #fff; }
 
-        /* --- [버튼 그룹] --- */
+        /* --- [메인 버튼 그룹: 핑크 톤온톤] --- */
         .btn-group { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; }
         
         .action-btn {
@@ -124,11 +128,15 @@
         }
         .action-btn:hover { transform: translateY(-2px); opacity: 0.9; }
 
-        .btn-clean { background-color: #ffb7b2; color: #fff; } /* 핑크 */
-        .btn-convert { background-color: #a2c2ff; color: #fff; } /* 블루 */
-        .btn-reset { background-color: #e0e0e0; color: #777; width: 100px; flex: none; }
+        /* 1차 정제: 연한 핑크 */
+        .btn-clean { background-color: var(--theme-main); color: #fff; } 
+        /* 2차 변환: 진한 핑크 (같은 계열, 농도 차이) */
+        .btn-convert { background-color: var(--theme-deep); color: #fff; } 
+        /* 초기화: 깔끔한 회색 */
+        .btn-reset { background-color: var(--btn-gray); color: #777; width: 100px; flex: none; box-shadow: none; }
+        .btn-reset:hover { background-color: #e0e0e0; }
 
-        /* --- [유틸리티 바] --- */
+        /* --- [유틸리티 바: 차분한 그레이] --- */
         .utility-bar {
             background: #f8f9fa; padding: 15px; border-radius: 15px;
             margin-bottom: 15px; display: flex; gap: 10px;
@@ -138,9 +146,12 @@
             border-radius: 10px; font-weight: bold; font-family: 'Pretendard';
             transition: 0.2s; display: flex; align-items: center; gap: 6px;
         }
-        .btn-copy { background-color: #95e1d3; color: #2d5a50; flex: 1; justify-content: center;}
-        .btn-save { background-color: #5d5d5d; color: white; flex: 0.4; justify-content: center;}
+        /* 복사/저장 버튼을 무채색으로 통일하여 시선 분산 방지 */
+        .btn-copy { background-color: #555; color: #fff; flex: 1; justify-content: center;}
+        .btn-save { background-color: #ddd; color: #555; flex: 0.4; justify-content: center;}
+        
         .btn-util:hover { transform: translateY(-2px); filter: brightness(0.95); }
+
 
         /* --- [모달] --- */
         .modal {
@@ -157,15 +168,16 @@
             max-height: 80vh;
         }
         .close-btn { position: absolute; top: 20px; right: 25px; font-size: 28px; cursor: pointer; color:#ccc;}
-        .close-btn:hover { color: var(--main-pink); }
+        .close-btn:hover { color: var(--theme-deep); }
 
-        .dict-form { margin-bottom: 20px; background: #fff0f0; padding: 20px; border-radius: 15px; }
+        .dict-form { margin-bottom: 20px; background: var(--theme-light); padding: 20px; border-radius: 15px; }
         .dict-form input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ffdbd9; border-radius: 8px; box-sizing: border-box;}
-        .btn-add { background-color: #ff9aa2; color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;}
+        .btn-add { background-color: var(--theme-deep); color: white; width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;}
 
         .dict-list-container { flex-grow: 1; overflow-y: auto; border: 1px solid #eee; margin-bottom: 15px; padding: 10px; border-radius: 10px; height: 300px;}
         .dict-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f5f5f5; padding: 10px; font-size: 14px;}
-        .btn-delete { background-color: #ffdede; color: #d63384; border: none; border-radius: 5px; font-size: 12px; padding: 5px 10px; cursor: pointer;}
+        .btn-delete { background-color: #eee; color: #777; border: none; border-radius: 5px; font-size: 12px; padding: 5px 10px; cursor: pointer;}
+        .btn-delete:hover { background-color: #ffdede; color: #d63384; }
         
         .backup-area { display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 20px; }
         .btn-backup { background-color: #f0f0f0; color: #555; flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;}
@@ -254,8 +266,7 @@
 </div>
 
 <script>
-    // --- [기능은 기존 로직 100% 유지] ---
-    
+    // --- [기능 로직은 100% 동일] ---
     function updateCount(id, spanId) {
         const text = document.getElementById(id).value;
         const pureLength = text.replace(/[^a-zA-Z0-9가-힣]/g, "").length;
@@ -271,12 +282,10 @@
         const btn = document.querySelector('.btn-copy');
         const originalHtml = btn.innerHTML; 
         btn.innerHTML = "<i class='fa-solid fa-check'></i> 복사 완료!";
-        btn.style.backgroundColor = "#27ae60";
-        btn.style.color = "#fff";
+        btn.style.backgroundColor = "#27ae60"; 
         setTimeout(() => {
             btn.innerHTML = originalHtml;
-            btn.style.backgroundColor = "#95e1d3";
-            btn.style.color = "#2d5a50";
+            btn.style.backgroundColor = "#555";
         }, 1500);
     }
 
@@ -291,7 +300,6 @@
         URL.revokeObjectURL(anchor.href);
     }
 
-    // 모달 및 단어장
     const modal = document.getElementById("dictModal");
     function openModal() { modal.style.display = "block"; renderDictList(); document.getElementById('newKey').focus(); }
     function closeModal() { modal.style.display = "none"; }
@@ -337,7 +345,6 @@
         }; reader.readAsText(file); input.value = '';
     }
 
-    // 변환 로직
     const alphabetMap = { 'A':'에이','B':'비','C':'씨','D':'디','E':'이','F':'에프','G':'지','H':'에이치','I':'아이','J':'제이','K':'케이','L':'엘','M':'엠','N':'엔','O':'오','P':'피','Q':'큐','R':'알','S':'에스','T':'티','U':'유','V':'브이','W':'더블유','X':'엑스','Y':'와이','Z':'제트'};
     const digitMap = { '0':'영','1':'일','2':'이','3':'삼','4':'사','5':'오','6':'육','7':'칠','8':'팔','9':'구'};
 
