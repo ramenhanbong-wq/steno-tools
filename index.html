@@ -1,52 +1,196 @@
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
-
-<style>
-    /* 전체 배경 및 폰트 설정 (가독성 개선) */
-    body { 
-        font-family: 'Gowun Dodum', 'Pretendard', sans-serif !important; 
-        background-color: #f4f5f7 !important; /* 웜그레이 배경 */
-        color: #333 !important; /* 진한 글자색 */
-        padding-top: 80px !important; 
-    }
-
-    /* 선명한 메뉴바 */
-    .navbar-fixed {
-        position: fixed; top: 0; left: 0; width: 100%; height: 70px;
-        background: rgba(255, 255, 255, 0.98); 
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 0 30px; box-sizing: border-box; z-index: 9999;
-        border-bottom: 1px solid #ddd; /* 경계선 명확하게 */
-        box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-    }
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쉽게 가자</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
     
-    .nav-logo { 
-        font-size: 1.2rem; color: #222; text-decoration: none; 
-        display: flex; align-items: center; gap: 8px; font-weight: bold;
-    }
-    .nav-logo i { color: #ff8fab; } /* 핑크 포인트 */
+    <style>
+        :root {
+            /* 눈이 편한 차분한 웜그레이 배경 */
+            --bg-warm: #f4f5f7;
+            --card-bg: #ffffff;
+            
+            /* 선명한 파스텔 포인트 컬러 */
+            --pop-pink: #ff8fab;     /* 딸기우유 */
+            --pop-blue: #8ab6d6;     /* 하늘색 */
+            --pop-mint: #7ec4cf;     /* 민트색 */
 
-    .nav-links { display: flex; gap: 8px; }
-    .nav-btn {
-        text-decoration: none; color: #555; font-weight: 600; font-size: 0.95rem;
-        padding: 8px 14px; border-radius: 10px; transition: 0.2s; 
-        display: flex; align-items: center; gap: 6px;
-        border: 1px solid transparent;
-    }
-    .nav-btn:hover { 
-        background: #fff0f5; color: #d63384; 
-        border-color: #ffc2d1; /* 호버시 테두리 */
-    }
-    
-    @media (max-width: 600px) { .nav-btn span { display: none; } }
-</style>
+            --text-main: #2c2c2c;    /* 진한 검정 (가독성 UP) */
+            --text-sub: #555555;     /* 진한 회색 */
+            --border-line: #e0e0e0;  /* 깔끔한 테두리용 */
+        }
 
-<nav class="navbar-fixed">
-    <a href="index.html" class="nav-logo"><i class="fa-solid fa-cloud"></i> 속기 솜사탕</a>
-    <div class="nav-links">
-        <a href="index.html" class="nav-btn"><i class="fa-solid fa-house"></i><span>홈</span></a>
-        <a href="cleaner.html" class="nav-btn"><i class="fa-solid fa-broom"></i><span>정제</span></a>
-        <a href="marker.html" class="nav-btn"><i class="fa-solid fa-highlighter"></i><span>자료</span></a>
-        <a href="splitter.html" class="nav-btn"><i class="fa-solid fa-align-left"></i><span>분할</span></a>
+        body {
+            font-family: 'Gowun Dodum', 'Pretendard', sans-serif;
+            margin: 0;
+            background-color: var(--bg-warm);
+            color: var(--text-main);
+            padding-top: 80px;
+        }
+
+        /* --- [선명한 메뉴바] --- */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 70px;
+            background: rgba(255, 255, 255, 0.98);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; box-sizing: border-box; z-index: 1000;
+            border-bottom: 1px solid #ddd; /* 선명한 하단 라인 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+        
+        .logo {
+            font-size: 1.3rem;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+            font-weight: bold;
+        }
+        .logo i { color: var(--pop-pink); font-size: 1.2em; }
+
+        .nav-links { display: flex; gap: 8px; }
+        .nav-item {
+            text-decoration: none; color: var(--text-sub);
+            font-weight: 600; padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.2s;
+            display: flex; align-items: center; gap: 6px;
+            border: 1px solid transparent;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: #fff0f5; 
+            color: #d63384; 
+            border-color: #ffc2d1;
+        }
+
+        /* --- [메인 컨텐츠] --- */
+        .hero { text-align: center; padding: 60px 20px 40px; }
+        .hero h1 {
+            font-size: 2.2rem; margin-bottom: 12px; color: #222;
+            letter-spacing: -0.5px;
+        }
+        /* 사용자가 문구를 삭제했으므로 p태그 제거함 */
+
+        .grid-container {
+            max-width: 1050px; margin: 0 auto 80px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px; padding: 20px;
+        }
+
+        /* --- [선명한 카드 디자인] --- */
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 35px 30px;
+            text-align: left;
+            border: 1px solid var(--border-line); /* 깔끔한 테두리 */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            display: flex; flex-direction: column; justify-content: space-between;
+            height: 230px;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border-color: var(--pop-pink); /* 호버 시 핑크 테두리 */
+        }
+
+        /* 아이콘 박스 */
+        .icon-circle {
+            width: 50px; height: 50px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; margin-bottom: 20px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* 테마별 색상 */
+        .cleaner-theme .icon-circle { background-color: #fff0f3; color: #e64980; }
+        .marker-theme .icon-circle { background-color: #e7f5ff; color: #228be6; }
+        .splitter-theme .icon-circle { background-color: #e6fcf5; color: #0ca678; }
+
+        .tool-card h3 { margin: 0 0 12px 0; font-size: 1.35rem; color: #333; font-weight: bold; }
+        .tool-card p { margin: 0; color: #555; font-size: 1rem; line-height: 1.55; word-break: keep-all; }
+        
+        .launch-btn {
+            margin-top: 25px;
+            align-self: flex-start;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+            transition: 0.2s;
+        }
+
+        /* 버튼 스타일 */
+        .cleaner-theme .launch-btn { background: #ffe3e3; color: #c92a2a; }
+        .marker-theme .launch-btn { background: #d0ebff; color: #1864ab; }
+        .splitter-theme .launch-btn { background: #c3fae8; color: #087f5b; }
+
+        .tool-card:hover .launch-btn { opacity: 0.9; }
+
+        @media (max-width: 600px) {
+            .navbar { padding: 0 15px; height: 60px; }
+            .nav-item span { display: none; }
+            .nav-item { padding: 8px 12px; }
+            .grid-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <i class="fa-solid fa-cloud"></i> <span>속기 솜사탕</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>홈</span></a>
+            <a href="cleaner.html" class="nav-item"><i class="fa-solid fa-broom"></i><span>정제</span></a>
+            <a href="marker.html" class="nav-item"><i class="fa-solid fa-highlighter"></i><span>자료</span></a>
+            <a href="splitter.html" class="nav-item"><i class="fa-solid fa-align-left"></i><span>분할</span></a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>오늘도 퇴근마렵쥬?🌸</h1>
     </div>
-</nav>
+
+    <div class="grid-container">
+        
+        <div class="tool-card cleaner-theme" onclick="location.href='cleaner.html'" style="cursor: pointer;">
+            <div>
+                <div class="icon-circle"><i class="fa-solid fa-broom"></i></div>
+                <h3>텍스트 정제하기</h3>
+                <p>특수문자를 털어내고 영어랑 숫자를 한글 발음으로 예쁘게 바꿔드려요.</p>
+            </div>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+
+        <div class="tool-card marker-theme" onclick="location.href='marker.html'" style="cursor: pointer;">
+            <div>
+                <div class="icon-circle"><i class="fa-solid fa-highlighter"></i></div>
+                <h3>약어 자동 표시</h3>
+                <p>약어 엑셀 파일을 넣으면 빈출 단어를 쏙쏙 골라 형광펜을 칠해드려요.</p>
+            </div>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+
+        <div class="tool-card splitter-theme" onclick="location.href='splitter.html'" style="cursor: pointer;">
+            <div>
+                <div class="icon-circle"><i class="fa-solid fa-align-left"></i></div>
+                <h3>단락 나누기</h3>
+                <p>긴 글을 보기 좋게 자르고 줄바꿈을 정리해서 읽기 편하게 만들어드려요.</p>
+            </div>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+
+    </div>
+
+</body>
+</html>
