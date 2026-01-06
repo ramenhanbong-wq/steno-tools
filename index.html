@@ -9,37 +9,42 @@
     
     <style>
         :root {
-            /* 눈이 편한 차분한 웜그레이 배경 */
-            --bg-warm: #f4f5f7;
-            --card-bg: #ffffff;
+            /* 요청하신 따뜻한 크림색 배경 복구 */
+            --bg-cream: #fdfbf7;
+            --card-white: #ffffff;
             
-            /* 선명한 파스텔 포인트 컬러 */
-            --pop-pink: #ff8fab;     /* 딸기우유 */
-            --pop-blue: #8ab6d6;     /* 하늘색 */
-            --pop-mint: #7ec4cf;     /* 민트색 */
+            /* 파스텔톤이지만 눈에 잘 들어오게 채도 조절 */
+            --pastel-pink: #ffb7b2;  /* 핑크 */
+            --pastel-blue: #a2c2ff;  /* 블루 */
+            --pastel-mint: #95e1d3;  /* 민트 */
 
-            --text-main: #2c2c2c;    /* 진한 검정 (가독성 UP) */
-            --text-sub: #555555;     /* 진한 회색 */
-            --border-line: #e0e0e0;  /* 깔끔한 테두리용 */
+            /* 글자색: 흐릿한 회색 대신 진한 초코색/검정으로 잡아 눈 피로 감소 */
+            --text-main: #4a4a4a;
+            --text-sub: #666666; 
+            
+            /* 테두리: 흐릿함을 없애주는 선명한 라인 */
+            --border-line: #f0ebeb; 
         }
 
         body {
             font-family: 'Gowun Dodum', 'Pretendard', sans-serif;
             margin: 0;
-            background-color: var(--bg-warm);
+            background-color: var(--bg-cream);
             color: var(--text-main);
             padding-top: 80px;
         }
 
-        /* --- [선명한 메뉴바] --- */
+        /* --- [메뉴바] --- */
         .navbar {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 70px;
-            background: rgba(255, 255, 255, 0.98);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 30px; box-sizing: border-box; z-index: 1000;
-            border-bottom: 1px solid #ddd; /* 선명한 하단 라인 */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            /* 테두리를 넣어 경계 명확화 */
+            border-bottom: 2px solid #fff0f0;
+            box-shadow: 0 4px 15px rgba(230, 210, 200, 0.1); 
         }
         
         .logo {
@@ -49,96 +54,97 @@
             display: flex; align-items: center; gap: 8px;
             font-weight: bold;
         }
-        .logo i { color: var(--pop-pink); font-size: 1.2em; }
+        .logo i { color: #ff9aa2; font-size: 1.2em; }
 
         .nav-links { display: flex; gap: 8px; }
         .nav-item {
-            text-decoration: none; color: var(--text-sub);
-            font-weight: 600; padding: 8px 16px;
-            border-radius: 12px;
-            transition: all 0.2s;
+            text-decoration: none; color: #888;
+            font-weight: 600; padding: 8px 15px;
+            border-radius: 20px;
+            transition: all 0.3s;
             display: flex; align-items: center; gap: 6px;
-            border: 1px solid transparent;
         }
         .nav-item:hover, .nav-item.active {
             background-color: #fff0f5; 
-            color: #d63384; 
-            border-color: #ffc2d1;
+            color: #ff6f91;
+            transform: translateY(-2px);
         }
 
         /* --- [메인 컨텐츠] --- */
         .hero { text-align: center; padding: 60px 20px 40px; }
         .hero h1 {
-            font-size: 2.2rem; margin-bottom: 12px; color: #222;
-            letter-spacing: -0.5px;
+            font-size: 2.2rem; margin-bottom: 10px; color: #4a4a4a;
+            letter-spacing: -1px;
         }
-        /* 사용자가 문구를 삭제했으므로 p태그 제거함 */
 
         .grid-container {
-            max-width: 1050px; margin: 0 auto 80px;
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            max-width: 1000px; margin: 0 auto 80px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px; padding: 20px;
         }
 
-        /* --- [선명한 카드 디자인] --- */
+        /* --- [카드 디자인] --- */
         .tool-card {
-            background: var(--card-bg);
-            border-radius: 20px;
+            background: var(--card-white);
+            border-radius: 25px;
             padding: 35px 30px;
             text-align: left;
-            border: 1px solid var(--border-line); /* 깔끔한 테두리 */
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            transition: all 0.2s ease-in-out;
+            /* 흐릿함을 잡기 위해 얇은 테두리 추가 */
+            border: 2px solid var(--border-line);
+            box-shadow: 0 8px 20px rgba(200, 200, 200, 0.1);
+            transition: all 0.3s ease;
             position: relative;
             display: flex; flex-direction: column; justify-content: space-between;
-            height: 230px;
+            height: 220px;
         }
 
         .tool-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-            border-color: var(--pop-pink); /* 호버 시 핑크 테두리 */
+            transform: translateY(-8px);
+            /* 호버 시 테두리 색상 변경 */
+            border-color: #ffe0e0;
+            box-shadow: 0 15px 30px rgba(255, 183, 178, 0.2);
         }
 
-        /* 아이콘 박스 */
+        /* 아이콘 원형 박스 */
         .icon-circle {
-            width: 50px; height: 50px; border-radius: 14px;
+            width: 55px; height: 55px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 22px; margin-bottom: 20px;
-            border: 1px solid rgba(0,0,0,0.05);
+            font-size: 24px; margin-bottom: 20px;
         }
 
-        /* 테마별 색상 */
-        .cleaner-theme .icon-circle { background-color: #fff0f3; color: #e64980; }
-        .marker-theme .icon-circle { background-color: #e7f5ff; color: #228be6; }
-        .splitter-theme .icon-circle { background-color: #e6fcf5; color: #0ca678; }
+        /* 테마별 색상 (파스텔톤 유지) */
+        .cleaner-theme .icon-circle { background-color: #fff0f0; color: #ff9aa2; }
+        .marker-theme .icon-circle { background-color: #f0f4ff; color: #a2c2ff; }
+        .splitter-theme .icon-circle { background-color: #f0fff4; color: #95e1d3; }
 
-        .tool-card h3 { margin: 0 0 12px 0; font-size: 1.35rem; color: #333; font-weight: bold; }
-        .tool-card p { margin: 0; color: #555; font-size: 1rem; line-height: 1.55; word-break: keep-all; }
+        .tool-card h3 { margin: 0 0 10px 0; font-size: 1.35rem; color: #333; font-weight: bold; }
+        /* 본문 글자색을 진하게(#666) 변경하여 눈 피로 줄임 */
+        .tool-card p { margin: 0; color: #666; font-size: 0.95rem; line-height: 1.55; word-break: keep-all; }
         
         .launch-btn {
-            margin-top: 25px;
+            margin-top: 20px;
             align-self: flex-start;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 0.95rem;
+            padding: 8px 18px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.9rem;
             text-decoration: none;
-            display: flex; align-items: center; gap: 8px;
+            display: flex; align-items: center; gap: 6px;
             transition: 0.2s;
         }
 
-        /* 버튼 스타일 */
-        .cleaner-theme .launch-btn { background: #ffe3e3; color: #c92a2a; }
-        .marker-theme .launch-btn { background: #d0ebff; color: #1864ab; }
-        .splitter-theme .launch-btn { background: #c3fae8; color: #087f5b; }
+        /* 버튼 배경색 (파스텔) */
+        .cleaner-theme .launch-btn { background: #fff0f0; color: #ff9aa2; }
+        .marker-theme .launch-btn { background: #f0f4ff; color: #8cb6ff; }
+        .splitter-theme .launch-btn { background: #f0fff4; color: #71d8c4; }
 
-        .tool-card:hover .launch-btn { opacity: 0.9; }
+        .tool-card:hover .launch-btn { font-weight: bold; opacity: 0.8; }
 
         @media (max-width: 600px) {
             .navbar { padding: 0 15px; height: 60px; }
+            .logo span { font-size: 1.1rem; }
             .nav-item span { display: none; }
-            .nav-item { padding: 8px 12px; }
+            .nav-item { padding: 8px 10px; }
             .grid-container { grid-template-columns: 1fr; }
         }
     </style>
@@ -169,7 +175,7 @@
                 <h3>텍스트 정제하기</h3>
                 <p>특수문자를 털어내고 영어랑 숫자를 한글 발음으로 예쁘게 바꿔드려요.</p>
             </div>
-            <span class="launch-btn">도구 열기 <i class="fa-solid fa-arrow-right"></i></span>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
         </div>
 
         <div class="tool-card marker-theme" onclick="location.href='marker.html'" style="cursor: pointer;">
@@ -178,7 +184,7 @@
                 <h3>약어 자동 표시</h3>
                 <p>약어 엑셀 파일을 넣으면 빈출 단어를 쏙쏙 골라 형광펜을 칠해드려요.</p>
             </div>
-            <span class="launch-btn">도구 열기 <i class="fa-solid fa-arrow-right"></i></span>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
         </div>
 
         <div class="tool-card splitter-theme" onclick="location.href='splitter.html'" style="cursor: pointer;">
@@ -187,7 +193,7 @@
                 <h3>단락 나누기</h3>
                 <p>긴 글을 보기 좋게 자르고 줄바꿈을 정리해서 읽기 편하게 만들어드려요.</p>
             </div>
-            <span class="launch-btn">도구 열기 <i class="fa-solid fa-arrow-right"></i></span>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
         </div>
 
     </div>
