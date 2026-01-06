@@ -9,14 +9,15 @@
     
     <style>
         :root {
-            var(--bg-cream: #fdfbf7);
-            var(--card-white: #ffffff);
-            var(--pastel-pink: #ffb7b2);
-            var(--pastel-blue: #a2c2ff);
-            var(--pastel-mint: #95e1d3);
-            var(--text-main: #4a4a4a);
-            var(--text-sub: #666666); 
-            var(--border-line: #f0ebeb); 
+            --bg-cream: #fdfbf7;
+            --card-white: #ffffff;
+            --pastel-pink: #ffb7b2;
+            --pastel-blue: #a2c2ff;
+            --pastel-mint: #95e1d3;
+            --pastel-purple: #c7ceea; /* 분석 도구용 신규 색상 */
+            --text-main: #4a4a4a;
+            --text-sub: #666666; 
+            --border-line: #f0ebeb; 
         }
 
         body {
@@ -70,7 +71,7 @@
         }
 
         .grid-container {
-            max-width: 1000px; margin: 0 auto 80px;
+            max-width: 1200px; margin: 0 auto 80px;
             display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px; padding: 20px;
         }
@@ -104,6 +105,7 @@
         /* 테마별 색상 */
         .marker-theme .icon-circle { background-color: #f0f4ff; color: #a2c2ff; }
         .splitter-theme .icon-circle { background-color: #f0fff4; color: #95e1d3; }
+        .analysis-theme .icon-circle { background-color: #f5f3ff; color: #c7ceea; } /* 신규 */
 
         .tool-card h3 { margin: 0 0 10px 0; font-size: 1.35rem; color: #333; font-weight: bold; }
         .tool-card p { margin: 0; color: #666; font-size: 0.95rem; line-height: 1.55; word-break: keep-all; }
@@ -122,6 +124,7 @@
 
         .marker-theme .launch-btn { background: #f0f4ff; color: #8cb6ff; }
         .splitter-theme .launch-btn { background: #f0fff4; color: #71d8c4; }
+        .analysis-theme .launch-btn { background: #f5f3ff; color: #a59ad1; } /* 신규 */
 
         .tool-card:hover .launch-btn { font-weight: bold; opacity: 0.8; }
 
@@ -144,6 +147,7 @@
             <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>홈</span></a>
             <a href="marker.html" class="nav-item"><i class="fa-solid fa-highlighter"></i><span>약어표시</span></a>
             <a href="splitter.html" class="nav-item"><i class="fa-solid fa-align-left"></i><span>분할</span></a>
+            <a href="analysis.html" class="nav-item"><i class="fa-solid fa-chart-line"></i><span>매출분석</span></a>
         </div>
     </nav>
 
@@ -167,6 +171,15 @@
                 <div class="icon-circle"><i class="fa-solid fa-align-left"></i></div>
                 <h3>단락 나누기</h3>
                 <p>긴 글을 보기 좋게 자르고 줄바꿈을 정리해서 읽기 편하게 만들어드려요.</p>
+            </div>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
+        </div>
+
+        <div class="tool-card analysis-theme" onclick="location.href='analysis.html'" style="cursor: pointer;">
+            <div>
+                <div class="icon-circle"><i class="fa-solid fa-chart-line"></i></div>
+                <h3>매출 분석 장부</h3>
+                <p>엑셀 파일을 업로드하여 월별 매출 추이와 수강생 현황을 한눈에 확인하세요.</p>
             </div>
             <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
         </div>
