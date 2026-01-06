@@ -3,115 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스마트 단락 분할기 v13</title>
+    <title>단락 분할기 - 쉽게 가자</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; background-color: #f0f2f5; padding: 30px; color: #333; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        h2 { margin-top: 0; color: #1a1a1a; font-size: 28px; margin-bottom: 10px; }
-        .subtitle { color: #666; margin-bottom: 30px; font-size: 15px; background: #fff3cd; display: inline-block; padding: 5px 15px; border-radius: 5px; color: #856404; font-weight: bold; line-height: 1.5; }
+        :root {
+            /* 배경: 크림색 */
+            --bg-cream: #fdfbf7;
+            --card-white: #ffffff;
 
-        .controls { 
-            display: flex; gap: 15px; align-items: center; margin-bottom: 30px; 
-            background: #eef2f5; padding: 20px; border-radius: 12px; flex-wrap: wrap;
+            /* [테마 컬러] 민트/그린 계열 */
+            --theme-main: #95e1d3;      /* 메인 민트 */
+            --theme-deep: #2d5a50;      /* 딥 그린 (강조/버튼) */
+            --theme-light: #e8f7f4;     /* 연한 배경용 */
+            
+            /* 텍스트 & 테두리 */
+            --text-main: #4a4a4a;
+            --text-sub: #666;
+            --border-line: #f0ebeb;
+            
+            /* 상태 표시 색상 */
+            --status-good: #d4edda;
+            --status-good-text: #155724;
+            --status-warn: #f8d7da;
+            --status-warn-text: #721c24;
         }
-        .input-group { display: flex; align-items: center; gap: 10px; }
-        .input-group label { font-weight: bold; font-size: 16px; }
-        .input-group input[type="number"] { 
-            width: 80px; padding: 10px; border: 2px solid #ddd; border-radius: 6px; 
-            font-size: 16px; text-align: center; font-weight: bold; color: #2c3e50;
+
+        body {
+            font-family: 'Gowun Dodum', 'Pretendard', sans-serif;
+            margin: 0;
+            background-color: var(--bg-cream);
+            color: var(--text-main);
+            padding-top: 90px;
+            padding-bottom: 80px; /* 하단 카운터 공간 확보 */
         }
 
-        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; display: flex; align-items: center; gap: 5px; }
-        .btn-primary { background-color: #2980b9; color: white; }
-        .btn-primary:hover { background-color: #1c5980; }
-        .btn-success { background-color: #27ae60; color: white; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.3); }
-        .btn-success:hover { background-color: #219150; transform: translateY(-2px); }
-        .btn-secondary { background-color: #7f8c8d; color: white; }
+        /* --- [메뉴바] --- */
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            background: rgba(255, 255, 255, 0.98); 
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; box-sizing: border-box; z-index: 1000;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .logo {
+            font-size: 1.15rem; color: #555; text-decoration: none;
+            display: flex; align-items: center; gap: 8px; font-weight: bold;
+            letter-spacing: -0.5px;
+        }
+        
+        .nav-links { display: flex; gap: 5px; align-items: center; }
+        
+        .nav-item {
+            text-decoration: none; color: #999; font-weight: 600; 
+            padding: 8px 16px; font-size: 0.95rem;
+            border-radius: 20px; display: flex; align-items: center; gap: 6px;
+            transition: all 0.2s;
+        }
+        .nav-item:hover { color: #555; background-color: #f8f8f8; }
 
-        .input-area { 
-            width: 100%; height: 120px; padding: 20px; 
-            border: 2px solid #e1e4e8; border-radius: 12px; 
+        /* 활성화된 메뉴 (민트 포인트) */
+        .nav-item.active {
+            background-color: var(--theme-light);
+            color: #008f68; /* 조금 더 진한 초록으로 가독성 확보 */
+            font-weight: 700;
+        }
+
+        /* --- [메인 컨테이너] --- */
+        .container {
+            max-width: 1000px; margin: 0 auto;
+            background: var(--card-white);
+            padding: 40px;
+            border-radius: 25px;
+            border: 2px solid var(--border-line);
+            box-shadow: 0 8px 20px rgba(200, 200, 200, 0.05);
+        }
+
+        .header-area {
+            text-align: center; margin-bottom: 30px;
+            border-bottom: 2px dashed var(--border-line);
+            padding-bottom: 20px;
+        }
+        .header-area h2 { margin: 0; color: var(--text-main); font-size: 1.8rem; letter-spacing: -1px; }
+
+        /* 안내 문구 박스 */
+        .info-box {
+            background-color: #fff8e1; color: #856404;
+            padding: 15px; border-radius: 12px; margin-bottom: 25px;
+            font-size: 0.95rem; line-height: 1.5; text-align: center;
+            border: 1px solid #ffeeba;
+        }
+
+        /* --- [입력 영역] --- */
+        .input-area {
+            width: 100%; height: 150px; padding: 20px;
+            border: 2px solid var(--border-line); border-radius: 15px;
             font-size: 16px; margin-bottom: 30px; resize: vertical; line-height: 1.6;
-            font-family: inherit; box-sizing: border-box;
+            font-family: 'Pretendard', sans-serif; box-sizing: border-box;
+            background: #fafafa; transition: 0.2s;
+        }
+        .input-area:focus { background: white; border-color: var(--theme-main); outline: none; }
+
+        /* --- [컨트롤 패널] --- */
+        .controls {
+            display: flex; gap: 20px; align-items: center; margin-bottom: 30px;
+            background: var(--theme-light); padding: 20px; border-radius: 20px; 
+            flex-wrap: wrap; border: 1px solid #d0eadd;
         }
         
-        #result-container { display: flex; flex-direction: column; gap: 15px; }
+        .input-group { display: flex; align-items: center; gap: 10px; }
+        .input-group label { font-weight: bold; font-size: 1rem; color: var(--theme-deep); }
+        .input-group input[type="number"] {
+            width: 80px; padding: 10px; border: 2px solid #fff; border-radius: 10px;
+            font-size: 16px; text-align: center; font-weight: bold; color: var(--theme-deep);
+            background: rgba(255,255,255,0.8);
+        }
+        .input-group input:focus { outline: none; border-color: var(--theme-deep); background: white; }
+
+        .btn { 
+            padding: 12px 20px; border: none; border-radius: 12px; cursor: pointer; 
+            font-weight: bold; font-size: 0.95rem; transition: 0.2s; 
+            display: flex; align-items: center; gap: 6px; font-family: 'Gowun Dodum', sans-serif;
+            color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        .btn-reset { background-color: #aaa; margin-left: auto; }
+        .btn-action { background-color: var(--theme-main); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .btn-final { background-color: var(--theme-deep); }
+
+        /* --- [결과 카드 스타일] --- */
+        #result-container { display: flex; flex-direction: column; gap: 20px; }
         
-        .paragraph-card { 
-            border: 1px solid #e1e4e8; border-radius: 12px; padding: 20px; 
+        .paragraph-card {
+            border: 2px solid var(--border-line); border-radius: 15px; padding: 20px;
             background: #fff; position: relative; transition: all 0.3s ease;
         }
-        .paragraph-card.locked { border: 2px solid #27ae60; background-color: #f6fffa; }
-        .paragraph-card.locked textarea { background-color: #f6fffa; }
+        
+        /* 잠금 상태 스타일 */
+        .paragraph-card.locked { 
+            border-color: var(--theme-main); 
+            background-color: #fafffd; 
+            box-shadow: 0 4px 12px rgba(149, 225, 211, 0.2);
+        }
+        .paragraph-card.locked textarea { background-color: #fafffd; }
 
-        .paragraph-card.overflow { border: 2px dashed #bdc3c7; background-color: #f8f9fa; }
-        .paragraph-card.overflow .card-header { color: #7f8c8d; }
-        .paragraph-card.overflow textarea { background-color: #f8f9fa; color: #555; }
+        /* 오버플로우 스타일 */
+        .paragraph-card.overflow { border: 2px dashed #ccc; background-color: #f5f5f5; opacity: 0.8; }
+        .paragraph-card.overflow textarea { background-color: #f5f5f5; color: #777; }
 
-        .card-header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 10px; font-size: 14px; color: #666; 
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px; font-size: 14px; color: #666;
         }
 
-        .status-badge { padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 12px; margin-left: 10px; }
-        .status-good { background: #d4edda; color: #155724; }
-        .status-warn { background: #f8d7da; color: #721c24; }
+        .status-badge { 
+            padding: 4px 10px; border-radius: 20px; font-weight: bold; 
+            font-size: 12px; margin-left: 10px; 
+        }
+        .status-good { background: var(--status-good); color: var(--status-good-text); }
+        .status-warn { background: var(--status-warn); color: var(--status-warn-text); }
         
-        .count-label { font-weight: bold; color: #2980b9; margin-left: 10px; font-size: 14px; }
-        .text-content { 
-            width: 100%; min-height: 80px; padding: 12px; 
-            border: 1px solid #ccc; border-radius: 8px; 
+        .count-label { font-weight: bold; color: var(--theme-deep); margin-left: 10px; font-size: 14px; }
+        
+        .text-content {
+            width: 100%; min-height: 80px; padding: 15px;
+            border: 1px solid #eee; border-radius: 10px;
             font-size: 17px; line-height: 1.7; resize: vertical; box-sizing: border-box;
-            font-family: inherit; overflow: hidden;
+            font-family: 'Pretendard', sans-serif; overflow: hidden; color: #333;
         }
+        .text-content:focus { outline: none; border-color: var(--theme-main); }
 
+        /* 잠금 버튼 */
         .lock-btn {
-            background: white; border: 1px solid #ccc; padding: 6px 12px;
-            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold;
+            background: white; border: 1px solid #ddd; padding: 5px 12px;
+            border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold;
+            color: #777; transition: 0.2s;
         }
-        .paragraph-card.locked .lock-btn { background: #27ae60; color: white; border-color: #27ae60; }
+        .paragraph-card.locked .lock-btn { 
+            background: var(--theme-deep); color: white; border-color: var(--theme-deep); 
+        }
 
+        /* --- [하단 고정 카운터] --- */
         .total-counter {
-            position: fixed; bottom: 20px; right: 20px; 
-            background: #2c3e50; color: white; padding: 12px 20px; 
-            border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: fixed; bottom: 30px; right: 30px;
+            background: var(--theme-deep); color: white; padding: 12px 25px;
+            border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             font-size: 15px; font-weight: bold; z-index: 100;
+            display: flex; align-items: center; gap: 8px; font-family: 'Gowun Dodum';
         }
         
-        .hint { font-size: 12px; color: #999; margin-left: 5px; font-weight: normal; }
+        .hint { font-size: 12px; color: #aaa; margin-left: 5px; font-weight: normal; }
+
+        @media (max-width: 600px) {
+            .navbar { padding: 0 15px; height: 60px; }
+            .nav-item span { display: none; }
+            .container { padding: 20px; }
+            .controls { flex-direction: column; align-items: stretch; }
+            .btn-reset { margin-left: 0; }
+        }
     </style>
 </head>
 <body>
 
+<nav class="navbar">
+    <a href="index.html" class="logo">
+        <span style="font-size: 1.2rem;">☁️</span> 왜 일 은 한번에 몰려오는 걸까요? <span style="font-size: 1.2rem;">🌸</span>
+    </a>
+    
+    <div class="nav-links">
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>홈</span></a>
+        <a href="cleaner.html" class="nav-item"><i class="fa-solid fa-broom"></i><span>정제</span></a>
+        <a href="marker.html" class="nav-item"><i class="fa-solid fa-highlighter"></i><span>자료</span></a>
+        <a href="splitter.html" class="nav-item active"><i class="fa-solid fa-align-left"></i><span>분할</span></a>
+    </div>
+</nav>
+
 <div class="container">
-    <h2>📝 스마트 단락 분할기 v13 (줄바꿈 표기)</h2>
-    <div class="subtitle">
-        ⚠️ 계산 기준: <b>한글, 영어, 숫자</b>만 1글자로 칩니다.<br>
-        (공백, 줄바꿈, 마침표, 따옴표 등 모든 특수문자는 0글자 취급)
+    <div class="header-area">
+        <h2>📝 스마트 단락 분할기</h2>
+    </div>
+
+    <div class="info-box">
+        <i class="fa-solid fa-circle-info"></i> <b>계산 기준:</b> 한글, 영어, 숫자만 1글자로 칩니다.<br>
+        (공백, 줄바꿈, 마침표 등 특수문자는 글자 수에 포함되지 않습니다)
     </div>
     
     <textarea id="sourceText" class="input-area" placeholder="여기에 원본 텍스트를 붙여넣으세요..."></textarea>
 
     <div class="controls">
         <div class="input-group">
-            <label>줄당(순수):</label>
+            <label><i class="fa-solid fa-ruler-horizontal"></i> 줄당(순수):</label>
             <input type="number" id="paraTarget" value="50">
-            <span>(±3)</span>
+            <span style="color:#666; font-size:14px;">(±3)</span>
         </div>
         <div class="input-group">
-            <label>총제한(순수):</label>
+            <label><i class="fa-solid fa-hand"></i> 총제한(순수):</label>
             <input type="number" id="totalLimit" value="1500">
         </div>
         
-        <button class="btn btn-secondary" onclick="firstRun()">🚀 초기화</button>
-        <button class="btn btn-primary" onclick="reDistribute()">🔄 재분배</button>
-        <button class="btn btn-success" onclick="copyAll()">📋 최종 복사 (버리는 글 제외)</button>
+        <button class="btn btn-reset" onclick="firstRun()">
+            <i class="fa-solid fa-rotate-right"></i> 초기화/실행
+        </button>
+        <button class="btn btn-action" onclick="reDistribute()">
+            <i class="fa-solid fa-arrows-rotate"></i> 재분배
+        </button>
+        <button class="btn btn-final" onclick="copyAll()">
+            <i class="fa-solid fa-copy"></i> 최종 복사
+        </button>
     </div>
 
     <div id="result-container"></div>
 </div>
 
-<div class="total-counter" id="stickyCounter">유효: 0자 / 제한: 0자</div>
+<div class="total-counter" id="stickyCounter">
+    <i class="fa-solid fa-calculator"></i> <span>유효: 0자 / 제한: 0자</span>
+</div>
 
 <script>
     const TOLERANCE = 3; 
@@ -265,7 +414,7 @@
                         <span class="count-label"></span> <span class="hint">(엔터/백스페이스 가능)</span>
                     </div>
                     <button class="lock-btn" onclick="toggleLock(this)">
-                        ${block.locked ? '🔒 잠금됨' : '🔓 잠금해제'}
+                        ${block.locked ? '<i class="fa-solid fa-lock"></i> 잠금됨' : '<i class="fa-solid fa-lock-open"></i> 잠금해제'}
                     </button>
                 </div>
                 <textarea class="text-content" oninput="updateAllCounts()" onkeydown="handleKey(event, this)">${block.content}</textarea>
@@ -330,8 +479,8 @@
         });
 
         const counter = document.getElementById('stickyCounter');
-        counter.innerText = `유효(순수): ${totalLen}자 / 제한: ${totalLimit}자`;
-        counter.style.background = totalLen > totalLimit ? '#e74c3c' : '#2c3e50';
+        counter.innerHTML = `<i class="fa-solid fa-calculator"></i> <span>유효: ${totalLen}자 / 제한: ${totalLimit}자</span>`;
+        counter.style.background = totalLen > totalLimit ? '#e74c3c' : '#2d5a50';
     }
 
     // ★ 수정된 복사 로직 (줄바꿈 추가)
@@ -347,7 +496,6 @@
             
             copyText += text;
             if (card.dataset.copyLabel) {
-                 // ★ 핵심 수정: 줄바꿈(\n) 후 라벨 추가
                  copyText += `\n${card.dataset.copyLabel}`;
             }
             copyText += "\n\n";
@@ -430,7 +578,12 @@
     window.toggleLock = function(btn) {
         const card = btn.closest('.paragraph-card');
         card.classList.toggle('locked');
-        btn.innerText = card.classList.contains('locked') ? '🔒 잠금됨' : '🔓 잠금해제';
+        // 아이콘 업데이트
+        if(card.classList.contains('locked')) {
+            btn.innerHTML = '<i class="fa-solid fa-lock"></i> 잠금됨';
+        } else {
+            btn.innerHTML = '<i class="fa-solid fa-lock-open"></i> 잠금해제';
+        }
     }
 </script>
 
