@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>속기 듀얼 마스터 (최종_6단락_완벽수정)</title>
+    <title>속기 듀얼 마스터 (최종_6단락_배너추가)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
     
@@ -25,18 +25,75 @@
             margin: 0; padding-top: 80px; padding-bottom: 50px;
         }
 
+        /* --- [메뉴바 (Index와 통일)] --- */
         .navbar {
-            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 70px;
             background: rgba(255, 255, 255, 0.95);
-            border-bottom: 1px solid #eee; display: flex; align-items: center;
-            justify-content: space-between; padding: 0 30px; box-sizing: border-box; z-index: 1000;
+            backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; box-sizing: border-box; z-index: 1000;
+            border-bottom: 2px solid #fff0f0;
+            box-shadow: 0 4px 15px rgba(230, 210, 200, 0.1); 
         }
-        .logo { font-family: 'Gowun Dodum'; font-weight: bold; font-size: 1.2rem; color: #555; text-decoration: none; }
         
+        .logo {
+            font-size: 1.3rem;
+            color: #4a4a4a;
+            text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'Gowun Dodum'; font-weight: bold;
+        }
+        .logo i { color: #ff9aa2; font-size: 1.2em; }
+
+        .nav-links { display: flex; gap: 8px; }
+        .nav-item {
+            text-decoration: none; color: #888;
+            font-weight: 600; padding: 8px 15px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            display: flex; align-items: center; gap: 6px;
+            font-family: 'Gowun Dodum';
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: #fff0f5; 
+            color: #ff6f91;
+            transform: translateY(-2px);
+        }
+
         .container {
             max-width: 1400px; margin: 0 auto; padding: 20px;
         }
 
+        /* --- [귀여운 배너 영역] --- */
+        .banner-area {
+            display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .cute-banner {
+            flex: 1; min-width: 200px;
+            background: white; border: 2px solid #f0ebeb;
+            border-radius: 20px; padding: 12px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            text-decoration: none; color: #555;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            transition: 0.2s; font-family: 'Gowun Dodum'; font-weight: bold;
+        }
+        .cute-banner:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
+        
+        .banner-icon {
+            width: 35px; height: 35px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: white;
+            font-size: 1.1rem; margin-right: 12px;
+        }
+        .b-typecast { background: #a2c2ff; } /* 파스텔 블루 */
+        .b-folder { background: #ffd97d; }   /* 파스텔 옐로우 */
+        .b-speller { background: #95e1d3; }  /* 파스텔 민트 */
+
+        .banner-text span { display: block; font-size: 0.75rem; color: #999; margin-bottom: 2px; }
+        .banner-text strong { font-size: 1rem; color: #4a4a4a; }
+
+
+        /* --- [기존 스타일 유지] --- */
         .control-panel {
             background: white; border-radius: 20px; padding: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px;
@@ -135,19 +192,66 @@
         .dict-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #f9f9f9; }
         
         @media (max-width: 800px) {
+            .navbar { padding: 0 15px; height: 60px; }
+            .logo span { font-size: 1.1rem; }
+            .nav-item span { display: none; }
+            .nav-item { padding: 8px 10px; }
             .card-row { grid-template-columns: 1fr; gap: 10px; border-bottom: 2px dashed #eee; padding-bottom: 20px; }
             .dual-view-header { display: none; }
+            .banner-area { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
 <nav class="navbar">
-    <a href="#" class="logo">🌸 속기 듀얼 마스터</a>
-    <div style="font-size: 0.9rem; color: #888;">선생님을 위한 통합 도구</div>
+    <a href="index.html" class="logo">
+        <i class="fa-solid fa-cloud"></i> <span> 왜 일은 한번에 몰려오는 걸까요? 🌸 </span>
+    </a>
+    <div class="nav-links">
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>홈</span></a>
+        <a href="marker.html" class="nav-item"><i class="fa-solid fa-highlighter"></i><span>약어표시</span></a>
+        <a href="splitter.html" class="nav-item active"><i class="fa-solid fa-align-left"></i><span>분할</span></a>
+    </div>
 </nav>
 
 <div class="container">
+    
+    <div class="banner-area">
+        <a href="https://typecast.ai/kr" target="_blank" class="cute-banner">
+            <div style="display:flex; align-items:center;">
+                <div class="banner-icon b-typecast"><i class="fa-solid fa-microphone-lines"></i></div>
+                <div class="banner-text">
+                    <span>TTS 서비스</span>
+                    <strong>타입캐스트</strong>
+                </div>
+            </div>
+            <i class="fa-solid fa-arrow-up-right-from-square" style="color:#ddd;"></i>
+        </a>
+
+        <a href="#" onclick="copyFolderLink(); return false;" class="cute-banner">
+            <div style="display:flex; align-items:center;">
+                <div class="banner-icon b-folder"><i class="fa-regular fa-folder-open"></i></div>
+                <div class="banner-text">
+                    <span>자료 공유 폴더</span>
+                    <strong>시대반 2026대비</strong>
+                </div>
+            </div>
+            <i class="fa-solid fa-copy" style="color:#ddd;"></i>
+        </a>
+
+        <a href="https://nara-speller.co.kr/speller/" target="_blank" class="cute-banner">
+            <div style="display:flex; align-items:center;">
+                <div class="banner-icon b-speller"><i class="fa-solid fa-check-double"></i></div>
+                <div class="banner-text">
+                    <span>검사기</span>
+                    <strong>부산대 맞춤법</strong>
+                </div>
+            </div>
+            <i class="fa-solid fa-arrow-up-right-from-square" style="color:#ddd;"></i>
+        </a>
+    </div>
+
     <div class="control-panel">
         <h3 style="margin-top:0;">📝 텍스트 정제 및 분할</h3>
         <p style="font-size:13px; color:#666; margin-bottom:10px;">
@@ -217,6 +321,16 @@
 </div>
 
 <script>
+    /* 폴더 경로 복사 스크립트 추가 */
+    function copyFolderLink() {
+        const path = "\\\\192.168.0.63\\도깨비도깨비3\\◆◆2026년 제1회 시험대비반◆◆";
+        navigator.clipboard.writeText(path).then(() => {
+            alert("폴더 경로가 복사되었습니다! \n파일 탐색기 주소창에 붙여넣기(Ctrl+V) 하세요.\n\n" + path);
+        }).catch(err => {
+            prompt("복사가 차단되었습니다. 아래 경로를 직접 복사하세요:", path);
+        });
+    }
+
     let myDict = JSON.parse(localStorage.getItem("stenoDict")) || { 
         "OECD": "오이시디", "Email": "이메일", "email": "이메일" 
     };
@@ -331,7 +445,6 @@
         renderGrid(finalBlocks);
     }
 
-    // [핵심 수정 1] 총 제한이 넘으면 무조건 하나로 합치기 (자르기 중단)
     function processBuffer(textStage1, outputArray) {
         textStage1 = textStage1.replace(/\s+/g, " ").trim();
         const textStage2 = convertStage2(textStage1);
@@ -339,7 +452,6 @@
         const lineLimit = parseInt(document.getElementById('lineLimit').value);
         const totalLimit = parseInt(document.getElementById('totalLimit').value);
         
-        // 현재까지 확정된 길이 계산
         let currentGlobalLen = 0;
         outputArray.forEach(block => {
             currentGlobalLen += getPureLen(block.s2);
@@ -359,11 +471,9 @@
 
             let shouldBreak = false;
             
-            // "지금까지 만든 길이"가 이미 제한을 넘었으면 -> 절대 자르지 마라 (무조건 합침)
             if (currentGlobalLen >= totalLimit) {
                 shouldBreak = false;
             } 
-            // 아직 제한 안 넘었으면 -> 270자씩 자르기 로직 가동
             else {
                 if (currentS2.length > 0) {
                     if (currentLen + nextLen > lineLimit + 3) {
@@ -384,7 +494,6 @@
                     locked: false
                 });
                 
-                // 블록 추가했으니 전체 길이 업데이트
                 currentGlobalLen += getPureLen(s2Str);
 
                 currentS1 = [w1]; currentS2 = [w2];
@@ -394,7 +503,6 @@
                 currentLen += nextLen;
             }
         }
-        // 남은거 털기 (마지막 블록 생성)
         if (currentS1.length > 0) {
             outputArray.push({
                 s1: currentS1.join(' '),
@@ -404,7 +512,6 @@
         }
     }
 
-    // [핵심 수정 2] 화면에 그릴 때, "시작 전"에 이미 넘쳐있어야만 회색 처리
     function renderGrid(blocks) {
         const grid = document.getElementById('resultGrid');
         grid.innerHTML = "";
@@ -414,10 +521,6 @@
 
         blocks.forEach((block, idx) => {
             const pureLen = getPureLen(block.s2);
-            
-            // "이 블록을 시작하기 전의 누적 길이"가 이미 제한을 넘었는가?
-            // 넘었으면 이 블록은 '버리는 부분' (회색)
-            // 안 넘었으면(딱 맞거나 부족하면) '유효한 부분' (흰색)
             let isOverflow = accumulatedLen >= totalLimit;
 
             accumulatedLen += pureLen;
