@@ -3,137 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>속기 트레이닝 센터</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>속기 솜사탕 허브</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
+        :root {
+            --bg-cream: #fdfbf7;   /* 따뜻한 크림 배경 */
+            --pastel-pink: #ffb7b2;
+            --pastel-mint: #b5ead7;
+            --pastel-purple: #e2f0cb;
+            --pastel-blue: #c7ceea;
+            --text-choco: #5d5d5d; /* 진한 회색 (초코색 느낌) */
+            --card-white: #ffffff;
+        }
+
         body {
-            font-family: 'Malgun Gothic', sans-serif;
+            font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
             margin: 0;
-            padding: 0;
-            background-color: #f0f2f5;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .header {
-            background: #2c3e50;
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .header h1 { margin: 0; font-size: 2.5em; letter-spacing: -1px; }
-        .header p { margin-top: 10px; opacity: 0.8; font-size: 1.1em; }
-        
-        .container {
-            max-width: 1000px;
-            margin: -30px auto 50px;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
+            background-color: var(--bg-cream);
+            color: var(--text-choco);
+            padding-top: 80px; /* 메뉴바 공간 */
         }
 
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-            transition: transform 0.3s, box-shadow 0.3s;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            border: 1px solid #eee;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        /* --- [파스텔 메뉴바] --- */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 70px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; box-sizing: border-box; z-index: 1000;
+            box-shadow: 0 4px 20px rgba(230, 210, 200, 0.3); /* 살구색 은은한 그림자 */
+            border-bottom: 2px solid #fff0f0;
         }
         
-        .icon-box {
-            width: 80px; height: 80px;
-            margin: 0 auto 20px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 35px; color: white;
-        }
-
-        .card h3 { margin: 10px 0; font-size: 1.4em; color: #2c3e50; }
-        .card p { color: #666; font-size: 0.95em; line-height: 1.6; margin-bottom: 25px; word-break: keep-all;}
-
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
+        .logo {
+            font-size: 1.4rem;
+            color: var(--text-choco);
             text-decoration: none;
-            border-radius: 25px;
+            display: flex; align-items: center; gap: 8px;
             font-weight: bold;
-            transition: background 0.2s;
-            width: 80%;
-            margin: 0 auto;
+        }
+        .logo i { color: #ff9aa2; font-size: 1.2em; } /* 로고 아이콘 핑크 */
+
+        .nav-links { display: flex; gap: 10px; }
+        .nav-item {
+            text-decoration: none; color: #888;
+            font-weight: 600; padding: 8px 15px;
+            border-radius: 20px; /* 둥근 버튼 */
+            transition: all 0.3s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: #fff0f5; /* 연한 핑크 배경 */
+            color: #ff6f91;
+            transform: translateY(-2px);
         }
 
-        /* 카드별 색상 테마 */
-        .card-cleaner .icon-box { background: linear-gradient(135deg, #e67e22, #f39c12); }
-        .card-cleaner .btn { background-color: #f39c12; color: white; }
-        .card-cleaner .btn:hover { background-color: #e67e22; }
+        /* --- [메인 컨텐츠] --- */
+        .hero { text-align: center; padding: 60px 20px 30px; }
+        .hero h1 {
+            font-size: 2.2rem; margin-bottom: 10px; color: #4a4a4a;
+            letter-spacing: -1px;
+        }
+        .hero p { font-size: 1.1rem; color: #999; max-width: 600px; margin: 0 auto; line-height: 1.6; }
 
-        .card-marker .icon-box { background: linear-gradient(135deg, #4a6fa5, #6c8ebf); }
-        .card-marker .btn { background-color: #4a6fa5; color: white; }
-        .card-marker .btn:hover { background-color: #3b5b8d; }
+        .grid-container {
+            max-width: 1000px; margin: 0 auto 80px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px; padding: 20px;
+        }
 
-        .card-splitter .icon-box { background: linear-gradient(135deg, #27ae60, #2ecc71); }
-        .card-splitter .btn { background-color: #27ae60; color: white; }
-        .card-splitter .btn:hover { background-color: #219150; }
+        /* --- [몽글몽글 카드 디자인] --- */
+        .tool-card {
+            background: var(--card-white);
+            border-radius: 25px; /* 아주 둥글게 */
+            padding: 35px 30px;
+            text-align: left;
+            border: 2px solid #fcfcfc;
+            box-shadow: 0 10px 25px rgba(200, 200, 200, 0.15); /* 부드러운 그림자 */
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex; flex-direction: column; justify-content: space-between;
+            height: 220px;
+        }
 
-        .footer {
-            text-align: center;
-            padding: 20px;
-            margin-top: auto;
-            color: #888;
-            font-size: 0.9em;
+        .tool-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(255, 183, 178, 0.25); /* 호버 시 핑크 그림자 */
+            border-color: #ffe0e0;
+        }
+
+        /* 아이콘 배경 원 */
+        .icon-circle {
+            width: 55px; height: 55px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin-bottom: 20px;
+        }
+
+        /* 카드별 색상 테마 (파스텔톤) */
+        .cleaner-theme .icon-circle { background-color: #fff0f0; color: #ff9aa2; }
+        .marker-theme .icon-circle { background-color: #f0f4ff; color: #a2c2ff; }
+        .splitter-theme .icon-circle { background-color: #f0fff4; color: #95e1d3; }
+
+        .tool-card h3 { margin: 0 0 10px 0; font-size: 1.3rem; color: #555; font-weight: bold; }
+        .tool-card p { margin: 0; color: #888; font-size: 0.95rem; line-height: 1.5; word-break: keep-all; }
+        
+        .launch-btn {
+            margin-top: 20px;
+            align-self: flex-start;
+            padding: 8px 18px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: flex; align-items: center; gap: 6px;
+            transition: 0.2s;
+        }
+
+        /* 버튼 색상 */
+        .cleaner-theme .launch-btn { background: #fff0f0; color: #ff9aa2; }
+        .marker-theme .launch-btn { background: #f0f4ff; color: #8cb6ff; }
+        .splitter-theme .launch-btn { background: #f0fff4; color: #71d8c4; }
+
+        .tool-card:hover .launch-btn { font-weight: bold; opacity: 0.8; }
+
+        /* 모바일 대응 */
+        @media (max-width: 600px) {
+            .navbar { padding: 0 15px; height: 60px; }
+            .logo span { font-size: 1.1rem; }
+            .nav-item span { display: none; }
+            .nav-item { padding: 8px 10px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>⌨️ 속기 트레이닝 센터</h1>
-        <p>효율적인 속기 연습을 위한 필수 도구 모음</p>
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <i class="fa-solid fa-cloud"></i> <span>속기 솜사탕</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>홈</span></a>
+            <a href="cleaner.html" class="nav-item"><i class="fa-solid fa-broom"></i><span>정제</span></a>
+            <a href="marker.html" class="nav-item"><i class="fa-solid fa-highlighter"></i><span>자료</span></a>
+            <a href="splitter.html" class="nav-item"><i class="fa-solid fa-align-left"></i><span>분할</span></a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>오늘도 가볍게 연습해볼까요?</h1>
+        <p>복잡한 준비 과정은 저에게 맡기고,<br>선생님은 학생들에게만 집중하세요! 🌸</p>
     </div>
 
-    <div class="container">
-        <div class="card card-cleaner">
+    <div class="grid-container">
+        
+        <div class="tool-card cleaner-theme" onclick="location.href='cleaner.html'" style="cursor: pointer;">
             <div>
-                <div class="icon-box"><i class="fas fa-broom"></i></div>
-                <h3>텍스트 변환기</h3>
-                <p>연습용 텍스트의 특수문자를 제거하고, 숫자와 영어를 한글 발음으로 자동 변환합니다.</p>
+                <div class="icon-circle"><i class="fa-solid fa-broom"></i></div>
+                <h3>텍스트 정제하기</h3>
+                <p>특수문자를 털어내고 영어랑 숫자를 한글 발음으로 예쁘게 바꿔드려요.</p>
             </div>
-            <a href="cleaner.html" class="btn">실행하기</a>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
         </div>
 
-        <div class="card card-marker">
+        <div class="tool-card marker-theme" onclick="location.href='marker.html'" style="cursor: pointer;">
             <div>
-                <div class="icon-box"><i class="fas fa-highlighter"></i></div>
-                <h3>수업 자료 생성기</h3>
-                <p>약어 엑셀 파일과 지문을 넣으면, 수업용 자료(통계표, 형광펜 표시)를 만들어줍니다.</p>
+                <div class="icon-circle"><i class="fa-solid fa-highlighter"></i></div>
+                <h3>수업 자료 만들기</h3>
+                <p>약어 엑셀 파일을 넣으면 빈출 단어를 쏙쏙 골라 형광펜을 칠해드려요.</p>
             </div>
-            <a href="marker.html" class="btn">실행하기</a>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
         </div>
 
-        <div class="card card-splitter">
+        <div class="tool-card splitter-theme" onclick="location.href='splitter.html'" style="cursor: pointer;">
             <div>
-                <div class="icon-box"><i class="fas fa-paragraph"></i></div>
-                <h3>스마트 단락 분할기</h3>
-                <p>긴 글을 지정한 글자 수에 맞춰서 보기 좋게 단락을 나누고 줄바꿈 처리를 해줍니다.</p>
+                <div class="icon-circle"><i class="fa-solid fa-align-left"></i></div>
+                <h3>단락 나누기</h3>
+                <p>긴 글을 보기 좋게 자르고 줄바꿈을 정리해서 읽기 편하게 만들어드려요.</p>
             </div>
-            <a href="splitter.html" class="btn">실행하기</a>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
         </div>
-    </div>
 
-    <div class="footer">
-        © 2026 Stenography Training Tools. All rights reserved.
     </div>
 
 </body>
