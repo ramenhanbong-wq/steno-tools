@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>원장님 전용 매출 장부</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-cream: #fdfbf7;
+            --card-white: #ffffff;
+            --pastel-pink: #ffb7b2;
+            --pastel-blue: #a2c2ff;
+            --pastel-mint: #95e1d3;
+            --text-main: #4a4a4a;
+            --text-sub: #666666; 
+            --border-line: #f0ebeb; 
+            --accent-blue: #8cb6ff;
+        }
+
+        body {
+            font-family: 'Gowun Dodum', 'Pretendard', sans-serif;
+            margin: 0;
+            background-color: var(--bg-cream);
+            color: var(--text-main);
+            padding-top: 90px; /* 네비게이션 바 공간 확보 */
+            padding-bottom: 50px;
+        }
+
+        /* --- [메뉴바 스타일] --- */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; box-sizing: border-box; z-index: 1000;
+            border-bottom: 2px solid #fff0f0;
+            box-shadow: 0 4px 15px rgba(230, 210, 200, 0.1); 
+        }
+        
+        .logo {
+            font-size: 1.3rem;
+            color: #4a4a4a;
+            text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+            font-weight: bold;
+        }
+        .logo i { color: #ff9aa2; font-size: 1.2em; }
+
+        .nav-links { display: flex; gap: 8px; }
+        .nav-item {
+            text-decoration: none; color: #888;
+            font-weight: 600; padding: 8px 15px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.95rem;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: #fff0f5; 
+            color: #ff6f91;
+            transform: translateY(-2px);
+        }
+
+        /* --- [메인 레이아웃] --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        
+        .header-box { text-align: center; margin-bottom: 40px; }
+        .header-box h1 { font-size: 2rem; color: #4a4a4a; margin-bottom: 10px; letter-spacing: -1px; }
+
+        /* 컨트롤 바 (업로드 등) */
+        .control-bar { 
+            display: flex; justify-content: center; gap: 15px; margin-top: 25px; 
+            background: white; padding: 15px 25px; border-radius: 50px; 
+            box-shadow: 0 8px 20px rgba(200, 200, 200, 0.15);
+            border: 2px solid #fff0f0;
+            max-width: 650px; margin-left: auto; margin-right: auto;
+            align-items: center;
+        }
+
+        .upload-btn {
+            background: #f0f4ff; color: #8cb6ff;
+            padding: 10px 25px; border-radius: 30px; 
+            font-size: 1rem; font-weight: bold; cursor: pointer; border: none; 
+            transition: 0.2s; font-family: 'Gowun Dodum', sans-serif;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .upload-btn:hover { background: #dce7ff; transform: translateY(-2px); }
+        
+        select { 
+            padding: 10px 20px; border-radius: 30px; 
+            border: 2px solid #f0ebeb; font-size: 1rem; cursor: pointer; outline: none; 
+            font-family: 'Gowun Dodum', sans-serif; color: #555;
+            background: #fff;
+        }
+        select:hover { border-color: #ffb7b2; }
+
+        /* 섹션 공통 */
+        .section-title { 
+            font-size: 1.4rem; font-weight: bold; margin: 50px 0 20px 0; 
+            display: flex; align-items: center; gap: 10px;
+            color: #333; 
+        }
+        .section-title::before {
+            content: ''; display: block; width: 6px; height: 24px; 
+            background: #ffb7b2; border-radius: 3px;
+        }
+
+        /* --- [카드 스타일] --- */
+        .card, .trend-card, .heatmap-container, .kpi-card {
+            background: #ffffff;
+            border-radius: 25px;
+            padding: 30px;
+            border: 2px solid #f0ebeb;
+            box-shadow: 0 8px 20px rgba(200, 200, 200, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .card:hover, .trend-card:hover, .heatmap-container:hover, .kpi-card:hover {
+            border-color: #ffe0e0;
+            box-shadow: 0 15px 30px rgba(255, 183, 178, 0.2);
+            transform: translateY(-5px);
+        }
+
+        /* KPI 카드 특화 */
+        .kpi-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 20px; }
+        .kpi-card { text-align: center; cursor: pointer; }
+        .kpi-label { font-size: 1.1rem; color: #666; margin-bottom: 10px; }
+        .kpi-amount { font-size: 2rem; font-weight: bold; margin: 5px 0; font-family: 'Pretendard'; }
+        
+        .total .kpi-amount { color: #8cb6ff; }
+        .cancel .kpi-amount { color: #ff9aa2; }
+        .total { background: #fdfeff; }
+        .cancel { background: #fffdfd; }
+
+        /* 그리드 레이아웃 */
+        .analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 30px; margin-top: 20px; }
+        
+        /* 테이블 스타일 */
+        table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin-top: 15px; }
+        th { 
+            background: #fff8f8; color: #666; padding: 12px; text-align: left; 
+            border-bottom: 2px solid #ffebeb; font-weight: bold;
+            first-child: border-top-left-radius: 10px;
+        }
+        td { padding: 12px; border-bottom: 1px solid #f5f5f5; color: #555; }
+        tr:hover td { background: #fffcfc; }
+        .clickable-row { cursor: pointer; color: #8cb6ff; font-weight: bold; text-decoration: none; }
+        .clickable-row:hover { text-decoration: underline; }
+
+        /* 히트맵 */
+        .heatmap-container { overflow-x: auto; padding: 20px; }
+        .heatmap-table { width: 100%; border-collapse: separate; border-spacing: 6px; }
+        .heatmap-cell { 
+            text-align: center; padding: 15px 5px; border-radius: 12px; 
+            font-size: 0.9rem; cursor: pointer; border: 1px solid #eee; transition: 0.2s; 
+            font-family: 'Pretendard';
+        }
+        .heatmap-cell:hover { transform: scale(1.05); border-color: #ffb7b2 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        /* 랭킹 뱃지 */
+        .rank-badge { 
+            background: #f0f0f0; color: #666; width: 26px; height: 26px; 
+            border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; 
+            font-size: 12px; font-weight: bold; margin-right: 5px;
+        }
+        .rank-1 { background: #ffd700; color: #fff; box-shadow: 0 2px 5px rgba(255, 215, 0, 0.4); } 
+        .rank-2 { background: #c0c0c0; color: #fff; } 
+        .rank-3 { background: #cd7f32; color: #fff; }
+
+        /* 모달 (팝업) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; backdrop-filter: blur(3px); }
+        .modal-box { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: white; width: 500px; max-height: 80vh; border-radius: 25px; 
+            display: flex; flex-direction: column; padding: 30px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2); 
+            border: 2px solid #fff0f0;
+        }
+        .student-item { 
+            display: flex; justify-content: space-between; padding: 15px 10px; 
+            border-bottom: 1px solid #f9f9f9; transition: 0.2s;
+        }
+        .student-item:hover { background: #fffcfc; border-radius: 10px; }
+        .badge-partial { font-size: 11px; background: #fff3cd; color: #856404; padding: 3px 8px; border-radius: 10px; margin-left: 5px; }
+        .copy-btn { 
+            background: #8cb6ff; color: white; padding: 8px 18px; border-radius: 20px; 
+            cursor: pointer; border: none; font-size: 0.9rem; margin-left: 10px;
+            font-family: 'Gowun Dodum';
+        }
+        .copy-btn:hover { background: #7aa7ff; }
+        
+        #debugLog { display: none; }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .navbar { padding: 0 15px; height: 60px; }
+            .logo span, .nav-item span { display: none; } /* 모바일에서 텍스트 숨김 */
+            .logo i, .nav-item i { font-size: 1.2rem; }
+            .grid-container { grid-template-columns: 1fr; }
+            .control-bar { flex-direction: column; width: 90%; padding: 20px; }
+            .upload-btn { width: 100%; justify-content: center; }
+            select { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="index.html" class="logo">
+        <i class="fa-solid fa-cloud"></i> <span> 왜 일은 한번에 몰려오는 걸까요? 🌸 </span>
+    </a>
+    <div class="nav-links">
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>홈</span></a>
+        <a href="marker.html" class="nav-item"><i class="fa-solid fa-highlighter"></i><span>약어표시</span></a>
+        <a href="splitter.html" class="nav-item"><i class="fa-solid fa-align-left"></i><span>분할</span></a>
+        <a href="#" class="nav-item active"><i class="fa-solid fa-chart-line"></i><span>매출장부</span></a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="header-box">
+        <h1>📅 원장님 전용 매출 장부</h1>
+        <p style="color:#888; margin-top:5px;">엑셀 파일 하나로 끝내는 학원 매출 분석</p>
+        
+        <div class="control-bar">
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                <i class="fa-regular fa-folder-open"></i> 엑셀 파일 업로드
+            </button>
+            <select id="monthFilter" onchange="updateDashboard()">
+                <option value="all">전체 기간 보기</option>
+            </select>
+        </div>
+        <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" style="display: none;" onchange="handleFile(this)">
+    </div>
+
+    <div id="debugLog"></div>
+
+    <div id="dashboard" style="display: none;">
+        <div id="trendSection">
+            <div class="section-title">📈 월별 매출 추이</div>
+            <div class="trend-card">
+                <div style="height:300px;"><canvas id="chartTrend"></canvas></div>
+            </div>
+        </div>
+
+        <div class="section-title"><span id="kpiTitle">💰 전체 매출 현황</span></div>
+        <div class="kpi-wrapper">
+            <div class="kpi-card total" onclick="showList('유효 매출 전체', 'valid_sales')">
+                <div class="icon-circle" style="background:#f0f4ff; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; color:#8cb6ff;"><i class="fa-solid fa-coins"></i></div>
+                <div class="kpi-label">총 유효 매출액</div>
+                <div class="kpi-amount" id="kpiTotalAmt">0원</div>
+                <div class="kpi-count" id="kpiTotalCnt" style="color:#666; margin-top:5px;">0건</div>
+                <div style="font-size:12px; color:#999; margin-top:5px;">(결제완료 + 중도환불 합계)</div>
+            </div>
+            <div class="kpi-card cancel" onclick="showList('전체 환불 (0원)', 'full_cancel')">
+                <div class="icon-circle" style="background:#fff0f0; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; color:#ff9aa2;"><i class="fa-solid fa-ban"></i></div>
+                <div class="kpi-label">전체 환불 (매출 취소)</div>
+                <div class="kpi-amount" id="kpiCancelCnt" style="font-size:1.8rem;">0건</div>
+                <div style="font-size:12px; color:#ff6f91; margin-top:5px;">* 1만원 미만 취소 건수</div>
+            </div>
+        </div>
+
+        <div class="section-title">🔥 수업 혼잡도 히트맵</div>
+        <div class="heatmap-container">
+            <div id="heatmapArea"></div>
+        </div>
+
+        <div class="section-title">📦 상품별 상세 분석</div>
+        <div class="analysis-grid">
+            <div class="card">
+                <h3 style="margin-top:0; color:#444;">유형별 매출</h3>
+                <div style="height:250px;"><canvas id="chartType"></canvas></div>
+                <table id="tableType"><thead><tr><th>구분</th><th>매출</th><th>건수</th><th>확인</th></tr></thead><tbody></tbody></table>
+            </div>
+            <div class="card">
+                <h3 style="margin-top:0; color:#444;">🎓 반(Class)별 세분화 분포</h3>
+                <div style="height:250px;"><canvas id="chartClass"></canvas></div>
+                <table id="tableClass"><thead><tr><th>반이름</th><th>매출</th><th>건수</th><th>확인</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+
+        <div class="section-title">📆 옵션(요일/시간) 통계</div>
+        <div class="analysis-grid">
+            <div class="card">
+                <h3 style="margin-top:0; color:#444;">요일별 수강생</h3>
+                <div style="height:250px;"><canvas id="chartDay"></canvas></div>
+                <table id="tableDay"><thead><tr><th>요일</th><th>인원수</th><th>확인</th></tr></thead><tbody></tbody></table>
+            </div>
+            <div class="card">
+                <h3 style="margin-top:0; color:#444;">⏰ 시간대별 수강생 (오름차순)</h3>
+                <div style="height:250px;"><canvas id="chartTime"></canvas></div>
+                <table id="tableTime"><thead><tr><th>시간</th><th>인원수</th><th>확인</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+
+        <div class="section-title">🏆 VIP & 재등록 분석</div>
+        <div class="analysis-grid">
+            <div class="card">
+                <h3 style="margin-top:0; color:#444;">💎 결제 금액 TOP 10</h3>
+                <table id="tableVip"><thead><tr><th>순위</th><th>이름</th><th>총 결제액</th><th>건수</th><th>확인</th></tr></thead><tbody></tbody></table>
+            </div>
+            <div class="card">
+                <h3 style="margin-top:0; color:#444;">🔄 재등록(중복결제) 의심</h3>
+                <table id="tableRevisit"><thead><tr><th>이름</th><th>연락처</th><th>결제횟수</th><th>총액</th><th>확인</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="studentModal" onclick="if(event.target.id==='studentModal') this.style.display='none'">
+    <div class="modal-box">
+        <div class="modal-header" style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #f0f0f0; padding-bottom:15px; align-items:center;">
+            <div style="font-size:1.2rem; font-weight:bold; color:#333;" id="modalTitle">학생 명단</div>
+            <div style="display:flex; align-items:center;">
+                <button class="copy-btn" onclick="copyList()"><i class="fa-regular fa-copy"></i> 복사</button>
+                <span style="font-size:24px; cursor:pointer; margin-left:15px; color:#aaa;" onclick="document.getElementById('studentModal').style.display='none'">&times;</span>
+            </div>
+        </div>
+        <div class="modal-body" id="modalList" style="overflow-y:auto; flex:1;"></div>
+    </div>
+</div>
+
+<script>
+    // 기존 스크립트 로직 유지
+    let db = [], filteredDb = [], monthList = new Set();
+    const logBox = document.getElementById('debugLog');
+
+    function handleFile(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
+                processData(rows);
+            } catch (err) { alert("파일 읽기 오류: " + err.message); }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function parseDate(raw) {
+        if (!raw) return null;
+        let str = String(raw).trim();
+        if (!isNaN(str) && str.length < 6 && str.length > 4) {
+            let date = new Date((Number(str) - (25567 + 2)) * 86400 * 1000);
+            return date;
+        }
+        let cleanStr = str.replace(/[./]/g, '-').split(' ')[0];
+        let date = new Date(cleanStr);
+        if (!isNaN(date.getTime())) return date;
+        return null;
+    }
+
+    function getMonthKey(dateObj) {
+        if (!dateObj) return "";
+        let y = dateObj.getFullYear();
+        let m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        return `${y}-${m}`;
+    }
+
+    function getDateStr(dateObj) {
+        if (!dateObj) return "";
+        let y = dateObj.getFullYear();
+        let m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        let d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function processData(rows) {
+        db = []; monthList.clear();
+        let statusIdx = findStatusCol(rows);
+        if(statusIdx === -1) return;
+
+        let i = 0;
+        while(i < rows.length) {
+            let row = rows[i];
+            if (!row) { i++; continue; }
+            
+            let status = String(row[statusIdx]).trim();
+            
+            if(status === '결제완료' || status.includes('취소')) {
+                let priceRaw = row[statusIdx-1] || row[4]; 
+                let price = parseInt(String(priceRaw).replace(/[^\d]/g, '')) || 0;
+                let dateObj = parseDate(row[0]);
+                let dateStr = getDateStr(dateObj); 
+                let monthKey = getMonthKey(dateObj); 
+
+                if (!monthKey) { i++; continue; }
+
+                let item = {
+                    date: dateStr, month: monthKey, name: row[3], phone: '',
+                    product: '', price: price, status: status, option: '',
+                    type: '', classInfo: '', dayInfo: '', timeInfo: '', 
+                    isPartial: false, isFullCancel: false
+                };
+
+                if(i+1 < rows.length) {
+                    let rowB = rows[i+1];
+                    item.product = String(rowB[1]);
+                    item.phone = String(rowB[3]);
+                    
+                    let increment = 2;
+                    if(i+2 < rows.length) {
+                        let optInfo = String(rows[i+2][1]);
+                        if(optInfo.includes('옵션')) {
+                            item.option = optInfo;
+                            increment = 3;
+                        }
+                    }
+
+                    let isValid = false;
+                    if (status === '결제완료') isValid = true;
+                    else if (status.includes('취소') && price >= 10000) {
+                        isValid = true;
+                        item.isPartial = true;
+                    } else if (status.includes('취소')) {
+                        item.isFullCancel = true;
+                    }
+
+                    if (isValid || item.isFullCancel) {
+                        // 1. 유형 분류
+                        if (item.product.includes('올패스')) item.type = '올패스';
+                        else item.type = '화상수업';
+
+                        // 2. 반(Class) 세분화
+                        if (item.product.includes('시험대비') && item.product.includes('자료')) item.classInfo = '시험대비 자료';
+                        else if (item.product.includes('시험대비')) item.classInfo = '시험대비반';
+                        else if (item.product.includes('3급')) item.classInfo = '3급 자료';
+                        else if (item.product.includes('입문')) item.classInfo = '입문/중급';
+                        else if (item.product.includes('고급')) item.classInfo = '고급';
+                        else if (item.product.includes('심야')) item.classInfo = '심야';
+                        else if (item.type === '화상수업') item.classInfo = '기타 수업';
+                        else item.classInfo = '기타';
+
+                        // 3. 옵션 파싱 (시간 숫자만 추출 + 유효성 체크)
+                        let dM = item.option.match(/\[요일\]\s*([^,]+)/);
+                        if(dM) item.dayInfo = dM[1].trim();
+                        
+                        let tM = item.option.match(/\[시간\]\s*([^,]+)/);
+                        if(tM) {
+                            let tStr = tM[1].trim().replace(/[:시분]/g, '').substring(0,2);
+                            if(!isNaN(parseInt(tStr))) item.timeInfo = parseInt(tStr); // 숫자로 저장
+                        }
+
+                        db.push(item);
+                        if (monthKey) monthList.add(monthKey);
+                    }
+                    i += increment;
+                } else { i++; }
+            } else { i++; }
+        }
+
+        populateFilter();
+        updateDashboard();
+    }
+
+    function findStatusCol(rows) {
+        for(let r=0; r<Math.min(rows.length, 50); r++) {
+            for(let c=0; c<rows[r].length; c++) {
+                if(String(rows[r][c]).includes('결제상태')) return c;
+            }
+        }
+        return 5; 
+    }
+
+    function populateFilter() {
+        const sel = document.getElementById('monthFilter');
+        sel.innerHTML = '<option value="all">📅 전체 기간 보기</option>';
+        let list = Array.from(monthList).sort().reverse();
+        list.forEach(m => { if(m) sel.innerHTML += `<option value="${m}">${m}월 매출</option>`; });
+    }
+
+    function updateDashboard() {
+        const mon = document.getElementById('monthFilter').value;
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('trendSection').style.display = (mon === 'all') ? 'block' : 'none';
+        
+        if(mon === 'all') {
+            filteredDb = db;
+            document.getElementById('kpiTitle').innerText = '💰 전체 누적 매출 현황';
+            renderTrend(); 
+        } else {
+            filteredDb = db.filter(i => i.month === mon);
+            document.getElementById('kpiTitle').innerText = `💰 ${mon}월 매출 현황`;
+        }
+        analyze(filteredDb);
+    }
+
+    function analyze(data) {
+        let kpi = { amt:0, cnt:0, cancelCnt:0 };
+        let cats = { type:{}, class:{}, day:{}, time:{} };
+        let hm = { '월':{}, '화':{}, '수':{}, '목':{}, '금':{}, '토':{}, '일':{} };
+        let stu = {};
+
+        data.forEach(i => {
+            if(i.isFullCancel) { kpi.cancelCnt++; return; }
+            kpi.amt += i.price;
+            kpi.cnt++;
+
+            addCnt(cats.type, i.type, i);
+            if(i.type !== '올패스') {
+                addCnt(cats.class, i.classInfo, i);
+                addCnt(cats.day, i.dayInfo, i);
+                
+                // 시간대가 유효한(숫자) 경우에만 추가
+                if(i.timeInfo !== '') {
+                    addCnt(cats.time, i.timeInfo + '시', i);
+                }
+                
+                if(i.dayInfo && i.timeInfo !== '') {
+                    i.dayInfo.split('').forEach(d => {
+                        if(hm[d]) {
+                            let t = i.timeInfo;
+                            if(!hm[d][t]) hm[d][t] = {cnt:0, list:[]};
+                            hm[d][t].cnt++;
+                            hm[d][t].list.push(i);
+                        }
+                    });
+                }
+            }
+            let key = i.phone || i.name;
+            if(!stu[key]) stu[key] = {name:i.name, phone:i.phone, amt:0, cnt:0, list:[]};
+            stu[key].amt += i.price;
+            stu[key].cnt++;
+            stu[key].list.push(i);
+        });
+
+        document.getElementById('kpiTotalAmt').innerText = kpi.amt.toLocaleString() + '원';
+        document.getElementById('kpiTotalCnt').innerText = kpi.cnt + '건';
+        document.getElementById('kpiCancelCnt').innerText = kpi.cancelCnt + '건';
+
+        // 컬러 팔레트 (파스텔톤)
+        const pastelColors = ['#a2c2ff', '#95e1d3', '#ffb7b2', '#e2f0cb', '#b5ead7', '#c7ceea', '#ffdac1', '#e0bbe4'];
+
+        renderChart('chartType', cats.type, '매출', false, pastelColors);
+        renderChart('chartClass', cats.class, '매출', false, pastelColors);
+        renderChart('chartDay', cats.day, '인원', false, pastelColors);
+        renderChart('chartTime', cats.time, '인원', true, pastelColors); 
+        renderTable('tableType', cats.type, '매출');
+        renderTable('tableClass', cats.class, '매출');
+        renderTable('tableDay', cats.day, '인원');
+        renderTable('tableTime', cats.time, '인원', true); 
+        renderHeatmap(hm);
+        renderVip(stu);
+    }
+
+    function addCnt(obj, key, item) {
+        if(!key) return;
+        if(!obj[key]) obj[key] = {amt:0, cnt:0, list:[]};
+        obj[key].amt += item.price;
+        obj[key].cnt++;
+        obj[key].list.push(item);
+    }
+
+    function renderTrend() {
+        let monthly = {};
+        db.forEach(i => { if(!i.isFullCancel) monthly[i.month] = (monthly[i.month]||0) + i.price; });
+        let keys = Object.keys(monthly).sort();
+        let vals = keys.map(k => monthly[k]);
+        let ctx = document.getElementById('chartTrend').getContext('2d');
+        if(Chart.getChart('chartTrend')) Chart.getChart('chartTrend').destroy();
+        new Chart(ctx, {
+            type: 'line',
+            data: { labels: keys, datasets: [{ 
+                label:'월매출', data:vals, 
+                borderColor:'#8cb6ff', backgroundColor:'rgba(162, 194, 255, 0.2)',
+                pointBackgroundColor: '#fff', pointBorderColor: '#8cb6ff', pointRadius: 5,
+                fill:true, tension: 0.3 
+            }] },
+            options: { 
+                responsive:true, maintainAspectRatio:false,
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { grid: { borderDash: [5, 5], color: '#f0f0f0' } }
+                }
+            }
+        });
+    }
+
+    function renderChart(id, obj, metric, isTimeSort=false, colors) {
+        let keys = Object.keys(obj);
+        if(isTimeSort) keys.sort((a,b) => parseInt(a) - parseInt(b));
+        else keys.sort((a,b) => metric==='매출'?obj[b].amt-obj[a].amt : obj[b].cnt-obj[a].cnt);
+
+        let vals = keys.map(k => metric==='매출'?obj[k].amt : obj[k].cnt);
+        let ctx = document.getElementById(id).getContext('2d');
+        if(Chart.getChart(id)) Chart.getChart(id).destroy();
+        new Chart(ctx, {
+            type: metric==='매출'?'doughnut':'bar',
+            data: { 
+                labels: keys, 
+                datasets: [{ 
+                    label:metric, data:vals, 
+                    backgroundColor: colors || ['#3b82f6','#10b981'],
+                    borderRadius: 5,
+                    borderWidth: 0
+                }] 
+            },
+            options: { 
+                responsive:true, maintainAspectRatio:false,
+                onClick: (e, els) => { if(els.length>0) showList(keys[els[0].index], 'list', obj[keys[els[0].index]].list); },
+                scales: metric==='매출' ? {} : {
+                    x: { grid: { display: false } },
+                    y: { grid: { borderDash: [5, 5], color: '#f0f0f0' } }
+                }
+            }
+        });
+    }
+
+    function renderTable(id, obj, metric, isTimeSort=false) {
+        let tb = document.querySelector(`#${id} tbody`);
+        tb.innerHTML = '';
+        let keys = Object.keys(obj);
+        if(isTimeSort) keys.sort((a,b) => parseInt(a) - parseInt(b));
+        else keys.sort((a,b) => metric==='매출'?obj[b].amt-obj[a].amt : obj[b].cnt-obj[a].cnt);
+
+        keys.forEach(k => {
+            let tr = document.createElement('tr');
+            let val = metric==='매출'?obj[k].amt.toLocaleString()+'원' : obj[k].cnt+'명';
+            tr.innerHTML = metric==='매출' ? `<td>${k}</td><td>${val}</td><td>${obj[k].cnt}건</td><td class="clickable-row">확인</td>` : `<td>${k}</td><td>${val}</td><td class="clickable-row">확인</td>`;
+            tr.onclick = () => showList(k, 'list', obj[k].list);
+            tb.appendChild(tr);
+        });
+    }
+
+    function renderHeatmap(hm) {
+        const times = [9,10,11,14,15,16,17,19,20,21];
+        const days = ['월','화','수','목','금','토','일'];
+        let html = '<table class="heatmap-table"><thead><tr><th></th>';
+        times.forEach(t=>html+=`<th>${t}</th>`);
+        html+='</tr></thead><tbody>';
+        let max = 0;
+        days.forEach(d=>times.forEach(t=>{ if(hm[d][t] && hm[d][t].cnt>max) max = hm[d][t].cnt; }));
+        days.forEach(d=>{
+            html+=`<tr><th>${d}</th>`;
+            times.forEach(t=>{
+                let cnt = hm[d][t] ? hm[d][t].cnt : 0;
+                // 파스텔 핑크 계열로 농도 조절
+                let alpha = max > 0 ? cnt/max : 0;
+                let bg = cnt>0 ? `rgba(255, 183, 178, ${Math.max(0.15, alpha)})` : '#fdfdfd';
+                let col = (alpha > 0.6) ? '#fff' : '#666';
+                let border = cnt>0 ? 'border:1px solid #ffdeda;' : '';
+                html+=`<td class="heatmap-cell" style="background:${bg};color:${col};${border}" onclick='showList("${d} ${t}시","list", ${JSON.stringify(hm[d][t]?hm[d][t].list:[])})'>${cnt||'-'}</td>`;
+            });
+            html+='</tr>';
+        });
+        document.getElementById('heatmapArea').innerHTML = html+'</tbody></table>';
+    }
+
+    function renderVip(stu) {
+        let list = Object.values(stu).sort((a,b)=>b.amt-a.amt).slice(0,10);
+        let tb = document.querySelector('#tableVip tbody');
+        tb.innerHTML = '';
+        list.forEach((s,i)=>{
+            let tr = document.createElement('tr');
+            tr.innerHTML = `<td><span class="rank-badge ${i<3?'rank-'+(i+1):''}">${i+1}</span></td><td style="font-weight:bold;">${s.name}</td><td>${s.amt.toLocaleString()}</td><td>${s.cnt}</td><td class="clickable-row">확인</td>`;
+            tr.onclick = () => showList(s.name, 'list', s.list);
+            tb.appendChild(tr);
+        });
+
+        let rev = Object.values(stu).filter(s=>s.cnt>=2).sort((a,b)=>b.cnt-a.cnt).slice(0,10);
+        let tb2 = document.querySelector('#tableRevisit tbody');
+        tb2.innerHTML = '';
+        rev.forEach(s=>{
+            let tr = document.createElement('tr');
+            tr.innerHTML = `<td>${s.name}</td><td>${s.phone}</td><td>${s.cnt}회</td><td>${s.amt.toLocaleString()}</td><td class="clickable-row">확인</td>`;
+            tr.onclick = () => showList(s.name, 'list', s.list);
+            tb2.appendChild(tr);
+        });
+    }
+
+    function showList(title, type, list=[]) {
+        let tList = list;
+        if(type==='valid_sales') tList = filteredDb.filter(i=>!i.isFullCancel);
+        if(type==='full_cancel') tList = filteredDb.filter(i=>i.isFullCancel);
+        
+        document.getElementById('modalTitle').innerText = `${title} (${tList.length}명)`;
+        let html = '';
+        tList.forEach(i=>{
+            let badge = i.isPartial ? '<span class="badge-partial">중도환불</span>' : '';
+            html += `<div class="student-item">
+                <div><b>${i.name}</b> ${badge} <span style="color:#888;font-size:12px">${i.product} (${i.price.toLocaleString()}원)</span></div>
+                <div>${i.phone} <span style="font-size:11px;color:#aaa">${i.date}</span></div>
+            </div>`;
+        });
+        document.getElementById('modalList').innerHTML = html;
+        document.getElementById('studentModal').style.display = 'flex';
+    }
+    
+    function copyList() {
+        let txt = "";
+        document.querySelectorAll('.student-item').forEach(div=>{
+            txt += `${div.children[0].innerText}\t${div.children[1].innerText}\n`;
+        });
+        navigator.clipboard.writeText(txt).then(()=>alert('명단이 복사되었습니다. 엑셀에 붙여넣기 하세요!'));
+    }
+</script>
+</body>
+</html>
