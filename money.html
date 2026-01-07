@@ -274,7 +274,7 @@
         <div class="section-title">📦 상품별 상세 분석</div>
         <div class="analysis-grid">
             <div class="card">
-                <h3 style="margin-top:0; color:#444;">유형별 매출</h3>
+                <h3 style="margin-top:0; color:#444;">유형별 매출 (4종)</h3>
                 <div style="height:250px;"><canvas id="chartType"></canvas></div>
                 <table id="tableType"><thead><tr><th>구분</th><th>매출</th><th>건수</th><th>확인</th></tr></thead><tbody></tbody></table>
             </div>
@@ -288,7 +288,7 @@
         <div class="section-title">📆 옵션(요일/시간) 통계</div>
         <div class="analysis-grid">
             <div class="card">
-                <h3 style="margin-top:0; color:#444;">요일별 수강생</h3>
+                <h3 style="margin-top:0; color:#444;">요일별 수강생(화상수업+시대반)</h3>
                 <div style="height:250px;"><canvas id="chartDay"></canvas></div>
                 <table id="tableDay"><thead><tr><th>요일</th><th>인원수</th><th>확인</th></tr></thead><tbody></tbody></table>
             </div>
@@ -427,17 +427,26 @@
                     }
 
                     if (isValid || item.isFullCancel) {
-                        // 1. 유형 분류
-                        if (item.product.includes('올패스')) item.type = '올패스';
-                        else item.type = '화상수업';
+                        // ==========================================
+                        // [수정된 부분] 1. 유형 분류 (4가지로 세분화)
+                        // ==========================================
+                        if (item.product.includes('올패스')) {
+                            item.type = '올패스';
+                        } else if (item.product.includes('시험대비') && item.product.includes('자료')) {
+                            item.type = '시험대비반 자료이용';
+                        } else if (item.product.includes('시험대비')) {
+                            item.type = '시험대비 CLASS';
+                        } else {
+                            item.type = '화상수업';
+                        }
 
                         // 2. 반(Class) 세분화
-                        if (item.product.includes('시험대비') && item.product.includes('자료')) item.classInfo = '시험대비 자료';
-                        else if (item.product.includes('시험대비')) item.classInfo = '시험대비반';
+                        if (item.product.includes('시험대비') && item.product.includes('자료')) item.classInfo = '시험대비 자료이용';
+                        else if (item.product.includes('시험대비')) item.classInfo = '시험대비 CLASS';
+						else if (item.product.includes('입문')) item.classInfo = '입문/중급';
                         else if (item.product.includes('3급')) item.classInfo = '3급 자료';
-                        else if (item.product.includes('입문')) item.classInfo = '입문/중급';
-                        else if (item.product.includes('고급')) item.classInfo = '고급';
-                        else if (item.product.includes('심야')) item.classInfo = '심야';
+                        else if (item.product.includes('고급')) item.classInfo = '고급 CLASS';
+                        else if (item.product.includes('심야')) item.classInfo = '심야 CLASS';
                         else if (item.type === '화상수업') item.classInfo = '기타 수업';
                         else item.classInfo = '기타';
 
@@ -705,8 +714,4 @@
     }
 </script>
 </body>
-
 </html>
-
-
-
