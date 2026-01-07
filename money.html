@@ -2,10 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>아카데미 매출 분석</title>
+    <title>아카데미 성과 분석 프로(Pro)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -20,6 +19,7 @@
             --text-sub: #666666; 
             --border-line: #f0ebeb; 
             --accent-blue: #8cb6ff;
+            --accent-green: #10b981;
         }
 
         body {
@@ -31,7 +31,7 @@
             padding-bottom: 50px;
         }
 
-        /* --- [메뉴바 스타일] --- [cite: 5-15] */
+        /* --- [메뉴바] --- */
         .navbar {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 70px;
@@ -43,7 +43,6 @@
             border-bottom: 2px solid #fff0f0;
             box-shadow: 0 4px 15px rgba(230, 210, 200, 0.1); 
         }
-        
         .logo {
             font-size: 1.3rem;
             color: #4a4a4a;
@@ -52,7 +51,6 @@
             font-weight: bold;
         }
         .logo i { color: #ff9aa2; font-size: 1.2em; }
-
         .nav-links { display: flex; gap: 8px; }
         .nav-item {
             text-decoration: none;
@@ -69,133 +67,126 @@
             transform: translateY(-2px);
         }
 
-        /* --- [메인 레이아웃] --- [cite: 16-32] */
+        /* --- [레이아웃] --- */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         
-        .header-box { text-align: center; margin-bottom: 40px; }
+        .header-box { text-align: center; margin-bottom: 30px; }
         .header-box h1 { font-size: 2rem; color: #4a4a4a; margin-bottom: 10px; letter-spacing: -1px; }
 
+        /* 목표 달성 게이지 스타일 */
+        .goal-wrapper {
+            max-width: 800px; margin: 0 auto 30px auto;
+            background: #fff; padding: 20px; border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #f0ebeb;
+            text-align: center;
+        }
+        .goal-input-area { margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .goal-input-area input {
+            padding: 8px 15px; border: 1px solid #ddd; border-radius: 10px; 
+            font-family: 'Pretendard'; font-size: 1rem; width: 120px; text-align: right;
+        }
+        .progress-container {
+            height: 24px; background-color: #f0f0f0; border-radius: 12px; overflow: hidden; position: relative;
+        }
+        .progress-bar {
+            height: 100%; background: linear-gradient(90deg, #a2c2ff, #95e1d3);
+            width: 0%; transition: width 1s ease-in-out;
+            display: flex; align-items: center; justify-content: flex-end; padding-right: 10px;
+            color: white; font-weight: bold; font-size: 0.85rem;
+        }
+        .goal-confetti { position: absolute; right: 10px; top: -20px; font-size: 20px; display: none; }
+
+        /* 컨트롤 바 */
         .control-bar { 
-            display: flex;
-            justify-content: center; gap: 15px; margin-top: 25px; 
+            display: flex; justify-content: center; gap: 10px; margin-top: 15px; 
             background: white; padding: 15px 25px; border-radius: 50px;
             box-shadow: 0 8px 20px rgba(200, 200, 200, 0.15);
             border: 2px solid #fff0f0;
-            max-width: 650px; margin-left: auto; margin-right: auto;
-            align-items: center;
+            max-width: 850px; margin-left: auto; margin-right: auto;
+            align-items: center; flex-wrap: wrap;
         }
 
-        .upload-btn {
-            background: #f0f4ff;
-            color: #8cb6ff;
-            padding: 10px 25px; border-radius: 30px; 
-            font-size: 1rem; font-weight: bold; cursor: pointer; border: none; 
-            transition: 0.2s;
-            font-family: 'Gowun Dodum', sans-serif;
-            display: flex; align-items: center; gap: 8px;
+        .btn-style {
+            padding: 10px 20px; border-radius: 30px; 
+            font-size: 0.95rem; font-weight: bold; cursor: pointer; border: none; 
+            transition: 0.2s; font-family: 'Gowun Dodum', sans-serif;
+            display: flex; align-items: center; gap: 6px;
         }
+        .upload-btn { background: #f0f4ff; color: #5874ff; }
         .upload-btn:hover { background: #dce7ff; transform: translateY(-2px); }
         
+        .compare-btn { background: #fff0f5; color: #ff6f91; }
+        .compare-btn:hover { background: #ffe0ea; transform: translateY(-2px); }
+
+        .report-btn { background: #e0f7fa; color: #0097a7; }
+        .report-btn:hover { background: #b2ebf2; transform: translateY(-2px); }
+        
         select { 
-            padding: 10px 20px;
-            border-radius: 30px; 
+            padding: 10px 20px; border-radius: 30px; 
             border: 2px solid #f0ebeb; font-size: 1rem; cursor: pointer; outline: none; 
-            font-family: 'Gowun Dodum', sans-serif; color: #555;
-            background: #fff;
+            font-family: 'Gowun Dodum', sans-serif; color: #555; background: #fff;
         }
         select:hover { border-color: #ffb7b2; }
 
         .section-title { 
-            font-size: 1.4rem;
-            font-weight: bold; margin: 50px 0 20px 0; 
-            display: flex; align-items: center; gap: 10px;
-            color: #333;
+            font-size: 1.4rem; font-weight: bold; margin: 50px 0 20px 0; 
+            display: flex; align-items: center; gap: 10px; color: #333;
         }
         .section-title::before {
-            content: '';
-            display: block; width: 6px; height: 24px; 
+            content: ''; display: block; width: 6px; height: 24px; 
             background: #ffb7b2; border-radius: 3px;
         }
 
-        /* --- [카드 스타일] --- [cite: 33-44] */
-        .card, .trend-card, .heatmap-container, .kpi-card {
-            background: #ffffff;
-            border-radius: 25px;
-            padding: 30px;
-            border: 2px solid #f0ebeb;
-            box-shadow: 0 8px 20px rgba(200, 200, 200, 0.1);
-            transition: all 0.3s ease;
-            position: relative;
+        /* --- [카드 및 그리드] --- */
+        .card, .trend-card, .heatmap-container, .kpi-card, .insight-card {
+            background: #ffffff; border-radius: 25px; padding: 30px;
+            border: 2px solid #f0ebeb; box-shadow: 0 8px 20px rgba(200, 200, 200, 0.1);
+            transition: all 0.3s ease; position: relative;
         }
-        .card:hover, .trend-card:hover, .heatmap-container:hover, .kpi-card:hover {
-            border-color: #ffe0e0;
-            box-shadow: 0 15px 30px rgba(255, 183, 178, 0.2);
+        .card:hover, .trend-card:hover, .kpi-card:hover, .insight-card:hover {
+            border-color: #ffe0e0; box-shadow: 0 15px 30px rgba(255, 183, 178, 0.2);
             transform: translateY(-5px);
         }
 
-        /* KPI 카드 특화 */
+        /* KPI & Insight */
         .kpi-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 20px; }
         .kpi-card { text-align: center; cursor: pointer; }
         .kpi-label { font-size: 1.1rem; color: #666; margin-bottom: 10px; }
         .kpi-amount { font-size: 2rem; font-weight: bold; margin: 5px 0; font-family: 'Pretendard'; }
-        
         .total .kpi-amount { color: #8cb6ff; }
         .cancel .kpi-amount { color: #ff9aa2; }
-        .total { background: #fdfeff; }
-        .cancel { background: #fffdfd; }
 
-        /* --- [인사이트 카드 전용 스타일] --- */
-        .insight-wrapper {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .insight-card {
-            background: #ffffff;
-            border-radius: 20px;
-            padding: 25px 20px;
-            text-align: center;
-            border: 2px solid #fcfaf9;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            transition: 0.3s;
-        }
-        .insight-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
-        .insight-card.danger { border: 2px solid #ffcfce; background: #fffafa; }
-        
+        .insight-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .insight-card { padding: 25px 20px; text-align: center; }
         .insight-label { font-size: 0.95rem; color: #999; margin-bottom: 8px; font-family: 'Pretendard'; }
         .insight-value { font-size: 1.7rem; font-weight: bold; color: #4a4a4a; margin-bottom: 8px; font-family: 'Pretendard'; }
         .insight-desc { font-size: 0.85rem; color: #666; font-family: 'Gowun Dodum'; }
-        
+        .insight-card.danger { border: 2px solid #ffcfce; background: #fffafa; }
         .badge-re { background: #eef2ff; color: #5874ff; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; display: inline-block; margin-top: 5px; }
 
-        /* 그리드 & 테이블 --- [cite: 45-62] */
+        /* 그리드 & 테이블 */
         .analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 30px; margin-top: 20px; }
-        
         table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin-top: 15px; }
-        th { 
-            background: #fff8f8;
-            color: #666; padding: 12px; text-align: left; 
-            border-bottom: 2px solid #ffebeb; font-weight: bold;
-        }
+        th { background: #fff8f8; color: #666; padding: 12px; text-align: left; border-bottom: 2px solid #ffebeb; font-weight: bold; }
         td { padding: 12px; border-bottom: 1px solid #f5f5f5; color: #555; }
         tr:hover td { background: #fffcfc; }
         .clickable-row { cursor: pointer; color: #8cb6ff; font-weight: bold; text-decoration: none; }
         .clickable-row:hover { text-decoration: underline; }
 
+        /* 히트맵 */
         .heatmap-container { overflow-x: auto; padding: 20px; }
         .heatmap-table { width: 100%; border-collapse: separate; border-spacing: 6px; }
         .heatmap-cell { 
-            text-align: center;
-            padding: 15px 5px; border-radius: 12px; 
+            text-align: center; padding: 15px 5px; border-radius: 12px; 
             font-size: 0.9rem; cursor: pointer; border: 1px solid #eee; transition: 0.2s; 
             font-family: 'Pretendard';
         }
         .heatmap-cell:hover { transform: scale(1.05); border-color: #ffb7b2 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
+        /* 랭킹 뱃지 */
         .rank-badge { 
-            background: #f0f0f0;
-            color: #666; width: 26px; height: 26px; 
+            background: #f0f0f0; color: #666; width: 26px; height: 26px; 
             border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; 
             font-size: 12px; font-weight: bold; margin-right: 5px;
         }
@@ -203,42 +194,50 @@
         .rank-2 { background: #c0c0c0; color: #fff; } 
         .rank-3 { background: #cd7f32; color: #fff; }
 
-        /* 모달 --- [cite: 63-75] */
+        /* 모달 공통 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; backdrop-filter: blur(3px); }
         .modal-box { 
-            position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            background: white; width: 500px; max-height: 80vh; border-radius: 25px; 
-            display: flex; flex-direction: column;
-            padding: 30px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2); 
-            border: 2px solid #fff0f0;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: white; width: 500px; max-height: 85vh; border-radius: 25px; 
+            display: flex; flex-direction: column; padding: 30px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2); border: 2px solid #fff0f0;
         }
-        .student-item { 
-            display: flex;
-            justify-content: space-between; padding: 15px 10px; 
-            border-bottom: 1px solid #f9f9f9; transition: 0.2s;
-        }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; align-items: center; }
+        .modal-title { font-size: 1.3rem; font-weight: bold; color: #333; }
+        
+        .student-item { display: flex; justify-content: space-between; padding: 15px 10px; border-bottom: 1px solid #f9f9f9; transition: 0.2s; }
         .student-item:hover { background: #fffcfc; border-radius: 10px; }
         .badge-partial { font-size: 11px; background: #fff3cd; color: #856404; padding: 3px 8px; border-radius: 10px; margin-left: 5px; }
-        .copy-btn { 
-            background: #8cb6ff;
-            color: white; padding: 8px 18px; border-radius: 20px; 
-            cursor: pointer; border: none; font-size: 0.9rem; margin-left: 10px;
-            font-family: 'Gowun Dodum';
-        }
-        .copy-btn:hover { background: #7aa7ff; }
         
-        #debugLog { display: none; }
+        /* 비교 모달 전용 */
+        .compare-grid-modal { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px; }
+        .compare-col { background: #fafafa; padding: 15px; border-radius: 15px; text-align: center; }
+        .compare-val { font-size: 1.5rem; font-weight: bold; font-family: 'Pretendard'; margin: 10px 0; }
+        .delta-pos { color: #ff6f91; font-weight: bold; }
+        .delta-neg { color: #8cb6ff; font-weight: bold; }
 
-        /* 반응형 --- [cite: 76-82] */
+        /* 보고서 텍스트 영역 */
+        .report-textarea {
+            width: 100%; height: 300px; padding: 15px; border: 2px solid #eee; border-radius: 15px;
+            font-family: 'Pretendard'; font-size: 1rem; line-height: 1.6; resize: none; background: #fafafa; outline: none;
+        }
+
+        /* LTV 섹션 */
+        .ltv-card {
+            background: #fdfdfd; border: 2px dashed #d1d5db; padding: 25px; border-radius: 20px; text-align: center;
+        }
+        .ltv-stat { font-size: 2rem; font-weight: bold; color: #5874ff; font-family: 'Pretendard'; }
+
+        /* 반응형 */
         @media (max-width: 768px) {
             .navbar { padding: 0 15px; height: 60px; }
             .logo span, .nav-item span { display: none; } 
             .logo i, .nav-item i { font-size: 1.2rem; }
             .analysis-grid { grid-template-columns: 1fr; }
             .control-bar { flex-direction: column; width: 90%; padding: 20px; }
-            .upload-btn, select { width: 100%; }
+            .btn-style, select { width: 100%; justify-content: center; }
+            .modal-box { width: 90%; }
+            .compare-grid-modal { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -246,33 +245,46 @@
 
 <nav class="navbar">
     <a href="index.html" class="logo">
-        <i class="fa-solid fa-cloud"></i> <span> 왜 일은 한번에 몰려오는 걸까요? 🌸 </span>
+        <i class="fa-solid fa-cloud"></i> <span> 왜 일은 한번에 몰려오는 걸까요? 🌸 (Pro)</span>
     </a>
     <div class="nav-links">
-        <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>홈</span></a>
-        <a href="marker.html" class="nav-item"><i class="fa-solid fa-highlighter"></i><span>약어표시</span></a>
-        <a href="splitter.html" class="nav-item"><i class="fa-solid fa-align-left"></i><span>분할</span></a>
-        <a href="#" class="nav-item active"><i class="fa-solid fa-chart-line"></i><span>매출장부</span></a>
+        <a href="#" class="nav-item active"><i class="fa-solid fa-chart-line"></i><span>매출분석</span></a>
     </div>
 </nav>
 
 <div class="container">
     <div class="header-box">
-        <h1>🌸 아카데미 매출 분석</h1>
-        <p style="color:#888; margin-top:5px;">엑셀 파일 하나로 끝내는 학원 매출 분석</p>
-    
-        <div class="control-bar">
-            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                <i class="fa-regular fa-folder-open"></i> 엑셀 파일 업로드
-            </button>
-            <select id="monthFilter" onchange="updateDashboard()">
-                <option value="all">전체 기간 보기</option>
-            </select>
-        </div>
-        <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" style="display: none;" onchange="handleFile(this)">
+        <h1>🌸 아카데미 성과 분석 프로</h1>
+        <p style="color:#888; margin-top:5px;">엑셀 파일 하나로 목표 관리부터 LTV 분석까지</p>
     </div>
 
-    <div id="debugLog"></div>
+    <div class="goal-wrapper">
+        <div class="goal-input-area">
+            <span style="font-weight:bold; color:#555;">🎯 이번 달 목표 매출:</span>
+            <input type="text" id="targetInput" placeholder="금액 입력" onchange="calculateGoal()" onkeyup="inputNumberFormat(this)"> 원
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="goalProgressBar">0%</div>
+            <div class="goal-confetti" id="goalConfetti">🎉</div>
+        </div>
+        <div style="font-size:0.85rem; color:#999; margin-top:5px;">목표를 입력하고 엔터를 치세요!</div>
+    </div>
+
+    <div class="control-bar">
+        <button class="btn-style upload-btn" onclick="document.getElementById('fileInput').click()">
+            <i class="fa-regular fa-folder-open"></i> 엑셀 업로드
+        </button>
+        <select id="monthFilter" onchange="updateDashboard()">
+            <option value="all">전체 기간 보기</option>
+        </select>
+        <button class="btn-style compare-btn" onclick="openCompareModal()">
+            <i class="fa-solid fa-scale-balanced"></i> 성과 비교
+        </button>
+        <button class="btn-style report-btn" onclick="generateReport()">
+            <i class="fa-solid fa-file-pen"></i> 보고서 생성
+        </button>
+    </div>
+    <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" style="display: none;" onchange="handleFile(this)">
 
     <div id="dashboard" style="display: none;">
         <div id="insightSection" style="display: none;">
@@ -369,25 +381,91 @@
                 <table id="tableRevisit"><thead><tr><th>이름</th><th>연락처</th><th>결제횟수</th><th>총액</th><th>확인</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
+
+        <div class="section-title">💎 수강생 생애주기(LTV) 분석</div>
+        <div class="analysis-grid">
+            <div class="ltv-card">
+                <h4>총 수강생 수 (Unique)</h4>
+                <div class="ltv-stat" id="ltvTotalStudents">0명</div>
+                <p style="color:#888; font-size:0.9rem;">학원을 거쳐간 모든 학생</p>
+            </div>
+            <div class="ltv-card">
+                <h4>평균 수강 개월 수</h4>
+                <div class="ltv-stat" id="ltvAvgDuration">0개월</div>
+                <p style="color:#888; font-size:0.9rem;">한 학생이 머무는 평균 기간</p>
+            </div>
+            <div class="card">
+                <h4 style="margin-top:0;">수강 기간 분포 (충성도)</h4>
+                <div style="height:200px;"><canvas id="chartLtv"></canvas></div>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <div class="modal-overlay" id="studentModal" onclick="if(event.target.id==='studentModal') this.style.display='none'">
     <div class="modal-box">
-        <div class="modal-header" style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #f0f0f0; padding-bottom:15px; align-items:center;">
-            <div style="font-size:1.2rem; font-weight:bold; color:#333;" id="modalTitle">학생 명단</div>
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">학생 명단</div>
             <div style="display:flex; align-items:center;">
-                <button class="copy-btn" onclick="copyList()"><i class="fa-regular fa-copy"></i> 복사</button>
+                <button class="btn-style upload-btn" onclick="copyList()"><i class="fa-regular fa-copy"></i> 복사</button>
                 <span style="font-size:24px; cursor:pointer; margin-left:15px; color:#aaa;" onclick="document.getElementById('studentModal').style.display='none'">&times;</span>
             </div>
         </div>
-        <div class="modal-body" id="modalList" style="overflow-y:auto; flex:1;"></div>
+        <div id="modalList" style="overflow-y:auto; flex:1;"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="compareModal" onclick="if(event.target.id==='compareModal') this.style.display='none'">
+    <div class="modal-box" style="width:700px;">
+        <div class="modal-header">
+            <div class="modal-title">🆚 월별 성과 비교</div>
+            <span style="font-size:24px; cursor:pointer; color:#aaa;" onclick="document.getElementById('compareModal').style.display='none'">&times;</span>
+        </div>
+        <div style="display:flex; gap:10px; justify-content:center; margin-bottom:20px;">
+            <select id="compA"></select> 
+            <span style="font-size:1.5rem; color:#ccc;">VS</span>
+            <select id="compB"></select>
+            <button class="btn-style compare-btn" onclick="doCompare()">비교 실행</button>
+        </div>
+        
+        <div id="compareResult" style="display:none; flex:1; overflow-y:auto;">
+            <div class="compare-grid-modal">
+                <div class="compare-col">
+                    <div id="compLabelA" style="color:#888; font-weight:bold;">A월</div>
+                    <div class="compare-val" id="compValA">0원</div>
+                </div>
+                <div class="compare-col">
+                    <div id="compLabelB" style="color:#888; font-weight:bold;">B월</div>
+                    <div class="compare-val" id="compValB">0원</div>
+                </div>
+            </div>
+            <div style="text-align:center; margin:15px 0; font-size:1.1rem;">
+                매출 차이: <span id="compDiff">0원</span>
+            </div>
+            <div style="height:250px;"><canvas id="chartCompare"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="reportModal" onclick="if(event.target.id==='reportModal') this.style.display='none'">
+    <div class="modal-box" style="width:600px;">
+        <div class="modal-header">
+            <div class="modal-title">📝 자동 생성된 성과 보고서</div>
+            <span style="font-size:24px; cursor:pointer; color:#aaa;" onclick="document.getElementById('reportModal').style.display='none'">&times;</span>
+        </div>
+        <p style="color:#888; font-size:0.9rem; margin-top:0;">아래 내용을 복사해서 카톡이나 문서에 바로 사용하세요.</p>
+        <textarea id="reportText" class="report-textarea"></textarea>
+        <div style="text-align:center; margin-top:15px;">
+             <button class="btn-style upload-btn" onclick="copyReport()"><i class="fa-regular fa-copy"></i> 전체 복사</button>
+        </div>
     </div>
 </div>
 
 <script>
     let db = [], filteredDb = [], monthList = new Set();
-    let churnList = [], newList = []; // 인사이트 클릭 전용 리스트 [추가]
+    let churnList = [], newList = [];
+    let currentKpi = { amt:0, cnt:0 }; // 보고서 생성을 위한 전역 변수
 
     function handleFile(input) {
         const file = input.files[0];
@@ -482,15 +560,10 @@
                     }
 
                     if (isValid || item.isFullCancel) {
-                        if (item.product.includes('올패스')) {
-                            item.type = '올패스';
-                        } else if (item.product.includes('시험대비') && item.product.includes('자료')) {
-                            item.type = '시험대비반 자료이용';
-                        } else if (item.product.includes('시험대비')) {
-                            item.type = '시험대비 CLASS';
-                        } else {
-                            item.type = '화상수업';
-                        }
+                        if (item.product.includes('올패스')) item.type = '올패스';
+                        else if (item.product.includes('시험대비') && item.product.includes('자료')) item.type = '시험대비반 자료이용';
+                        else if (item.product.includes('시험대비')) item.type = '시험대비 CLASS';
+                        else item.type = '화상수업';
 
                         if (item.product.includes('시험대비') && !item.product.includes('자료')) item.classInfo = '시험대비 CLASS';
                         else if (item.product.includes('입문')) item.classInfo = '입문/중급 CLASS';
@@ -500,7 +573,6 @@
 
                         let dM = item.option.match(/\[요일\]\s*([^,]+)/);
                         if(dM) item.dayInfo = dM[1].trim();
-                        
                         let tM = item.option.match(/\[시간\]\s*([^,]+)/);
                         if(tM) {
                             let tStr = tM[1].trim().replace(/[:시분]/g, '').substring(0,2);
@@ -517,6 +589,7 @@
 
         populateFilter();
         updateDashboard();
+        analyzeLTV(); // LTV 분석 실행
     }
 
     function findStatusCol(rows) {
@@ -539,8 +612,6 @@
         const mon = document.getElementById('monthFilter').value;
         document.getElementById('dashboard').style.display = 'block';
         document.getElementById('trendSection').style.display = (mon === 'all') ? 'block' : 'none';
-        
-        // [인사이트 섹션 표시 제어]
         document.getElementById('insightSection').style.display = (mon === 'all') ? 'none' : 'block';
 
         if(mon === 'all') {
@@ -551,7 +622,8 @@
             filteredDb = db.filter(i => i.month === mon);
             document.getElementById('kpiTitle').innerText = `💰 ${mon}월 매출 현황`;
         }
-        analyze(filteredDb, mon); // mon 인자 추가
+        analyze(filteredDb, mon);
+        calculateGoal(); // 목표 달성률 갱신
     }
 
     function analyze(data, currentMon) {
@@ -569,9 +641,7 @@
             if(i.type !== '올패스') {
                 addCnt(cats.class, i.classInfo, i);
                 addCnt(cats.day, i.dayInfo, i);
-                if(i.timeInfo !== '') {
-                    addCnt(cats.time, i.timeInfo + '시', i);
-                }
+                if(i.timeInfo !== '') addCnt(cats.time, i.timeInfo + '시', i);
                 if(i.dayInfo && i.timeInfo !== '') {
                     i.dayInfo.split('').forEach(d => {
                         if(hm[d]) {
@@ -590,40 +660,36 @@
             stu[key].list.push(i);
         });
 
-        // --- [인사이트 로직 시작] ---
+        currentKpi = kpi; // 전역 저장 (보고서용)
+
+        // 인사이트 로직
         if (currentMon !== 'all') {
             const uniqueStudents = Object.keys(stu);
             const uniqueCount = uniqueStudents.length;
 
-            // 1. ARPU
             const arpu = uniqueCount > 0 ? Math.round(kpi.amt / uniqueCount) : 0;
             document.getElementById('insightArpu').innerText = arpu.toLocaleString() + '원';
 
-            // 이전 달 정보
             let [y, m] = currentMon.split('-').map(Number);
             let prevDate = new Date(y, m - 2, 1);
             let prevMon = getMonthKey(prevDate);
-
-            // 전월 학생 명단
+            
             let prevMonthStudents = new Set();
             db.filter(i => i.month === prevMon && !i.isFullCancel)
               .forEach(i => prevMonthStudents.add(i.phone || i.name));
-
-            // 2. 재등록률
+            
             let reRegCount = 0;
             uniqueStudents.forEach(k => { if(prevMonthStudents.has(k)) reRegCount++; });
             const retentionRate = prevMonthStudents.size > 0 ? Math.round((reRegCount / prevMonthStudents.size) * 100) : 0;
             document.getElementById('insightRetention').innerText = retentionRate + '%';
 
-            // 3. 신규 유입 (이전 달들에 존재하지 않았던 학생)
             let totalPastStudents = new Set();
             db.filter(i => i.month < currentMon && !i.isFullCancel)
               .forEach(i => totalPastStudents.add(i.phone || i.name));
             
             newList = uniqueStudents.filter(k => !totalPastStudents.has(k)).map(k => stu[k]);
             document.getElementById('insightNew').innerText = newList.length + '명';
-
-            // 4. 이탈 위험 (전월에는 있었으나 이번 달엔 없는 학생)
+            
             let churnKeys = Array.from(prevMonthStudents).filter(k => !stu[k]);
             churnList = churnKeys.map(k => {
                 let lastInfo = db.filter(i => (i.phone || i.name) === k).pop();
@@ -631,12 +697,11 @@
             });
             document.getElementById('insightChurn').innerText = churnList.length + '명';
         }
-        // --- [인사이트 로직 종료] ---
 
         document.getElementById('kpiTotalAmt').innerText = kpi.amt.toLocaleString() + '원';
         document.getElementById('kpiTotalCnt').innerText = kpi.cnt + '건';
         document.getElementById('kpiCancelCnt').innerText = kpi.cancelCnt + '건';
-
+        
         const pastelColors = ['#a2c2ff', '#95e1d3', '#ffb7b2', '#e2f0cb', '#b5ead7', '#c7ceea', '#ffdac1', '#e0bbe4'];
         renderChart('chartType', cats.type, '매출', false, pastelColors);
         renderChart('chartClass', cats.class, '매출', false, pastelColors);
@@ -650,6 +715,191 @@
         renderVip(stu);
     }
 
+    // --- [LTV 분석 기능] ---
+    function analyzeLTV() {
+        if(db.length === 0) return;
+        
+        let stuMap = {};
+        db.forEach(i => {
+            if(i.isFullCancel) return;
+            let key = i.phone || i.name;
+            if(!stuMap[key]) stuMap[key] = { months: new Set() };
+            stuMap[key].months.add(i.month);
+        });
+
+        let counts = { '1개월(신규/단발)': 0, '2~3개월(유지)': 0, '4~6개월(장기)': 0, '7개월 이상(VIP)': 0 };
+        let totalMonths = 0;
+        let totalStudents = 0;
+
+        Object.values(stuMap).forEach(s => {
+            let n = s.months.size;
+            totalMonths += n;
+            totalStudents++;
+            if(n === 1) counts['1개월(신규/단발)']++;
+            else if(n <= 3) counts['2~3개월(유지)']++;
+            else if(n <= 6) counts['4~6개월(장기)']++;
+            else counts['7개월 이상(VIP)']++;
+        });
+
+        let avg = totalStudents > 0 ? (totalMonths / totalStudents).toFixed(1) : 0;
+        document.getElementById('ltvTotalStudents').innerText = totalStudents.toLocaleString() + '명';
+        document.getElementById('ltvAvgDuration').innerText = avg + '개월';
+
+        // LTV 차트 렌더링
+        let ctx = document.getElementById('chartLtv').getContext('2d');
+        if(Chart.getChart('chartLtv')) Chart.getChart('chartLtv').destroy();
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(counts),
+                datasets: [{
+                    data: Object.values(counts),
+                    backgroundColor: ['#ffb7b2', '#ffd700', '#95e1d3', '#a2c2ff']
+                }]
+            },
+            options: { responsive:true, maintainAspectRatio:false }
+        });
+    }
+
+    // --- [목표 매출 기능] ---
+    function inputNumberFormat(obj) {
+        obj.value = comma(uncomma(obj.value));
+    }
+    function comma(str) {
+        str = String(str);
+        return str.replace(/(\d)(?=(?:\d{3})+(?!\d))/g, '$1,');
+    }
+    function uncomma(str) {
+        str = String(str);
+        return str.replace(/[^\d]+/g, '');
+    }
+
+    function calculateGoal() {
+        const input = document.getElementById('targetInput').value;
+        const target = parseInt(uncomma(input));
+        const current = currentKpi.amt;
+        const bar = document.getElementById('goalProgressBar');
+        const confetti = document.getElementById('goalConfetti');
+
+        if (!target || target === 0) {
+            bar.style.width = '0%';
+            bar.innerText = '목표를 입력하세요';
+            return;
+        }
+
+        let percent = Math.min(100, Math.round((current / target) * 100));
+        bar.style.width = percent + '%';
+        bar.innerText = percent + '% 달성';
+
+        if (percent >= 100) {
+            bar.style.background = 'linear-gradient(90deg, #10b981, #6ee7b7)';
+            confetti.style.display = 'block';
+        } else {
+            bar.style.background = 'linear-gradient(90deg, #a2c2ff, #95e1d3)';
+            confetti.style.display = 'none';
+        }
+    }
+
+    // --- [성과 비교 기능] ---
+    function openCompareModal() {
+        if(monthList.size < 2) { alert("비교할 데이터가 충분하지 않습니다 (2개월 이상 필요)"); return; }
+        
+        const selA = document.getElementById('compA');
+        const selB = document.getElementById('compB');
+        selA.innerHTML = ''; selB.innerHTML = '';
+        
+        let list = Array.from(monthList).sort().reverse();
+        list.forEach(m => {
+            selA.innerHTML += `<option value="${m}">${m}</option>`;
+            selB.innerHTML += `<option value="${m}">${m}</option>`;
+        });
+        if(list.length >= 2) selB.selectedIndex = 1; // 기본적으로 전월 선택
+
+        document.getElementById('compareModal').style.display = 'flex';
+        document.getElementById('compareResult').style.display = 'none';
+    }
+
+    function doCompare() {
+        const mA = document.getElementById('compA').value;
+        const mB = document.getElementById('compB').value;
+        
+        if(mA === mB) { alert("서로 다른 달을 선택해주세요."); return; }
+
+        const dataA = db.filter(i => i.month === mA && !i.isFullCancel);
+        const dataB = db.filter(i => i.month === mB && !i.isFullCancel);
+
+        const sumA = dataA.reduce((sum, i) => sum + i.price, 0);
+        const sumB = dataB.reduce((sum, i) => sum + i.price, 0);
+        const diff = sumA - sumB;
+
+        document.getElementById('compLabelA').innerText = mA + '월 매출';
+        document.getElementById('compLabelB').innerText = mB + '월 매출';
+        document.getElementById('compValA').innerText = sumA.toLocaleString() + '원';
+        document.getElementById('compValB').innerText = sumB.toLocaleString() + '원';
+        
+        const diffEl = document.getElementById('compDiff');
+        diffEl.innerText = (diff > 0 ? '▲ ' : '▼ ') + Math.abs(diff).toLocaleString() + '원';
+        diffEl.className = diff > 0 ? 'delta-pos' : 'delta-neg';
+
+        document.getElementById('compareResult').style.display = 'block';
+
+        // 비교 차트
+        let ctx = document.getElementById('chartCompare').getContext('2d');
+        if(Chart.getChart('chartCompare')) Chart.getChart('chartCompare').destroy();
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['매출액'],
+                datasets: [
+                    { label: mA, data: [sumA], backgroundColor: '#a2c2ff' },
+                    { label: mB, data: [sumB], backgroundColor: '#ffb7b2' }
+                ]
+            },
+            options: { responsive:true, maintainAspectRatio:false, scales: { y: { beginAtZero: true } } }
+        });
+    }
+
+    // --- [자동 보고서 생성 기능] ---
+    function generateReport() {
+        const mon = document.getElementById('monthFilter').value;
+        if(mon === 'all') { alert("특정 월을 선택한 후 보고서를 생성해주세요."); return; }
+
+        let txt = `[ 📢 ${mon}월 아카데미 운영 성과 보고 ]\n\n`;
+        
+        // 1. 매출 요약
+        txt += `1. 매출 요약\n`;
+        txt += `- 총 매출액: ${currentKpi.amt.toLocaleString()}원\n`;
+        txt += `- 결제 건수: ${currentKpi.cnt}건\n`;
+        txt += `- 객단가: ${document.getElementById('insightArpu').innerText}\n\n`;
+
+        // 2. 수강생 현황
+        txt += `2. 수강생 현황\n`;
+        txt += `- 신규 유입: ${document.getElementById('insightNew').innerText}\n`;
+        txt += `- 재등록률: ${document.getElementById('insightRetention').innerText}\n`;
+        txt += `- 이탈 의심: ${document.getElementById('insightChurn').innerText} (재등록 독려 필요)\n\n`;
+
+        // 3. 특이사항 (자동 분석)
+        // 가장 매출이 높은 반 찾기
+        let classSums = {};
+        filteredDb.forEach(i => { if(!i.isFullCancel && i.classInfo) classSums[i.classInfo] = (classSums[i.classInfo]||0)+i.price; });
+        let topClass = Object.keys(classSums).sort((a,b) => classSums[b]-classSums[a])[0] || '없음';
+        
+        txt += `3. 주요 사항\n`;
+        txt += `- 이번 달 효자 상품은 '${topClass}' 입니다.\n`;
+        txt += `- 환불 건수는 총 ${currentKpi.cancelCnt}건 발생했습니다.\n`;
+
+        document.getElementById('reportText').value = txt;
+        document.getElementById('reportModal').style.display = 'flex';
+    }
+
+    function copyReport() {
+        const el = document.getElementById('reportText');
+        el.select();
+        document.execCommand('copy');
+        alert("보고서 내용이 복사되었습니다.");
+    }
+
+    // --- [기존 차트 렌더링 함수들] ---
     function addCnt(obj, key, item) {
         if(!key) return;
         if(!obj[key]) obj[key] = {amt:0, cnt:0, list:[]};
@@ -698,8 +948,7 @@
                 datasets: [{ 
                     label:metric, data:vals, 
                     backgroundColor: colors || ['#3b82f6','#10b981'],
-                    borderRadius: 5,
-                    borderWidth: 0
+                    borderRadius: 5, borderWidth: 0
                 }] 
             },
             options: { 
@@ -790,7 +1039,6 @@
         document.getElementById('studentModal').style.display = 'flex';
     }
     
-    // [인사이트 전용 명단 표시 기능 추가]
     function showInsightList(title, type) {
         let list = (type === 'new') ? newList : churnList;
         showList(title, 'list', list);
