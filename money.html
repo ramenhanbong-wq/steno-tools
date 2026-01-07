@@ -262,7 +262,7 @@
                 <div class="icon-circle" style="background:#fff0f0; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; color:#ff9aa2;"><i class="fa-solid fa-ban"></i></div>
                 <div class="kpi-label">전체 환불 (매출 취소)</div>
                 <div class="kpi-amount" id="kpiCancelCnt" style="font-size:1.8rem;">0건</div>
-                <div style="font-size:12px; color:#ff6f91; margin-top:5px;">* 1만원 미만 취소 건수</div>
+                <div style="font-size:12px; color:#ff6f91; margin-top:5px;">* 수강 시작 전 취소 건수</div>
             </div>
         </div>
 
@@ -327,7 +327,6 @@
 </div>
 
 <script>
-    // 기존 스크립트 로직 유지
     let db = [], filteredDb = [], monthList = new Set();
     const logBox = document.getElementById('debugLog');
 
@@ -427,9 +426,7 @@
                     }
 
                     if (isValid || item.isFullCancel) {
-                        // ==========================================
-                        // [수정된 부분] 1. 유형 분류 (4가지로 세분화)
-                        // ==========================================
+                        // 1. 유형 분류
                         if (item.product.includes('올패스')) {
                             item.type = '올패스';
                         } else if (item.product.includes('시험대비') && item.product.includes('자료')) {
@@ -440,24 +437,21 @@
                             item.type = '화상수업';
                         }
 
-                        // 2. 반(Class) 세분화
-                        if (item.product.includes('시험대비') && item.product.includes('자료')) item.classInfo = '시험대비 자료이용';
-                        else if (item.product.includes('시험대비')) item.classInfo = '시험대비 CLASS';
-						else if (item.product.includes('입문')) item.classInfo = '입문/중급';
-                        else if (item.product.includes('3급')) item.classInfo = '3급 자료';
+                        // 2. 반(Class) 세분화 (정해진 클래스 외에는 빈값 처리하여 집계에서 제외)
+                        if (item.product.includes('시험대비') && !item.product.includes('자료')) item.classInfo = '시험대비 CLASS';
+                        else if (item.product.includes('입문')) item.classInfo = '입문/중급 CLASS';
                         else if (item.product.includes('고급')) item.classInfo = '고급 CLASS';
                         else if (item.product.includes('심야')) item.classInfo = '심야 CLASS';
-                        else if (item.type === '화상수업') item.classInfo = '기타 수업';
-                        else item.classInfo = '기타';
+                        else item.classInfo = '';
 
-                        // 3. 옵션 파싱 (시간 숫자만 추출 + 유효성 체크)
+                        // 3. 옵션 파싱
                         let dM = item.option.match(/\[요일\]\s*([^,]+)/);
                         if(dM) item.dayInfo = dM[1].trim();
                         
                         let tM = item.option.match(/\[시간\]\s*([^,]+)/);
                         if(tM) {
                             let tStr = tM[1].trim().replace(/[:시분]/g, '').substring(0,2);
-                            if(!isNaN(parseInt(tStr))) item.timeInfo = parseInt(tStr); // 숫자로 저장
+                            if(!isNaN(parseInt(tStr))) item.timeInfo = parseInt(tStr);
                         }
 
                         db.push(item);
@@ -520,7 +514,6 @@
                 addCnt(cats.class, i.classInfo, i);
                 addCnt(cats.day, i.dayInfo, i);
                 
-                // 시간대가 유효한(숫자) 경우에만 추가
                 if(i.timeInfo !== '') {
                     addCnt(cats.time, i.timeInfo + '시', i);
                 }
@@ -547,7 +540,6 @@
         document.getElementById('kpiTotalCnt').innerText = kpi.cnt + '건';
         document.getElementById('kpiCancelCnt').innerText = kpi.cancelCnt + '건';
 
-        // 컬러 팔레트 (파스텔톤)
         const pastelColors = ['#a2c2ff', '#95e1d3', '#ffb7b2', '#e2f0cb', '#b5ead7', '#c7ceea', '#ffdac1', '#e0bbe4'];
 
         renderChart('chartType', cats.type, '매출', false, pastelColors);
@@ -563,7 +555,7 @@
     }
 
     function addCnt(obj, key, item) {
-        if(!key) return;
+        if(!key) return; // key가 빈 문자열('')이면 집계하지 않음
         if(!obj[key]) obj[key] = {amt:0, cnt:0, list:[]};
         obj[key].amt += item.price;
         obj[key].cnt++;
@@ -653,7 +645,6 @@
             html+=`<tr><th>${d}</th>`;
             times.forEach(t=>{
                 let cnt = hm[d][t] ? hm[d][t].cnt : 0;
-                // 파스텔 핑크 계열로 농도 조절
                 let alpha = max > 0 ? cnt/max : 0;
                 let bg = cnt>0 ? `rgba(255, 183, 178, ${Math.max(0.15, alpha)})` : '#fdfdfd';
                 let col = (alpha > 0.6) ? '#fff' : '#666';
