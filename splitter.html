@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>속기 듀얼 마스터 (최종_6단락_배너추가)</title>
+    <title>시대반 마스터)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
     
@@ -390,7 +390,6 @@
         return text;
     }
 
-    /* --- 버튼 기능 --- */
     function resetData() {
         if(!confirm("모든 작업 내용이 삭제됩니다. 초기화하시겠습니까?")) return;
         document.getElementById('resultGrid').innerHTML = '<div style="text-align:center; padding:50px; color:#aaa;">초기화 완료. 다시 시작하세요.</div>';
@@ -399,10 +398,8 @@
     function firstSplit() {
         const rawInput = document.getElementById('rawInput').value.trim();
         if (!rawInput) { alert("원본 텍스트를 입력하세요."); return; }
-        
         let finalBlocks = [];
         let buffer1 = cleanStage1(rawInput);
-        
         processBuffer(buffer1, finalBlocks);
         renderGrid(finalBlocks);
     }
@@ -410,92 +407,55 @@
     function reSplit() {
         const grid = document.getElementById('resultGrid');
         const rows = grid.querySelectorAll('.card-row');
-        
-        if (rows.length === 0) {
-            alert("재분배할 카드가 없습니다. '최초 실행'을 먼저 해주세요.");
-            return;
-        }
-
+        if (rows.length === 0) { alert("재분배할 카드가 없습니다. '최초 실행'을 먼저 해주세요."); return; }
         let finalBlocks = [];
         let buffer1 = ""; 
-
         rows.forEach(row => {
             const s1 = row.querySelector('.left-editor').value;
             const isLocked = row.classList.contains('locked');
-
             if (isLocked) {
-                if (buffer1.trim()) {
-                    processBuffer(buffer1, finalBlocks);
-                    buffer1 = "";
-                }
-                finalBlocks.push({ 
-                    s1: s1, 
-                    s2: convertStage2(s1), 
-                    locked: true 
-                });
+                if (buffer1.trim()) { processBuffer(buffer1, finalBlocks); buffer1 = ""; }
+                finalBlocks.push({ s1: s1, s2: convertStage2(s1), locked: true });
             } else {
                 buffer1 += " " + s1;
             }
         });
-
-        if (buffer1.trim()) {
-            processBuffer(buffer1, finalBlocks);
-        }
-
+        if (buffer1.trim()) { processBuffer(buffer1, finalBlocks); }
         renderGrid(finalBlocks);
     }
 
     function processBuffer(textStage1, outputArray) {
         textStage1 = textStage1.replace(/\s+/g, " ").trim();
         const textStage2 = convertStage2(textStage1);
-        
         const lineLimit = parseInt(document.getElementById('lineLimit').value);
         const totalLimit = parseInt(document.getElementById('totalLimit').value);
-        
         let currentGlobalLen = 0;
-        outputArray.forEach(block => {
-            currentGlobalLen += getPureLen(block.s2);
-        });
-
+        outputArray.forEach(block => { currentGlobalLen += getPureLen(block.s2); });
         const words1 = textStage1.split(' ');
         const words2 = textStage2.split(' ');
-        
         let currentS1 = [];
         let currentS2 = [];
         let currentLen = 0;
-
         for (let i = 0; i < words1.length; i++) {
             const w1 = words1[i] || "";
             const w2 = words2[i] || ""; 
             const nextLen = getPureLen(w2);
-
             let shouldBreak = false;
-            
-            if (currentGlobalLen >= totalLimit) {
-                shouldBreak = false;
-            } 
+            if (currentGlobalLen >= totalLimit) { shouldBreak = false; } 
             else {
                 if (currentS2.length > 0) {
-                    if (currentLen + nextLen > lineLimit + 3) {
-                        shouldBreak = true;
-                    } else if (currentLen + nextLen >= lineLimit - 3) {
+                    if (currentLen + nextLen > lineLimit + 3) { shouldBreak = true; } 
+                    else if (currentLen + nextLen >= lineLimit - 3) {
                          const diffNow = Math.abs((currentLen + nextLen) - lineLimit);
                          const diffPrev = Math.abs(currentLen - lineLimit);
                          if (diffPrev < diffNow) shouldBreak = true;
                     }
                 }
             }
-
             if (shouldBreak) {
                 const s2Str = currentS2.join(' ');
-                outputArray.push({
-                    s1: currentS1.join(' '),
-                    s2: s2Str,
-                    locked: false
-                });
-                
+                outputArray.push({ s1: currentS1.join(' '), s2: s2Str, locked: false });
                 currentGlobalLen += getPureLen(s2Str);
-
                 currentS1 = [w1]; currentS2 = [w2];
                 currentLen = nextLen;
             } else {
@@ -503,31 +463,20 @@
                 currentLen += nextLen;
             }
         }
-        if (currentS1.length > 0) {
-            outputArray.push({
-                s1: currentS1.join(' '),
-                s2: currentS2.join(' '),
-                locked: false
-            });
-        }
+        if (currentS1.length > 0) { outputArray.push({ s1: currentS1.join(' '), s2: currentS2.join(' '), locked: false }); }
     }
 
     function renderGrid(blocks) {
         const grid = document.getElementById('resultGrid');
         grid.innerHTML = "";
         const totalLimit = parseInt(document.getElementById('totalLimit').value);
-        
         let accumulatedLen = 0;
-
         blocks.forEach((block, idx) => {
             const pureLen = getPureLen(block.s2);
             let isOverflow = accumulatedLen >= totalLimit;
-
             accumulatedLen += pureLen;
-            
             const div = document.createElement('div');
             div.className = `card-row ${block.locked ? 'locked' : ''} ${isOverflow ? 'overflow-row' : ''}`;
-            
             div.innerHTML = `
                 <div class="text-card left-card">
                     <div class="card-info">
@@ -568,11 +517,13 @@
         btn.innerHTML = isLocked ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-solid fa-lock-open"></i>';
     }
 
+    /* --- [수정된 동기화 함수들] --- */
     window.syncLeftToRight = function(leftTa) {
         autoResize(leftTa);
         const row = leftTa.closest('.card-row');
         const rightTa = row.querySelector('.right-editor');
-        const badge = row.querySelector('.badge');
+        // 중요: 오른쪽 카드 안에 있는 배지만 지목하여 숫자를 업데이트합니다.
+        const badge = row.querySelector('.right-card .badge');
         const newS1 = leftTa.value; 
         const newS2 = convertStage2(newS1);
         rightTa.value = newS2;
@@ -584,7 +535,8 @@
         autoResize(rightTa);
         const row = rightTa.closest('.card-row');
         const leftTa = row.querySelector('.left-editor');
-        const badge = row.querySelector('.badge');
+        // 중요: 오른쪽 카드 안에 있는 배지만 지목하여 숫자를 업데이트합니다.
+        const badge = row.querySelector('.right-card .badge');
         const val = rightTa.value;
         leftTa.value = val;
         autoResize(leftTa);
@@ -592,6 +544,7 @@
     }
 
     function updateBadge(badge, text) {
+        if(!badge) return;
         const len = getPureLen(text);
         const target = parseInt(document.getElementById('lineLimit').value);
         badge.innerText = `순수 ${len}자`;
@@ -602,10 +555,8 @@
         const rows = Array.from(document.querySelectorAll('.card-row'));
         const validRows = rows.filter(r => !r.classList.contains('overflow-row'));
         if(validRows.length === 0) { alert("복사할 유효 데이터가 없습니다."); return; }
-
         let fullText = "";
         const totalValid = validRows.length;
-
         validRows.forEach((row, idx) => {
             const s1 = row.querySelector('.left-editor').value; 
             const s2 = row.querySelector('.right-editor').value; 
@@ -618,7 +569,6 @@
             }
             fullText += s1 + suffix + "\n\n";
         });
-
         navigator.clipboard.writeText(fullText).then(() => {
             alert("복사 완료! (마지막 5개 단락 꼬리표 포함)");
         });
