@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>아카데미 성과 분석 프로(Pro)</title>
+    <title>아카데미 성과 분석 프로(Pro) - 통합버전</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -122,6 +122,9 @@
         .report-btn { background: #e0f7fa; color: #0097a7; }
         .report-btn:hover { background: #b2ebf2; transform: translateY(-2px); }
         
+        .reset-btn { background: #f5f5f5; color: #666; }
+        .reset-btn:hover { background: #e0e0e0; transform: translateY(-2px); }
+
         select { 
             padding: 10px 20px; border-radius: 30px; 
             border: 2px solid #f0ebeb; font-size: 1rem; cursor: pointer; outline: none; 
@@ -245,7 +248,7 @@
 
 <nav class="navbar">
     <a href="index.html" class="logo">
-        <i class="fa-solid fa-cloud"></i> <span> 왜 일은 한번에 몰려오는 걸까요? 🌸 (Pro)</span>
+        <i class="fa-solid fa-cloud"></i> <span> 왜 일은 한번에 몰려오는 걸까요? 🌸 (통합판)</span>
     </a>
     <div class="nav-links">
         <a href="#" class="nav-item active"><i class="fa-solid fa-chart-line"></i><span>매출분석</span></a>
@@ -255,7 +258,7 @@
 <div class="container">
     <div class="header-box">
         <h1>🌸 아카데미 성과 분석 프로</h1>
-        <p style="color:#888; margin-top:5px;">엑셀 파일 하나로 목표 관리부터 LTV 분석까지</p>
+        <p style="color:#888; margin-top:5px;">일반 강좌와 PT권 매출을 자동으로 합산합니다</p>
     </div>
 
     <div class="goal-wrapper">
@@ -272,7 +275,10 @@
 
     <div class="control-bar">
         <button class="btn-style upload-btn" onclick="document.getElementById('fileInput').click()">
-            <i class="fa-regular fa-folder-open"></i> 엑셀 업로드
+            <i class="fa-regular fa-folder-open"></i> 엑셀 업로드 (다중선택 가능)
+        </button>
+        <button class="btn-style reset-btn" onclick="resetData()">
+            <i class="fa-solid fa-rotate-right"></i> 초기화
         </button>
         <select id="monthFilter" onchange="updateDashboard()">
             <option value="all">전체 기간 보기</option>
@@ -284,7 +290,7 @@
             <i class="fa-solid fa-file-pen"></i> 보고서 생성
         </button>
     </div>
-    <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" style="display: none;" onchange="handleFile(this)">
+    <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" style="display: none;" multiple onchange="handleFiles(this)">
 
     <div id="dashboard" style="display: none;">
         <div id="insightSection" style="display: none;">
@@ -327,7 +333,7 @@
                 <div class="kpi-label">총 유효 매출액</div>
                 <div class="kpi-amount" id="kpiTotalAmt">0원</div>
                 <div class="kpi-count" id="kpiTotalCnt" style="color:#666; margin-top:5px;">0건</div>
-                <div style="font-size:12px; color:#999; margin-top:5px;">(결제완료 + 중도환불 합계)</div>
+                <div style="font-size:12px; color:#999; margin-top:5px;">(강좌 + PT권 합계)</div>
             </div>
             <div class="kpi-card cancel" onclick="showList('전체 환불 (0원)', 'full_cancel')">
                 <div class="icon-circle" style="background:#fff0f0; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; color:#ff9aa2;"><i class="fa-solid fa-ban"></i></div>
@@ -337,15 +343,16 @@
             </div>
         </div>
 
-        <div class="section-title">🔥 수업 혼잡도 히트맵</div>
+        <div class="section-title">🔥 수업 혼잡도 히트맵 (화상수업/CLASS)</div>
         <div class="heatmap-container">
             <div id="heatmapArea"></div>
+            <p style="color:#999; font-size:0.85rem; margin-top:10px; text-align:right;">* PT권 및 요일/시간 정보가 없는 건은 제외됩니다.</p>
         </div>
 
         <div class="section-title">📦 상품별 상세 분석</div>
         <div class="analysis-grid">
             <div class="card">
-                <h3 style="margin-top:0; color:#444;">유형별 매출 (4종)</h3>
+                <h3 style="margin-top:0; color:#444;">유형별 매출 (PT 포함)</h3>
                 <div style="height:250px;"><canvas id="chartType"></canvas></div>
                 <table id="tableType"><thead><tr><th>구분</th><th>매출</th><th>건수</th><th>확인</th></tr></thead><tbody></tbody></table>
             </div>
@@ -463,63 +470,95 @@
 </div>
 
 <script>
+    // 전역 변수
     let db = [], filteredDb = [], monthList = new Set();
     let churnList = [], newList = [];
-    let currentKpi = { amt:0, cnt:0 }; // 보고서 생성을 위한 전역 변수
+    let currentKpi = { amt:0, cnt:0 };
 
-    function handleFile(input) {
-        const file = input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
-                processData(rows);
-            } catch (err) { alert("파일 읽기 오류: " + err.message); }
-        };
-        reader.readAsArrayBuffer(file);
-    }
-
-    function parseDate(raw) {
-        if (!raw) return null;
-        let str = String(raw).trim();
-        if (!isNaN(str) && str.length < 6 && str.length > 4) {
-            let date = new Date((Number(str) - (25567 + 2)) * 86400 * 1000);
-            return date;
+    // --- [파일 처리 및 파싱] ---
+    
+    function resetData() {
+        if(confirm('모든 데이터를 초기화하시겠습니까?')) {
+            db = [];
+            monthList.clear();
+            document.getElementById('fileInput').value = '';
+            document.getElementById('dashboard').style.display = 'none';
+            alert('초기화되었습니다. 새로운 파일을 업로드하세요.');
         }
-        let cleanStr = str.replace(/[./]/g, '-').split(' ')[0];
-        let date = new Date(cleanStr);
-        if (!isNaN(date.getTime())) return date;
-        return null;
     }
 
-    function getMonthKey(dateObj) {
-        if (!dateObj) return "";
-        let y = dateObj.getFullYear();
-        let m = String(dateObj.getMonth() + 1).padStart(2, '0');
-        return `${y}-${m}`;
+    function handleFiles(input) {
+        const files = input.files;
+        if (!files || files.length === 0) return;
+
+        let loadedCount = 0;
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    // 헤더 감지를 위해 raw 데이터 가져오기
+                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
+                    
+                    processData(rows); // 여기서 파일 종류 자동 감지
+                    
+                    loadedCount++;
+                    if(loadedCount === files.length) {
+                        finalizeDataProcessing();
+                    }
+                } catch (err) { alert("파일 읽기 오류 ("+file.name+"): " + err.message); }
+            };
+            reader.readAsArrayBuffer(file);
+        });
     }
 
-    function getDateStr(dateObj) {
-        if (!dateObj) return "";
-        let y = dateObj.getFullYear();
-        let m = String(dateObj.getMonth() + 1).padStart(2, '0');
-        let d = String(dateObj.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
+    function finalizeDataProcessing() {
+        // 모든 파일 로드 후 필터 갱신 및 대시보드 업데이트
+        populateFilter();
+        updateDashboard();
+        analyzeLTV();
+        alert(`총 ${db.length}건의 데이터를 성공적으로 불러왔습니다!`);
     }
 
     function processData(rows) {
-        db = []; monthList.clear();
-        let statusIdx = findStatusCol(rows);
+        if(!rows || rows.length < 2) return;
+
+        // 1. 일반 매출 (계단식) 감지: 헤더나 첫 열에 "신청정보" 등이 포함됨
+        // 2. PT 매출 (한 줄) 감지: 헤더에 "주문번호", "학생명" 등이 포함됨
+        
+        let isGeneralSales = false;
+        let isPTSales = false;
+        
+        // 헤더 줄 찾기 (보통 0~2줄 사이에 있음)
+        let headerRow = rows[0].map(x=>String(x).trim());
+        if(headerRow.length === 0 && rows.length > 1) headerRow = rows[1].map(x=>String(x).trim());
+
+        if (headerRow.some(h => h.includes('신청정보') || h.includes('선택정보'))) {
+            isGeneralSales = true;
+        } else if (headerRow.some(h => h.includes('주문번호') || h.includes('학생명') || h.includes('신청일(카톡)'))) {
+            isPTSales = true;
+        }
+
+        if (isGeneralSales) {
+            parseGeneralSales(rows);
+        } else if (isPTSales) {
+            parsePTSales(rows);
+        } else {
+            console.log("알 수 없는 파일 형식입니다.");
+        }
+    }
+
+    // A. 일반 매출 파싱 (기존 로직)
+    function parseGeneralSales(rows) {
+        let statusIdx = findStatusCol(rows); // '결제상태' 열 찾기
         if(statusIdx === -1) return;
 
         let i = 0;
         while(i < rows.length) {
             let row = rows[i];
-            if (!row) { i++; continue; }
+            if (!row || row.length < statusIdx) { i++; continue; }
             
             let status = String(row[statusIdx]).trim();
             if(status === '결제완료' || status.includes('취소')) {
@@ -528,6 +567,7 @@
                 let dateObj = parseDate(row[0]);
                 let dateStr = getDateStr(dateObj); 
                 let monthKey = getMonthKey(dateObj);
+                
                 if (!monthKey) { i++; continue; }
 
                 let item = {
@@ -536,6 +576,8 @@
                     type: '', classInfo: '', dayInfo: '', timeInfo: '', 
                     isPartial: false, isFullCancel: false
                 };
+
+                // 다음 줄 정보 읽기
                 if(i+1 < rows.length) {
                     let rowB = rows[i+1];
                     item.product = String(rowB[1]);
@@ -550,48 +592,110 @@
                         }
                     }
 
-                    let isValid = false;
-                    if (status === '결제완료') isValid = true;
-                    else if (status.includes('취소') && price >= 10000) {
-                        isValid = true;
-                        item.isPartial = true;
-                    } else if (status.includes('취소')) {
-                        item.isFullCancel = true;
-                    }
-
-                    if (isValid || item.isFullCancel) {
-                        if (item.product.includes('올패스')) item.type = '올패스';
-                        else if (item.product.includes('시험대비') && item.product.includes('자료')) item.type = '시험대비반 자료이용';
-                        else if (item.product.includes('시험대비')) item.type = '시험대비 CLASS';
-                        else item.type = '화상수업';
-
-                        if (item.product.includes('시험대비') && !item.product.includes('자료')) item.classInfo = '시험대비 CLASS';
-                        else if (item.product.includes('입문')) item.classInfo = '입문/중급 CLASS';
-                        else if (item.product.includes('고급')) item.classInfo = '고급 CLASS';
-                        else if (item.product.includes('심야')) item.classInfo = '심야 CLASS';
-                        else item.classInfo = '';
-
-                        let dM = item.option.match(/\[요일\]\s*([^,]+)/);
-                        if(dM) item.dayInfo = dM[1].trim();
-                        let tM = item.option.match(/\[시간\]\s*([^,]+)/);
-                        if(tM) {
-                            let tStr = tM[1].trim().replace(/[:시분]/g, '').substring(0,2);
-                            if(!isNaN(parseInt(tStr))) item.timeInfo = parseInt(tStr);
-                        }
-
-                        db.push(item);
-                        if (monthKey) monthList.add(monthKey);
-                    }
+                    // 유효성 및 타입 분류
+                    processItemType(item);
+                    db.push(item);
+                    if (monthKey) monthList.add(monthKey);
                     i += increment;
                 } else { i++; }
             } else { i++; }
         }
-
-        populateFilter();
-        updateDashboard();
-        analyzeLTV(); // LTV 분석 실행
     }
 
+    // B. PT 매출 파싱 (새로운 로직)
+    function parsePTSales(rows) {
+        // 헤더 인덱스 찾기
+        let headerIdx = rows.findIndex(r => r.some(c => String(c).includes('주문번호') || String(c).includes('학생명')));
+        if(headerIdx === -1) return;
+
+        // 컬럼 매핑 찾기
+        const headers = rows[headerIdx].map(x => String(x).trim());
+        const colIdx = {
+            date: headers.findIndex(h => h.includes('신청일') || h.includes('결제일')),
+            name: headers.findIndex(h => h === '학생명'),
+            phone: headers.findIndex(h => h === '연락처'),
+            product: headers.findIndex(h => h === '상품명'),
+            price: headers.findIndex(h => h === '결제금액'),
+            status: headers.findIndex(h => h === '결제상태')
+        };
+
+        for(let i = headerIdx + 1; i < rows.length; i++) {
+            let row = rows[i];
+            if(!row || !row[colIdx.price]) continue;
+
+            let status = String(row[colIdx.status]).trim();
+            // PT권은 '결제완료' 외에 엑셀상 그냥 입력된 경우도 있을 수 있으니 금액이 있으면 유효로 볼 수도 있으나,
+            // 안전하게 결제완료/취소 상태만 가져옵니다.
+            if (status !== '결제완료' && !status.includes('취소')) continue;
+
+            let price = parseInt(String(row[colIdx.price]).replace(/[^\d]/g, '')) || 0;
+            let dateObj = parseDate(row[colIdx.date]); // 신청일 or 결제일
+            let dateStr = getDateStr(dateObj);
+            let monthKey = getMonthKey(dateObj);
+
+            if(!monthKey) continue;
+
+            let item = {
+                date: dateStr, month: monthKey, 
+                name: String(row[colIdx.name]).trim(), 
+                phone: String(row[colIdx.phone]).trim(),
+                product: String(row[colIdx.product]).trim(), 
+                price: price, status: status, option: '',
+                type: 'PT 이용권', classInfo: '', dayInfo: '', timeInfo: '',
+                isPartial: false, isFullCancel: false
+            };
+            
+            // PT 상품명으로 타입 한번 더 정리
+            if(item.product.includes('회권')) item.type = 'PT 이용권';
+            
+            // 유효성 체크
+            if(status.includes('취소')) {
+                 if (price >= 10000) item.isPartial = true;
+                 else item.isFullCancel = true;
+            }
+
+            db.push(item);
+            monthList.add(monthKey);
+        }
+    }
+
+    // 공통 로직: 아이템 분류
+    function processItemType(item) {
+        let isValid = false;
+        if (item.status === '결제완료') isValid = true;
+        else if (item.status.includes('취소') && item.price >= 10000) {
+            isValid = true;
+            item.isPartial = true;
+        } else if (item.status.includes('취소')) {
+            item.isFullCancel = true;
+        }
+
+        if (isValid || item.isFullCancel) {
+            // 이미 PT 로직에서 type이 들어갔으면 패스
+            if (item.type === 'PT 이용권') return;
+
+            if (item.product.includes('올패스')) item.type = '올패스';
+            else if (item.product.includes('시험대비') && item.product.includes('자료')) item.type = '시험대비반 자료이용';
+            else if (item.product.includes('시험대비')) item.type = '시험대비 CLASS';
+            else item.type = '화상수업';
+
+            if (item.product.includes('시험대비') && !item.product.includes('자료')) item.classInfo = '시험대비 CLASS';
+            else if (item.product.includes('입문')) item.classInfo = '입문/중급 CLASS';
+            else if (item.product.includes('고급')) item.classInfo = '고급 CLASS';
+            else if (item.product.includes('심야')) item.classInfo = '심야 CLASS';
+            else item.classInfo = '';
+
+            let dM = item.option.match(/\[요일\]\s*([^,]+)/);
+            if(dM) item.dayInfo = dM[1].trim();
+            let tM = item.option.match(/\[시간\]\s*([^,]+)/);
+            if(tM) {
+                let tStr = tM[1].trim().replace(/[:시분]/g, '').substring(0,2);
+                if(!isNaN(parseInt(tStr))) item.timeInfo = parseInt(tStr);
+            }
+        }
+    }
+
+    // 유틸리티 함수
     function findStatusCol(rows) {
         for(let r=0; r<Math.min(rows.length, 50); r++) {
             for(let c=0; c<rows[r].length; c++) {
@@ -601,12 +705,45 @@
         return 5;
     }
 
+    function parseDate(raw) {
+        if (!raw) return null;
+        let str = String(raw).trim();
+        // 엑셀 날짜 코드 (숫자) 처리
+        if (!isNaN(str) && str.length < 6 && str.length > 4) {
+            let date = new Date((Number(str) - (25567 + 2)) * 86400 * 1000);
+            return date;
+        }
+        // 문자열 날짜 (YYYY-MM-DD or YYYY.MM.DD)
+        let cleanStr = str.replace(/[./]/g, '-').split(' ')[0]; // 시간 제거
+        let date = new Date(cleanStr);
+        if (!isNaN(date.getTime())) return date;
+        return null;
+    }
+
+    function getMonthKey(dateObj) {
+        if (!dateObj) return "";
+        let y = dateObj.getFullYear();
+        let m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        if(isNaN(y) || isNaN(m)) return "";
+        return `${y}-${m}`;
+    }
+
+    function getDateStr(dateObj) {
+        if (!dateObj) return "";
+        let y = dateObj.getFullYear();
+        let m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        let d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
     function populateFilter() {
         const sel = document.getElementById('monthFilter');
         sel.innerHTML = '<option value="all">📅 전체 기간 보기</option>';
         let list = Array.from(monthList).sort().reverse();
         list.forEach(m => { if(m) sel.innerHTML += `<option value="${m}">${m}월 매출</option>`; });
     }
+
+    // --- [대시보드 업데이트 & 분석 로직] ---
 
     function updateDashboard() {
         const mon = document.getElementById('monthFilter').value;
@@ -623,7 +760,7 @@
             document.getElementById('kpiTitle').innerText = `💰 ${mon}월 매출 현황`;
         }
         analyze(filteredDb, mon);
-        calculateGoal(); // 목표 달성률 갱신
+        calculateGoal(); 
     }
 
     function analyze(data, currentMon) {
@@ -637,8 +774,11 @@
             kpi.amt += i.price;
             kpi.cnt++;
 
+            // 유형별 (PT 포함)
             addCnt(cats.type, i.type, i);
-            if(i.type !== '올패스') {
+
+            // 반별/요일별/시간별 (PT가 아니거나 정보가 있을 때만)
+            if(i.type !== '올패스' && i.type !== 'PT 이용권') {
                 addCnt(cats.class, i.classInfo, i);
                 addCnt(cats.day, i.dayInfo, i);
                 if(i.timeInfo !== '') addCnt(cats.time, i.timeInfo + '시', i);
@@ -653,6 +793,8 @@
                     });
                 }
             }
+            
+            // 학생별 집계 (이름/폰번호 키)
             let key = i.phone || i.name;
             if(!stu[key]) stu[key] = {name:i.name, phone:i.phone, amt:0, cnt:0, list:[]};
             stu[key].amt += i.price;
@@ -660,9 +802,9 @@
             stu[key].list.push(i);
         });
 
-        currentKpi = kpi; // 전역 저장 (보고서용)
+        currentKpi = kpi; 
 
-        // 인사이트 로직
+        // 인사이트 로직 (전월 비교 등)
         if (currentMon !== 'all') {
             const uniqueStudents = Object.keys(stu);
             const uniqueCount = uniqueStudents.length;
@@ -702,7 +844,7 @@
         document.getElementById('kpiTotalCnt').innerText = kpi.cnt + '건';
         document.getElementById('kpiCancelCnt').innerText = kpi.cancelCnt + '건';
         
-        const pastelColors = ['#a2c2ff', '#95e1d3', '#ffb7b2', '#e2f0cb', '#b5ead7', '#c7ceea', '#ffdac1', '#e0bbe4'];
+        const pastelColors = ['#a2c2ff', '#95e1d3', '#ffb7b2', '#e2f0cb', '#b5ead7', '#c7ceea', '#ffdac1', '#e0bbe4', '#f9f9f9'];
         renderChart('chartType', cats.type, '매출', false, pastelColors);
         renderChart('chartClass', cats.class, '매출', false, pastelColors);
         renderChart('chartDay', cats.day, '인원', false, pastelColors);
@@ -813,7 +955,7 @@
             selA.innerHTML += `<option value="${m}">${m}</option>`;
             selB.innerHTML += `<option value="${m}">${m}</option>`;
         });
-        if(list.length >= 2) selB.selectedIndex = 1; // 기본적으로 전월 선택
+        if(list.length >= 2) selB.selectedIndex = 1; 
 
         document.getElementById('compareModal').style.display = 'flex';
         document.getElementById('compareResult').style.display = 'none';
@@ -843,7 +985,6 @@
 
         document.getElementById('compareResult').style.display = 'block';
 
-        // 비교 차트
         let ctx = document.getElementById('chartCompare').getContext('2d');
         if(Chart.getChart('chartCompare')) Chart.getChart('chartCompare').destroy();
         new Chart(ctx, {
@@ -866,26 +1007,22 @@
 
         let txt = `[ 📢 ${mon}월 아카데미 운영 성과 보고 ]\n\n`;
         
-        // 1. 매출 요약
         txt += `1. 매출 요약\n`;
         txt += `- 총 매출액: ${currentKpi.amt.toLocaleString()}원\n`;
         txt += `- 결제 건수: ${currentKpi.cnt}건\n`;
         txt += `- 객단가: ${document.getElementById('insightArpu').innerText}\n\n`;
 
-        // 2. 수강생 현황
         txt += `2. 수강생 현황\n`;
         txt += `- 신규 유입: ${document.getElementById('insightNew').innerText}\n`;
         txt += `- 재등록률: ${document.getElementById('insightRetention').innerText}\n`;
         txt += `- 이탈 의심: ${document.getElementById('insightChurn').innerText} (재등록 독려 필요)\n\n`;
 
-        // 3. 특이사항 (자동 분석)
-        // 가장 매출이 높은 반 찾기
         let classSums = {};
-        filteredDb.forEach(i => { if(!i.isFullCancel && i.classInfo) classSums[i.classInfo] = (classSums[i.classInfo]||0)+i.price; });
+        filteredDb.forEach(i => { if(!i.isFullCancel && i.type) classSums[i.type] = (classSums[i.type]||0)+i.price; });
         let topClass = Object.keys(classSums).sort((a,b) => classSums[b]-classSums[a])[0] || '없음';
         
         txt += `3. 주요 사항\n`;
-        txt += `- 이번 달 효자 상품은 '${topClass}' 입니다.\n`;
+        txt += `- 이번 달 효자 상품(유형)은 '${topClass}' 입니다.\n`;
         txt += `- 환불 건수는 총 ${currentKpi.cancelCnt}건 발생했습니다.\n`;
 
         document.getElementById('reportText').value = txt;
