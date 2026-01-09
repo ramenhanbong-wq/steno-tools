@@ -321,7 +321,7 @@
 </div>
 
 <script>
-    /* 폴더 경로 복사 스크립트 추가 */
+    /* 폴더 경로 복사 스크립트 */
     function copyFolderLink() {
         const path = "\\\\192.168.0.63\\도깨비도깨비3\\◆◆2026년 제1회 시험대비반◆◆";
         navigator.clipboard.writeText(path).then(() => {
@@ -370,12 +370,16 @@
     function cleanStage1(text) {
         text = text.replace(/\([^)]*\)/g, ""); 
         text = text.replace(/\n/g, " ");        
+        // 1차 정제: 여기서 %는 삭제하지 않고 남겨둡니다.
         text = text.replace(/[^a-zA-Z0-9가-힣\s.,?%·&]/g, ""); 
         text = text.replace(/\s+/g, " ").trim(); 
         return text;
     }
 
     function convertStage2(text) {
+        // [수정된 부분] 2차 변환에서 %를 '퍼센트'로 변경
+        text = text.replace(/%/g, "퍼센트");
+        
         text = text.replace(/6\.25/g, "육이오");
         const sortedKeys = Object.keys(myDict).sort((a,b)=>b.length-a.length);
         for(const eng of sortedKeys) {
@@ -522,7 +526,6 @@
         autoResize(leftTa);
         const row = leftTa.closest('.card-row');
         const rightTa = row.querySelector('.right-editor');
-        // 중요: 오른쪽 카드 안에 있는 배지만 지목하여 숫자를 업데이트합니다.
         const badge = row.querySelector('.right-card .badge');
         const newS1 = leftTa.value; 
         const newS2 = convertStage2(newS1);
@@ -535,7 +538,6 @@
         autoResize(rightTa);
         const row = rightTa.closest('.card-row');
         const leftTa = row.querySelector('.left-editor');
-        // 중요: 오른쪽 카드 안에 있는 배지만 지목하여 숫자를 업데이트합니다.
         const badge = row.querySelector('.right-card .badge');
         const val = rightTa.value;
         leftTa.value = val;
