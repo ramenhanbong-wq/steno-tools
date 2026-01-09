@@ -117,7 +117,7 @@
             border-color: var(--theme-main); outline: none;
         }
         
-        /* 파일 찾기 버튼 예쁘게 (브라우저 기본 스타일 덮어쓰기 위해 padding 조정) */
+        /* 파일 찾기 버튼 예쁘게 */
         input[type="file"]::file-selector-button {
             background: var(--theme-light); color: var(--theme-deep);
             border: none; padding: 5px 10px; border-radius: 8px;
@@ -170,21 +170,30 @@
             line-height: 2.2; font-size: 1.05rem; text-align: justify;
             color: #333; padding: 30px; background: #fff;
             border: 2px solid var(--border-line); border-radius: 15px;
-            min-height: 200px; font-family: 'Noto Sans KR', sans-serif; /* 본문은 가독성 위해 고딕 */
+            min-height: 200px; font-family: 'Noto Sans KR', sans-serif;
         }
 
-        /* 약어 강조 스타일 */
+        /* [수정됨] 약어 강조 스타일 - 끊김 방지 */
         .highlight {
             color: var(--highlight-text) !important;
             background-color: var(--highlight-bg) !important;
-            font-weight: 700; padding: 2px 6px; border-radius: 4px;
-            margin: 0 2px; border: 1px solid rgba(0,0,0,0.05);
+            font-weight: 700;
+            
+            /* 핵심: 여백을 0으로 설정하여 글자가 끊기지 않게 함 */
+            padding: 0; 
+            margin: 0; 
+            
+            border-radius: 2px;
+            
+            /* 줄바꿈 시에도 스타일 유지 */
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone;
         }
 
         /* --- [인쇄 모드] --- */
         @media print {
             body { background: white; padding: 0; }
-            .navbar, .controls { display: none !important; } /* 메뉴바, 설정창 숨김 */
+            .navbar, .controls { display: none !important; }
             .container { box-shadow: none; border: none; max-width: 100%; width: 100%; padding: 0; margin: 0; }
             h3 { background: none; color: black; padding: 0; border: none; font-size: 1.2rem; margin-top: 20px;}
             
@@ -293,7 +302,7 @@
         });
     }
 
-    // 데이터 처리 및 렌더링
+    // [수정됨] 데이터 처리 및 렌더링 (플레이스홀더 방식 적용)
     async function processData() {
         const excelFileInput = document.getElementById('excelFile').files[0];
         const textFileInput = document.getElementById('textFile').files[0];
@@ -307,25 +316,20 @@
         abbreviations = await loadExcel(excelFileInput);
         let text = await loadText(textFileInput);
 
-        // 1. 카운팅 (전체 약어 대상)
+        // 1. 카운팅 (통계용 - 원본 텍스트에서 수행)
         const counts = {};
         abbreviations.forEach(abbr => {
             const escapedAbbr = abbr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(escapedAbbr, 'gi');
+            const regex = new RegExp(escapedAbbr, 'g');
             const matches = text.match(regex);
             if (matches) counts[abbr] = matches.length;
         });
 
-        // 2. [통계표용] 필터링 (설정 빈도 이상)
+        // 2. 통계표 생성
         let statsAbbrs = Object.entries(counts)
             .filter(([_, count]) => count >= minFreq)
             .sort((a, b) => b[1] - a[1]);
 
-        // 3. [본문용] 필터링 (전체 표시)
-        let textAbbrs = Object.keys(counts); 
-        textAbbrs.sort((a, b) => b.length - a.length); 
-
-        // --- 통계표 생성 ---
         let tableHtml = `<table>
             <colgroup>
                 <col style="width: 15%">
@@ -359,25 +363,50 @@
         document.getElementById('statsTitle').innerHTML = `<i class="fa-solid fa-list-ol"></i> 빈출 약어 리스트 (${minFreq}회 이상)`;
         document.getElementById('statsTable').innerHTML = tableHtml;
 
-        // --- 본문 강조 생성 ---
-        let highlightedText = text.replace(/\n/g, '<br>');
+        // 3. [핵심 로직 변경] 본문 하이라이트 (플레이스홀더)
+        // 약어 길이가 긴 순서대로 정렬되어 있어야 정확히 치환됨
+        let textAbbrs = Object.keys(counts).sort((a, b) => b.length - a.length);
         
-        textAbbrs.forEach(abbr => {
+        let tempText = text;
+        let placeholders = []; // 임시 저장소
+
+        // (1) 텍스트 -> 임시 기호 변환
+        textAbbrs.forEach((abbr, index) => {
             const escapedAbbr = abbr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(`(${escapedAbbr})`, 'gi');
-            highlightedText = highlightedText.replace(regex, '<span class="highlight">$1</span>');
+            const regex = new RegExp(escapedAbbr, 'g');
+            
+            // 이미 다른 약어로 변환된 부분이 아닐 때만 치환
+            if (tempText.match(regex)) {
+                // 유니크한 키 생성 (예: @@@ABBR_0@@@)
+                const placeholder = `@@@ABBR_${index}@@@`;
+                
+                placeholders.push({ 
+                    key: placeholder, 
+                    html: `<span class="highlight">${abbr}</span>` 
+                });
+                
+                // 해당 약어를 임시 기호로 교체
+                tempText = tempText.replace(regex, placeholder);
+            }
         });
 
-        document.getElementById('textContent').innerHTML = highlightedText;
+        // (2) 줄바꿈 처리
+        tempText = tempText.replace(/\n/g, '<br>');
+
+        // (3) 임시 기호 -> HTML 태그 복원
+        placeholders.forEach(item => {
+            tempText = tempText.split(item.key).join(item.html);
+        });
+
+        document.getElementById('textContent').innerHTML = tempText;
         
-        // 결과 표시 (애니메이션 효과)
+        // 화면 표시 및 스크롤
         const statsSec = document.getElementById('statsSection');
         const textSec = document.getElementById('textSection');
         
         statsSec.style.display = 'block';
         textSec.style.display = 'block';
         
-        // 부드럽게 스크롤 이동
         statsSec.scrollIntoView({ behavior: 'smooth' });
     }
 </script>
