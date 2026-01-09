@@ -2,11 +2,12 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>아카데미 성과 분석 프로(Pro) - 통합버전</title>
+    <title>아카데미 성과 분석 프로(Pro) - 통합 완성판</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
     <style>
         :root {
@@ -18,8 +19,6 @@
             --text-main: #4a4a4a;
             --text-sub: #666666; 
             --border-line: #f0ebeb; 
-            --accent-blue: #8cb6ff;
-            --accent-green: #10b981;
         }
 
         body {
@@ -33,53 +32,40 @@
 
         /* --- [메뉴바] --- */
         .navbar {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 70px;
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(5px);
-            display: flex; align-items: center;
-            justify-content: space-between;
+            display: flex; align-items: center; justify-content: space-between;
             padding: 0 30px; box-sizing: border-box; z-index: 1000;
             border-bottom: 2px solid #fff0f0;
             box-shadow: 0 4px 15px rgba(230, 210, 200, 0.1); 
         }
         .logo {
-            font-size: 1.3rem;
-            color: #4a4a4a;
-            text-decoration: none;
-            display: flex; align-items: center; gap: 8px;
-            font-weight: bold;
+            font-size: 1.3rem; color: #4a4a4a; text-decoration: none;
+            display: flex; align-items: center; gap: 8px; font-weight: bold;
         }
         .logo i { color: #ff9aa2; font-size: 1.2em; }
         .nav-links { display: flex; gap: 8px; }
         .nav-item {
-            text-decoration: none;
-            color: #888;
-            font-weight: 600; padding: 8px 15px;
-            border-radius: 20px;
-            transition: all 0.3s;
-            display: flex; align-items: center; gap: 6px;
-            font-size: 0.95rem;
+            text-decoration: none; color: #888; font-weight: 600; padding: 8px 15px;
+            border-radius: 20px; transition: all 0.3s;
+            display: flex; align-items: center; gap: 6px; font-size: 0.95rem;
         }
         .nav-item:hover, .nav-item.active {
-            background-color: #fff0f5;
-            color: #ff6f91;
-            transform: translateY(-2px);
+            background-color: #fff0f5; color: #ff6f91; transform: translateY(-2px);
         }
 
         /* --- [레이아웃] --- */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        
         .header-box { text-align: center; margin-bottom: 30px; }
         .header-box h1 { font-size: 2rem; color: #4a4a4a; margin-bottom: 10px; letter-spacing: -1px; }
 
-        /* 목표 달성 게이지 스타일 */
+        /* 목표 달성 게이지 */
         .goal-wrapper {
             max-width: 800px; margin: 0 auto 30px auto;
             background: #fff; padding: 20px; border-radius: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1px solid #f0ebeb;
-            text-align: center;
+            border: 1px solid #f0ebeb; text-align: center;
         }
         .goal-input-area { margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; }
         .goal-input-area input {
@@ -115,13 +101,10 @@
         }
         .upload-btn { background: #f0f4ff; color: #5874ff; }
         .upload-btn:hover { background: #dce7ff; transform: translateY(-2px); }
-        
         .compare-btn { background: #fff0f5; color: #ff6f91; }
         .compare-btn:hover { background: #ffe0ea; transform: translateY(-2px); }
-
         .report-btn { background: #e0f7fa; color: #0097a7; }
         .report-btn:hover { background: #b2ebf2; transform: translateY(-2px); }
-        
         .reset-btn { background: #f5f5f5; color: #666; }
         .reset-btn:hover { background: #e0e0e0; transform: translateY(-2px); }
 
@@ -142,12 +125,12 @@
         }
 
         /* --- [카드 및 그리드] --- */
-        .card, .trend-card, .heatmap-container, .kpi-card, .insight-card {
+        .card, .trend-card, .heatmap-container, .kpi-card, .insight-card, .conversion-card {
             background: #ffffff; border-radius: 25px; padding: 30px;
             border: 2px solid #f0ebeb; box-shadow: 0 8px 20px rgba(200, 200, 200, 0.1);
             transition: all 0.3s ease; position: relative;
         }
-        .card:hover, .trend-card:hover, .kpi-card:hover, .insight-card:hover {
+        .card:hover, .trend-card:hover, .kpi-card:hover, .insight-card:hover, .conversion-card:hover {
             border-color: #ffe0e0; box-shadow: 0 15px 30px rgba(255, 183, 178, 0.2);
             transform: translateY(-5px);
         }
@@ -186,6 +169,13 @@
             font-family: 'Pretendard';
         }
         .heatmap-cell:hover { transform: scale(1.05); border-color: #ffb7b2 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        /* 전환율 카드 스타일 */
+        .conversion-stats { display: flex; justify-content: space-around; margin-bottom: 20px; }
+        .conv-stat-box { text-align: center; }
+        .conv-label { font-size: 0.9rem; color: #888; margin-bottom: 5px; }
+        .conv-val { font-size: 1.4rem; font-weight: bold; color: #555; font-family: 'Pretendard'; }
+        .conv-rate { color: #8cb6ff; font-size: 2rem; }
 
         /* 랭킹 뱃지 */
         .rank-badge { 
@@ -258,7 +248,7 @@
 <div class="container">
     <div class="header-box">
         <h1>🌸 아카데미 성과 분석 프로</h1>
-        <p style="color:#888; margin-top:5px;">일반 강좌와 PT권 매출을 자동으로 합산합니다</p>
+        <p style="color:#888; margin-top:5px;">매출 / PT / 무료 체험자 전환율 자동 분석</p>
     </div>
 
     <div class="goal-wrapper">
@@ -275,13 +265,13 @@
 
     <div class="control-bar">
         <button class="btn-style upload-btn" onclick="document.getElementById('fileInput').click()">
-            <i class="fa-regular fa-folder-open"></i> 엑셀 업로드 (다중선택 가능)
+            <i class="fa-regular fa-folder-open"></i> 엑셀 파일 추가 (다중 선택)
         </button>
         <button class="btn-style reset-btn" onclick="resetData()">
             <i class="fa-solid fa-rotate-right"></i> 초기화
         </button>
         <select id="monthFilter" onchange="updateDashboard()">
-            <option value="all">전체 기간 보기</option>
+            <option value="all">📅 전체 기간 보기</option>
         </select>
         <button class="btn-style compare-btn" onclick="openCompareModal()">
             <i class="fa-solid fa-scale-balanced"></i> 성과 비교
@@ -340,6 +330,48 @@
                 <div class="kpi-label">전체 환불 (매출 취소)</div>
                 <div class="kpi-amount" id="kpiCancelCnt" style="font-size:1.8rem;">0건</div>
                 <div style="font-size:12px; color:#ff6f91; margin-top:5px;">* 수강 시작 전 취소 건수</div>
+            </div>
+        </div>
+
+        <div class="section-title">🆓 무료 체험 전환율 분석</div>
+        <div class="analysis-grid">
+            <div class="conversion-card" style="grid-column: span 2;">
+                <h3 style="margin-top:0; color:#444;">무료 사용자 유료 결제 전환 분석</h3>
+                <div class="conversion-stats">
+                    <div class="conv-stat-box">
+                        <div class="conv-label">총 무료체험</div>
+                        <div class="conv-val" id="convTotal">0명</div>
+                    </div>
+                    <div class="conv-stat-box">
+                        <div class="conv-label">유료 전환 성공</div>
+                        <div class="conv-val" id="convSuccess" style="color:#10b981;">0명</div>
+                    </div>
+                    <div class="conv-stat-box">
+                        <div class="conv-label">전환율</div>
+                        <div class="conv-val conv-rate" id="convRate">0%</div>
+                    </div>
+                </div>
+                
+                <div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center; margin-top:20px;">
+                    <div style="flex:1; min-width:300px; text-align:center;">
+                        <h4 style="color:#666; margin-bottom:10px;">📊 전환 vs 미전환</h4>
+                        <div style="height:250px;"><canvas id="chartConversion"></canvas></div>
+                    </div>
+                    <div style="flex:1; min-width:300px; text-align:center;">
+                        <h4 style="color:#666; margin-bottom:10px;">🍰 전환 상품 상세 비율</h4>
+                        <div style="height:250px;"><canvas id="chartConversionDetail"></canvas></div>
+                    </div>
+                </div>
+
+                <div style="margin-top:30px;">
+                    <h3 style="margin-top:0; color:#444;">🎉 유료 전환 성공 명단</h3>
+                    <div style="overflow-y: auto; max-height: 300px; border:1px solid #eee; border-radius:10px; padding:10px;">
+                        <table id="tableConversion">
+                            <thead><tr><th>이름</th><th>전화번호</th><th>전환된 상품(대표)</th><th>확인</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -472,6 +504,7 @@
 <script>
     // 전역 변수
     let db = [], filteredDb = [], monthList = new Set();
+    let freeUserDb = []; // 무료 사용자 명단 저장
     let churnList = [], newList = [];
     let currentKpi = { amt:0, cnt:0 };
 
@@ -480,6 +513,7 @@
     function resetData() {
         if(confirm('모든 데이터를 초기화하시겠습니까?')) {
             db = [];
+            freeUserDb = []; // 초기화
             monthList.clear();
             document.getElementById('fileInput').value = '';
             document.getElementById('dashboard').style.display = 'none';
@@ -515,44 +549,74 @@
     }
 
     function finalizeDataProcessing() {
-        // 모든 파일 로드 후 필터 갱신 및 대시보드 업데이트
         populateFilter();
         updateDashboard();
         analyzeLTV();
-        alert(`총 ${db.length}건의 데이터를 성공적으로 불러왔습니다!`);
+        alert(`데이터 로드 완료! (매출: ${db.length}건, 무료체험: ${freeUserDb.length}명)`);
     }
 
     function processData(rows) {
         if(!rows || rows.length < 2) return;
 
-        // 1. 일반 매출 (계단식) 감지: 헤더나 첫 열에 "신청정보" 등이 포함됨
-        // 2. PT 매출 (한 줄) 감지: 헤더에 "주문번호", "학생명" 등이 포함됨
-        
         let isGeneralSales = false;
         let isPTSales = false;
+        let isFreeUsers = false;
         
-        // 헤더 줄 찾기 (보통 0~2줄 사이에 있음)
-        let headerRow = rows[0].map(x=>String(x).trim());
-        if(headerRow.length === 0 && rows.length > 1) headerRow = rows[1].map(x=>String(x).trim());
+        // 상위 5줄을 스캔하여 파일 종류를 자동으로 감지합니다.
+        for(let i = 0; i < Math.min(rows.length, 5); i++) {
+            let rowStr = rows[i].map(x => String(x || '')).join(' ');
 
-        if (headerRow.some(h => h.includes('신청정보') || h.includes('선택정보'))) {
-            isGeneralSales = true;
-        } else if (headerRow.some(h => h.includes('주문번호') || h.includes('학생명') || h.includes('신청일(카톡)'))) {
-            isPTSales = true;
+            if (rowStr.includes('신청정보') && rowStr.includes('선택정보')) {
+                isGeneralSales = true;
+                break;
+            } else if ((rowStr.includes('주문번호') || rowStr.includes('학생명')) && !rowStr.includes('수업 여부')) {
+                isPTSales = true;
+                break;
+            } else if (rowStr.includes('수업 여부') || rowStr.includes('쿠폰 만료일')) {
+                isFreeUsers = true;
+                break;
+            }
         }
 
         if (isGeneralSales) {
             parseGeneralSales(rows);
         } else if (isPTSales) {
             parsePTSales(rows);
-        } else {
-            console.log("알 수 없는 파일 형식입니다.");
+        } else if (isFreeUsers) {
+            parseFreeUsers(rows);
         }
     }
 
-    // A. 일반 매출 파싱 (기존 로직)
+    // C. 무료 사용자 파싱
+    function parseFreeUsers(rows) {
+        // 헤더 인덱스 찾기
+        let headerIdx = rows.findIndex(r => r.some(c => String(c).includes('성명') || String(c).includes('이름')));
+        if(headerIdx === -1) return;
+
+        const headers = rows[headerIdx].map(x => String(x).trim());
+        const colIdx = {
+            name: headers.findIndex(h => h === '성명' || h === '이름'),
+            phone: headers.findIndex(h => h === '핸드폰' || h === '연락처' || h === '전화번호')
+        };
+
+        if(colIdx.name === -1 || colIdx.phone === -1) return;
+
+        for(let i = headerIdx + 1; i < rows.length; i++) {
+            let row = rows[i];
+            if(!row || !row[colIdx.name]) continue;
+
+            let name = String(row[colIdx.name]).trim();
+            let phone = String(row[colIdx.phone]).trim();
+
+            if(name && phone) {
+                freeUserDb.push({ name: name, phone: cleanPhone(phone) });
+            }
+        }
+    }
+
+    // A. 일반 매출 파싱
     function parseGeneralSales(rows) {
-        let statusIdx = findStatusCol(rows); // '결제상태' 열 찾기
+        let statusIdx = findStatusCol(rows);
         if(statusIdx === -1) return;
 
         let i = 0;
@@ -577,11 +641,10 @@
                     isPartial: false, isFullCancel: false
                 };
 
-                // 다음 줄 정보 읽기
                 if(i+1 < rows.length) {
                     let rowB = rows[i+1];
                     item.product = String(rowB[1]);
-                    item.phone = String(rowB[3]);
+                    item.phone = cleanPhone(String(rowB[3])); // 전화번호 정제
                     
                     let increment = 2;
                     if(i+2 < rows.length) {
@@ -591,8 +654,6 @@
                             increment = 3;
                         }
                     }
-
-                    // 유효성 및 타입 분류
                     processItemType(item);
                     db.push(item);
                     if (monthKey) monthList.add(monthKey);
@@ -602,13 +663,11 @@
         }
     }
 
-    // B. PT 매출 파싱 (새로운 로직)
+    // B. PT 매출 파싱
     function parsePTSales(rows) {
-        // 헤더 인덱스 찾기
         let headerIdx = rows.findIndex(r => r.some(c => String(c).includes('주문번호') || String(c).includes('학생명')));
         if(headerIdx === -1) return;
 
-        // 컬럼 매핑 찾기
         const headers = rows[headerIdx].map(x => String(x).trim());
         const colIdx = {
             date: headers.findIndex(h => h.includes('신청일') || h.includes('결제일')),
@@ -624,12 +683,10 @@
             if(!row || !row[colIdx.price]) continue;
 
             let status = String(row[colIdx.status]).trim();
-            // PT권은 '결제완료' 외에 엑셀상 그냥 입력된 경우도 있을 수 있으니 금액이 있으면 유효로 볼 수도 있으나,
-            // 안전하게 결제완료/취소 상태만 가져옵니다.
             if (status !== '결제완료' && !status.includes('취소')) continue;
 
             let price = parseInt(String(row[colIdx.price]).replace(/[^\d]/g, '')) || 0;
-            let dateObj = parseDate(row[colIdx.date]); // 신청일 or 결제일
+            let dateObj = parseDate(row[colIdx.date]);
             let dateStr = getDateStr(dateObj);
             let monthKey = getMonthKey(dateObj);
 
@@ -638,17 +695,15 @@
             let item = {
                 date: dateStr, month: monthKey, 
                 name: String(row[colIdx.name]).trim(), 
-                phone: String(row[colIdx.phone]).trim(),
+                phone: cleanPhone(String(row[colIdx.phone])),
                 product: String(row[colIdx.product]).trim(), 
                 price: price, status: status, option: '',
                 type: 'PT 이용권', classInfo: '', dayInfo: '', timeInfo: '',
                 isPartial: false, isFullCancel: false
             };
             
-            // PT 상품명으로 타입 한번 더 정리
             if(item.product.includes('회권')) item.type = 'PT 이용권';
             
-            // 유효성 체크
             if(status.includes('취소')) {
                  if (price >= 10000) item.isPartial = true;
                  else item.isFullCancel = true;
@@ -659,7 +714,6 @@
         }
     }
 
-    // 공통 로직: 아이템 분류
     function processItemType(item) {
         let isValid = false;
         if (item.status === '결제완료') isValid = true;
@@ -671,7 +725,6 @@
         }
 
         if (isValid || item.isFullCancel) {
-            // 이미 PT 로직에서 type이 들어갔으면 패스
             if (item.type === 'PT 이용권') return;
 
             if (item.product.includes('올패스')) item.type = '올패스';
@@ -695,7 +748,6 @@
         }
     }
 
-    // 유틸리티 함수
     function findStatusCol(rows) {
         for(let r=0; r<Math.min(rows.length, 50); r++) {
             for(let c=0; c<rows[r].length; c++) {
@@ -708,13 +760,11 @@
     function parseDate(raw) {
         if (!raw) return null;
         let str = String(raw).trim();
-        // 엑셀 날짜 코드 (숫자) 처리
         if (!isNaN(str) && str.length < 6 && str.length > 4) {
             let date = new Date((Number(str) - (25567 + 2)) * 86400 * 1000);
             return date;
         }
-        // 문자열 날짜 (YYYY-MM-DD or YYYY.MM.DD)
-        let cleanStr = str.replace(/[./]/g, '-').split(' ')[0]; // 시간 제거
+        let cleanStr = str.replace(/[./]/g, '-').split(' ')[0];
         let date = new Date(cleanStr);
         if (!isNaN(date.getTime())) return date;
         return null;
@@ -734,6 +784,11 @@
         let m = String(dateObj.getMonth() + 1).padStart(2, '0');
         let d = String(dateObj.getDate()).padStart(2, '0');
         return `${y}-${m}-${d}`;
+    }
+    
+    function cleanPhone(str) {
+        if(!str) return "";
+        return str.replace(/[^\d]/g, '');
     }
 
     function populateFilter() {
@@ -760,7 +815,138 @@
             document.getElementById('kpiTitle').innerText = `💰 ${mon}월 매출 현황`;
         }
         analyze(filteredDb, mon);
-        calculateGoal(); 
+        calculateGoal();
+        
+        if(freeUserDb.length > 0) {
+            analyzeConversion();
+        }
+    }
+    
+    // [업그레이드] 상품별 상세 전환 분석 및 시각화
+    function analyzeConversion() {
+        if (freeUserDb.length === 0) return;
+
+        let convertedList = [];
+        let detailStats = {
+            '올패스': 0,
+            '시대반(시험대비)': 0,
+            '퍼스널클래스(PT)': 0,
+            '화상수업(입문/중급)': 0,
+            '화상수업(고급)': 0,
+            '화상수업(심야)': 0,
+            '기타': 0
+        };
+
+        let payHistory = {};
+        db.forEach(item => {
+            if (!item.isFullCancel && item.phone) {
+                if (!payHistory[item.phone]) payHistory[item.phone] = [];
+                payHistory[item.phone].push(item);
+            }
+        });
+
+        freeUserDb.forEach(freeUser => {
+            if (freeUser.phone && payHistory[freeUser.phone]) {
+                // 유료 전환됨
+                
+                // 해당 유저가 구매한 상품 파악 (중복 제거)
+                let userCategories = new Set(); 
+                payHistory[freeUser.phone].forEach(payItem => {
+                    let cat = '기타';
+                    if (payItem.type === '올패스') cat = '올패스';
+                    else if (payItem.type === 'PT 이용권') cat = '퍼스널클래스(PT)';
+                    else if (payItem.type.includes('시험대비')) cat = '시대반(시험대비)';
+                    else if (payItem.type === '화상수업') {
+                        if (payItem.classInfo.includes('입문') || payItem.classInfo.includes('중급')) cat = '화상수업(입문/중급)';
+                        else if (payItem.classInfo.includes('고급')) cat = '화상수업(고급)';
+                        else if (payItem.classInfo.includes('심야')) cat = '화상수업(심야)';
+                    }
+                    userCategories.add(cat);
+                });
+                
+                // 리스트에 추가 (대표 상품 하나만 표시하기 위해 첫 번째 요소 사용)
+                let repProduct = Array.from(userCategories)[0] || '기타';
+                convertedList.push({ ...freeUser, repProduct: repProduct });
+
+                // 통계 집계
+                userCategories.forEach(c => {
+                    if (detailStats[c] !== undefined) detailStats[c]++;
+                    else detailStats['기타']++;
+                });
+            }
+        });
+
+        let totalFree = freeUserDb.length;
+        let convertedCount = convertedList.length;
+        let rate = totalFree > 0 ? ((convertedCount / totalFree) * 100).toFixed(1) : 0;
+
+        // 2. UI 업데이트
+        document.getElementById('convTotal').innerText = totalFree + '명';
+        document.getElementById('convSuccess').innerText = convertedCount + '명';
+        document.getElementById('convRate').innerText = rate + '%';
+
+        // 3. 차트 1: 전환 vs 미전환
+        let ctx1 = document.getElementById('chartConversion').getContext('2d');
+        if (Chart.getChart('chartConversion')) Chart.getChart('chartConversion').destroy();
+        new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+                labels: ['미전환', '유료 전환'],
+                datasets: [{
+                    data: [totalFree - convertedCount, convertedCount],
+                    backgroundColor: ['#f0f0f0', '#10b981'],
+                    borderWidth: 0
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '60%' }
+        });
+
+        // 4. 차트 2: 상세 상품 비율 (신규 추가!)
+        let ctx2 = document.getElementById('chartConversionDetail').getContext('2d');
+        if (Chart.getChart('chartConversionDetail')) Chart.getChart('chartConversionDetail').destroy();
+        
+        // 데이터 정제 (0인 항목 제외)
+        let detailLabels = [];
+        let detailData = [];
+        Object.keys(detailStats).forEach(k => {
+            if(detailStats[k] > 0) {
+                detailLabels.push(k);
+                detailData.push(detailStats[k]);
+            }
+        });
+
+        new Chart(ctx2, {
+            type: 'pie', // 또는 'doughnut'
+            data: {
+                labels: detailLabels,
+                datasets: [{
+                    data: detailData,
+                    backgroundColor: ['#ffb7b2', '#ffd700', '#a2c2ff', '#95e1d3', '#e0bbe4', '#ffdac1', '#c7ceea'],
+                    borderWidth: 1
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } }
+                }
+            }
+        });
+
+        // 5. 명단 테이블 업데이트
+        let tb = document.querySelector('#tableConversion tbody');
+        tb.innerHTML = '';
+        convertedList.forEach(u => {
+            let tr = document.createElement('tr');
+            let fmtPhone = u.phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+            tr.innerHTML = `<td>${u.name}</td><td>${fmtPhone}</td><td>${u.repProduct}</td><td class="clickable-row">확인</td>`;
+            tr.onclick = () => {
+                let userPayList = db.filter(p => p.phone === u.phone);
+                showList(`${u.name}님의 전환 내역`, 'list', userPayList);
+            };
+            tb.appendChild(tr);
+        });
     }
 
     function analyze(data, currentMon) {
@@ -774,10 +960,8 @@
             kpi.amt += i.price;
             kpi.cnt++;
 
-            // 유형별 (PT 포함)
             addCnt(cats.type, i.type, i);
 
-            // 반별/요일별/시간별 (PT가 아니거나 정보가 있을 때만)
             if(i.type !== '올패스' && i.type !== 'PT 이용권') {
                 addCnt(cats.class, i.classInfo, i);
                 addCnt(cats.day, i.dayInfo, i);
@@ -794,7 +978,6 @@
                 }
             }
             
-            // 학생별 집계 (이름/폰번호 키)
             let key = i.phone || i.name;
             if(!stu[key]) stu[key] = {name:i.name, phone:i.phone, amt:0, cnt:0, list:[]};
             stu[key].amt += i.price;
@@ -804,7 +987,6 @@
 
         currentKpi = kpi; 
 
-        // 인사이트 로직 (전월 비교 등)
         if (currentMon !== 'all') {
             const uniqueStudents = Object.keys(stu);
             const uniqueCount = uniqueStudents.length;
@@ -887,7 +1069,6 @@
         document.getElementById('ltvTotalStudents').innerText = totalStudents.toLocaleString() + '명';
         document.getElementById('ltvAvgDuration').innerText = avg + '개월';
 
-        // LTV 차트 렌더링
         let ctx = document.getElementById('chartLtv').getContext('2d');
         if(Chart.getChart('chartLtv')) Chart.getChart('chartLtv').destroy();
         new Chart(ctx, {
@@ -1024,6 +1205,12 @@
         txt += `3. 주요 사항\n`;
         txt += `- 이번 달 효자 상품(유형)은 '${topClass}' 입니다.\n`;
         txt += `- 환불 건수는 총 ${currentKpi.cancelCnt}건 발생했습니다.\n`;
+
+        if(freeUserDb.length > 0) {
+            txt += `\n4. 무료체험 전환율\n`;
+            txt += `- 총 체험 인원: ${document.getElementById('convTotal').innerText}\n`;
+            txt += `- 유료 전환: ${document.getElementById('convSuccess').innerText} (${document.getElementById('convRate').innerText})\n`;
+        }
 
         document.getElementById('reportText').value = txt;
         document.getElementById('reportModal').style.display = 'flex';
