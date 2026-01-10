@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>시대반 마스터</title>
+    <title>시대반 마스터 (Cloud)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
     
@@ -25,7 +25,7 @@
             margin: 0; padding-top: 80px; padding-bottom: 50px;
         }
 
-        /* --- [메뉴바 (Index와 통일)] --- */
+        /* --- [메뉴바] --- */
         .navbar {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 70px;
@@ -65,7 +65,7 @@
             max-width: 1400px; margin: 0 auto; padding: 20px;
         }
 
-        /* --- [귀여운 배너 영역] --- */
+        /* --- [배너 영역] --- */
         .banner-area {
             display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;
         }
@@ -85,15 +85,15 @@
             display: flex; align-items: center; justify-content: center; color: white;
             font-size: 1.1rem; margin-right: 12px;
         }
-        .b-typecast { background: #a2c2ff; } /* 파스텔 블루 */
-        .b-folder { background: #ffd97d; }   /* 파스텔 옐로우 */
-        .b-speller { background: #95e1d3; }  /* 파스텔 민트 */
+        .b-typecast { background: #a2c2ff; }
+        .b-folder { background: #ffd97d; }   
+        .b-speller { background: #95e1d3; }  
 
         .banner-text span { display: block; font-size: 0.75rem; color: #999; margin-bottom: 2px; }
         .banner-text strong { font-size: 1rem; color: #4a4a4a; }
 
 
-        /* --- [기존 스타일 유지] --- */
+        /* --- [컨트롤 패널] --- */
         .control-panel {
             background: white; border-radius: 20px; padding: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px;
@@ -309,7 +309,7 @@
 <div id="dictModal" class="modal">
     <div class="modal-content">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3>📚 변환 단어장</h3>
+            <h3>📚 변환 단어장 (Cloud)</h3>
             <span onclick="closeDictModal()" style="cursor:pointer; font-size:20px;">&times;</span>
         </div>
         <div style="display:flex; gap:5px; margin-bottom:10px;">
@@ -317,27 +317,108 @@
             <input type="text" id="newVal" placeholder="변환 (예: 이메일)" style="flex:1; padding:8px;">
             <button onclick="addWord()" style="background:var(--theme-mint); border:none; color:white; border-radius:5px; cursor:pointer;">추가</button>
         </div>
-        <div id="dictList" class="dict-list"></div>
+        <div id="dictList" class="dict-list">
+            </div>
     </div>
 </div>
 
 <script>
-    /* 폴더 경로 복사 스크립트 */
-    function copyFolderLink() {
-        const path = "\\\\192.168.0.63\\도깨비도깨비3\\◆◆2026년 제1회 시험대비반◆◆";
-        navigator.clipboard.writeText(path).then(() => {
-            alert("폴더 경로가 복사되었습니다! \n파일 탐색기 주소창에 붙여넣기(Ctrl+V) 하세요.\n\n" + path);
-        }).catch(err => {
-            prompt("복사가 차단되었습니다. 아래 경로를 직접 복사하세요:", path);
-        });
-    }
+    /* ==================================================
+       [중요] 구글 Apps Script 배포 후 받은 URL을 아래에 입력하세요.
+       예: "https://script.google.com/macros/s/XXXXX/exec"
+       ================================================== */
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbytBaEXJF4UICVvqMd0WVaa1MplivbwbF0YJqQ_6Z7jx_fxyU5vD93egN858r6agoQ5/exec";
 
-    let myDict = JSON.parse(localStorage.getItem("stenoDict")) || { 
-        "OECD": "오이시디", "Email": "이메일", "email": "이메일" 
-    };
+    /* --- 기본 데이터 및 설정 --- */
+    let myDict = JSON.parse(localStorage.getItem("stenoDict")) || { "OECD": "오이시디" };
     const alphabetMap = {'A':'에이','B':'비','C':'씨','D':'디','E':'이','F':'에프','G':'지','H':'에이치','I':'아이','J':'제이','K':'케이','L':'엘','M':'엠','N':'엔','O':'오','P':'피','Q':'큐','R':'알','S':'에스','T':'티','U':'유','V':'브이','W':'더블유','X':'엑스','Y':'와이','Z':'제트'};
     const digitMap = {'0':'영','1':'일','2':'이','3':'삼','4':'사','5':'오','6':'육','7':'칠','8':'팔','9':'구'};
     const CIRCLE_NUMS = ['①', '②', '③', '④', '⑤'];
+
+    /* --- [1] 구글 시트 연동 로직 --- */
+    
+    // 서버에서 단어장 불러오기
+    async function loadDict() {
+        try {
+            if(!GAS_URL || GAS_URL.includes("여기에")) {
+                console.warn("GAS URL이 설정되지 않아 로컬 데이터만 사용합니다.");
+                renderDict();
+                return;
+            }
+            const response = await fetch(GAS_URL);
+            const data = await response.json();
+            if (data && Object.keys(data).length > 0) {
+                myDict = data;
+                localStorage.setItem("stenoDict", JSON.stringify(myDict)); // 로컬 백업 업데이트
+            }
+        } catch (e) {
+            console.error("서버 데이터 로드 실패(오프라인 등). 로컬 데이터를 사용합니다.", e);
+        }
+        renderDict();
+    }
+
+    // 서버에 단어장 저장하기
+    async function saveDict() {
+        localStorage.setItem("stenoDict", JSON.stringify(myDict)); // 로컬 우선 저장
+        try {
+            if(GAS_URL && !GAS_URL.includes("여기에")) {
+                await fetch(GAS_URL, {
+                    method: "POST",
+                    body: JSON.stringify(myDict)
+                });
+            }
+        } catch (e) {
+            console.error("서버 저장 실패:", e);
+        }
+    }
+
+    /* --- [2] 단어장 조작 로직 --- */
+    
+    async function addWord() {
+        const k = document.getElementById('newKey').value.trim();
+        const v = document.getElementById('newVal').value.trim();
+        if(k && v) {
+            myDict[k] = v;
+            renderDict();
+            document.getElementById('newKey').value = "";
+            document.getElementById('newVal').value = "";
+            await saveDict(); // 비동기 저장
+        }
+    }
+
+    async function delWord(key) {
+        if(!confirm(`'${key}' 항목을 삭제하시겠습니까?`)) return;
+        delete myDict[key];
+        renderDict();
+        await saveDict(); // 비동기 저장
+    }
+
+    function renderDict() {
+        const list = document.getElementById('dictList');
+        if(!list) return;
+        list.innerHTML = "";
+        
+        // 정렬 (긴 단어 우선 표시 - 치환 순서와 동일하게)
+        const sortedKeys = Object.keys(myDict).sort((a,b) => b.length - a.length);
+
+        sortedKeys.forEach(key => {
+            const div = document.createElement('div');
+            div.className = 'dict-item';
+            div.innerHTML = `<span>${key} → ${myDict[key]}</span> <button onclick="delWord('${key}')" style="border:none;background:none;color:red;cursor:pointer;">삭제</button>`;
+            list.appendChild(div);
+        });
+    }
+
+    function openDictModal() { 
+        document.getElementById('dictModal').style.display = "block"; 
+        renderDict(); 
+    }
+    
+    function closeDictModal() { 
+        document.getElementById('dictModal').style.display = "none"; 
+    }
+
+    /* --- [3] 텍스트 처리 로직 (기존 유지) --- */
 
     function getPureLen(str) {
         if (!str) return 0;
@@ -371,21 +452,20 @@
     function cleanStage1(text) {
         text = text.replace(/\([^)]*\)/g, ""); 
         text = text.replace(/\n/g, " ");        
-        // 1차 정제: 여기서 %는 삭제하지 않고 남겨둡니다.
         text = text.replace(/[^a-zA-Z0-9가-힣\s.,?%·&]/g, ""); 
         text = text.replace(/\s+/g, " ").trim(); 
         return text;
     }
 
     function convertStage2(text) {
-        // [수정된 부분] 2차 변환에서 %를 '퍼센트'로 변경
         text = text.replace(/%/g, "퍼센트");
-        
         text = text.replace(/6\.25/g, "육이오");
+        
         const sortedKeys = Object.keys(myDict).sort((a,b)=>b.length-a.length);
         for(const eng of sortedKeys) {
             text = text.replace(new RegExp(`\\b${eng}\\b`,'g'), myDict[eng]);
         }
+        
         text = text.replace(/\b[A-Z]+\b/g, (m) => /[가-힣]/.test(m)?m:[...m].map(c=>alphabetMap[c]||c).join(''));
         text = text.replace(/([0-9]+)(\.[0-9]+)?/g, (m, p1, p2) => {
             let korInt = convertNumberToKorean(p1);
@@ -394,6 +474,8 @@
         });
         return text;
     }
+
+    /* --- [4] 분할 및 UI 처리 로직 (기존 유지) --- */
 
     function resetData() {
         if(!confirm("모든 작업 내용이 삭제됩니다. 초기화하시겠습니까?")) return;
@@ -451,9 +533,9 @@
                 if (currentS2.length > 0) {
                     if (currentLen + nextLen > lineLimit + 3) { shouldBreak = true; } 
                     else if (currentLen + nextLen >= lineLimit - 3) {
-                         const diffNow = Math.abs((currentLen + nextLen) - lineLimit);
-                         const diffPrev = Math.abs(currentLen - lineLimit);
-                         if (diffPrev < diffNow) shouldBreak = true;
+                            const diffNow = Math.abs((currentLen + nextLen) - lineLimit);
+                            const diffPrev = Math.abs(currentLen - lineLimit);
+                            if (diffPrev < diffNow) shouldBreak = true;
                     }
                 }
             }
@@ -522,7 +604,6 @@
         btn.innerHTML = isLocked ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-solid fa-lock-open"></i>';
     }
 
-    /* --- [수정된 동기화 함수들] --- */
     window.syncLeftToRight = function(leftTa) {
         autoResize(leftTa);
         const row = leftTa.closest('.card-row');
@@ -577,33 +658,21 @@
         });
     }
 
-    function openDictModal() { document.getElementById('dictModal').style.display = "block"; renderDict(); }
-    function closeDictModal() { document.getElementById('dictModal').style.display = "none"; }
-    function addWord() {
-        const k = document.getElementById('newKey').value.trim();
-        const v = document.getElementById('newVal').value.trim();
-        if(k && v) {
-            myDict[k] = v;
-            localStorage.setItem("stenoDict", JSON.stringify(myDict));
-            document.getElementById('newKey').value=""; document.getElementById('newVal').value="";
-            renderDict();
-        }
-    }
-    function renderDict() {
-        const list = document.getElementById('dictList');
-        list.innerHTML = "";
-        Object.keys(myDict).forEach(key => {
-            const div = document.createElement('div');
-            div.className = 'dict-item';
-            div.innerHTML = `<span>${key} → ${myDict[key]}</span> <button onclick="delWord('${key}')" style="border:none;background:none;color:red;cursor:pointer;">삭제</button>`;
-            list.appendChild(div);
+    function copyFolderLink() {
+        const path = "\\\\192.168.0.63\\도깨비도깨비3\\◆◆2026년 제1회 시험대비반◆◆";
+        navigator.clipboard.writeText(path).then(() => {
+            alert("폴더 경로가 복사되었습니다! \n파일 탐색기 주소창에 붙여넣기(Ctrl+V) 하세요.\n\n" + path);
+        }).catch(err => {
+            prompt("복사가 차단되었습니다. 아래 경로를 직접 복사하세요:", path);
         });
     }
-    window.delWord = function(key) { delete myDict[key]; localStorage.setItem("stenoDict", JSON.stringify(myDict)); renderDict(); }
+
+    // 모달창 닫기 이벤트 바인딩
     window.onclick = function(e) { if(e.target == document.getElementById('dictModal')) closeDictModal(); }
+    
+    // 페이지 로드 시 단어장 로드
+    window.onload = loadDict;
+
 </script>
 </body>
 </html>
-
-
-
