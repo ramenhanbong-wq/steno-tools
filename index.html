@@ -3,141 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>소리자바 아카데미 도구 모음</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>쉽게 가자</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
+        :root {
+            --bg-cream: #fdfbf7;
+            --card-white: #ffffff;
+            --pastel-pink: #ffb7b2;
+            --pastel-blue: #a2c2ff;
+            --pastel-mint: #95e1d3;
+            --pastel-purple: #c7ceea;
+            --pastel-orange: #ffccbc; /* 면접 도구용 신규 색상 */
+            --text-main: #4a4a4a;
+            --text-sub: #666666; 
+            --border-line: #f0ebeb; 
+        }
+
         body {
-            font-family: 'Pretendard', sans-serif;
-            background-color: #f4f6f9;
+            font-family: 'Gowun Dodum', 'Pretendard', sans-serif;
             margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            width: 100%;
-            max-width: 800px;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .header img {
-            max-width: 200px;
-            margin-bottom: 15px;
-        }
-        .header h1 {
-            color: #2c3e50;
-            margin: 0;
-            font-size: 1.8rem;
-        }
-        .header p {
-            color: #7f8c8d;
-            margin-top: 10px;
+            background-color: #fdfbf7;
+            color: #4a4a4a;
+            padding-top: 80px;
         }
 
-        /* 카드 그리드 스타일 */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+        /* --- [메뉴바] --- */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; box-sizing: border-box; z-index: 1000;
+            border-bottom: 2px solid #fff0f0;
+            box-shadow: 0 4px 15px rgba(230, 210, 200, 0.1); 
         }
-
-        /* 메뉴 카드 디자인 */
-        .menu-card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px 20px;
-            text-align: center;
+        
+        .logo {
+            font-size: 1.3rem;
+            color: #4a4a4a;
             text-decoration: none;
-            color: #333;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border: 1px solid #eee;
+            display: flex; align-items: center; gap: 8px;
+            font-weight: bold;
+        }
+        .logo i { color: #ff9aa2; font-size: 1.2em; }
+
+        .nav-links { display: flex; gap: 8px; }
+        .nav-item {
+            text-decoration: none; color: #888;
+            font-weight: 600; padding: 8px 15px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: #fff0f5; 
+            color: #ff6f91;
+            transform: translateY(-2px);
         }
 
-        .menu-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-            border-color: #3498db;
+        /* --- [메인 컨텐츠] --- */
+        .hero { text-align: center; padding: 60px 20px 40px; }
+        .hero h1 {
+            font-size: 2.2rem; margin-bottom: 10px; color: #4a4a4a;
+            letter-spacing: -1px;
         }
 
-        .icon-box {
-            width: 70px;
-            height: 70px;
-            background: #eaf2f8;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            font-size: 30px;
-            color: #3498db;
+        .grid-container {
+            max-width: 1200px; margin: 0 auto 80px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px; padding: 20px;
         }
 
-        .menu-card h3 {
-            margin: 10px 0 5px;
-            font-size: 1.2rem;
-            color: #2c3e50;
+        /* --- [카드 디자인] --- */
+        .tool-card {
+            background: #ffffff;
+            border-radius: 25px;
+            padding: 35px 30px;
+            text-align: left;
+            border: 2px solid #f0ebeb;
+            box-shadow: 0 8px 20px rgba(200, 200, 200, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex; flex-direction: column; justify-content: space-between;
+            height: 220px;
         }
 
-        .menu-card p {
+        .tool-card:hover {
+            transform: translateY(-8px);
+            border-color: #ffe0e0;
+            box-shadow: 0 15px 30px rgba(255, 183, 178, 0.2);
+        }
+
+        .icon-circle {
+            width: 55px; height: 55px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin-bottom: 20px;
+        }
+
+        /* 테마별 색상 */
+        .marker-theme .icon-circle { background-color: #f0f4ff; color: #a2c2ff; }
+        .splitter-theme .icon-circle { background-color: #f0fff4; color: #95e1d3; }
+        .analysis-theme .icon-circle { background-color: #f5f3ff; color: #c7ceea; }
+        .interview-theme .icon-circle { background-color: #fff3e0; color: #ffab91; } /* 면접용 신규 */
+
+        .tool-card h3 { margin: 0 0 10px 0; font-size: 1.35rem; color: #333; font-weight: bold; }
+        .tool-card p { margin: 0; color: #666; font-size: 0.95rem; line-height: 1.55; word-break: keep-all; }
+        
+        .launch-btn {
+            margin-top: 20px;
+            align-self: flex-start;
+            padding: 8px 18px;
+            border-radius: 15px;
+            font-weight: 600;
             font-size: 0.9rem;
-            color: #95a5a6;
-            margin: 0;
+            text-decoration: none;
+            display: flex; align-items: center; gap: 6px;
+            transition: 0.2s;
         }
 
-        /* 면접 리포트 카드 색상 포인트 */
-        .card-interview .icon-box {
-            background: #fdebd0;
-            color: #e67e22;
-        }
-        .card-interview:hover {
-            border-color: #e67e22;
+        .marker-theme .launch-btn { background: #f0f4ff; color: #8cb6ff; }
+        .splitter-theme .launch-btn { background: #f0fff4; color: #71d8c4; }
+        .analysis-theme .launch-btn { background: #f5f3ff; color: #a59ad1; }
+        .interview-theme .launch-btn { background: #fff3e0; color: #ff8a65; } /* 면접용 신규 */
+
+        .tool-card:hover .launch-btn { font-weight: bold; opacity: 0.8; }
+
+        @media (max-width: 600px) {
+            .navbar { padding: 0 15px; height: 60px; }
+            .logo span { font-size: 1.1rem; }
+            .nav-item span { display: none; }
+            .nav-item { padding: 8px 10px; }
+            .grid-container { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <h1>속기 교육 도구 모음</h1>
-            <p>학생 관리를 위한 프로그램 바로가기</p>
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <i class="fa-solid fa-cloud"></i> <span> 왜 일은 한번에 몰려오는 걸까요? 🌸 </span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>홈</span></a>
+            <a href="marker.html" class="nav-item"><i class="fa-solid fa-highlighter"></i><span>약어표시</span></a>
+            <a href="splitter.html" class="nav-item"><i class="fa-solid fa-align-left"></i><span>분할</span></a>
+            <a href="money.html" class="nav-item"><i class="fa-solid fa-chart-line"></i><span>매출분석</span></a>
+            <a href="면접.html" class="nav-item"><i class="fa-solid fa-file-invoice"></i><span>면접기출</span></a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>오늘도 퇴근마렵쥬?🌸</h1>
+    </div>
+
+    <div class="grid-container">
+        
+        <div class="tool-card marker-theme" onclick="location.href='marker.html'" style="cursor: pointer;">
+            <div>
+                <div class="icon-circle"><i class="fa-solid fa-highlighter"></i></div>
+                <h3>약어 자동 표시</h3>
+                <p>약어 엑셀 파일을 넣으면 빈출 단어를 쏙쏙 골라 형광펜을 칠해드려요.</p>
+            </div>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
         </div>
 
-        <div class="menu-grid">
-            
-            <a href="면접.html" class="menu-card card-interview">
-                <div class="icon-box">
-                    <i class="fas fa-file-invoice"></i>
-                </div>
+        <div class="tool-card splitter-theme" onclick="location.href='splitter.html'" style="cursor: pointer;">
+            <div>
+                <div class="icon-circle"><i class="fa-solid fa-align-left"></i></div>
+                <h3>단락 나누기</h3>
+                <p>긴 글을 보기 좋게 자르고 줄바꿈을 정리해서 읽기 편하게 만들어드려요.</p>
+            </div>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
+        </div>
+
+        <div class="tool-card analysis-theme" onclick="location.href='money.html'" style="cursor: pointer;">
+            <div>
+                <div class="icon-circle"><i class="fa-solid fa-chart-line"></i></div>
+                <h3>매출 분석</h3>
+                <p>엑셀 파일을 업로드하여 월별 매출 추이와 수강생 현황을 한눈에 확인하세요.</p>
+            </div>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
+        </div>
+
+        <div class="tool-card interview-theme" onclick="location.href='면접.html'" style="cursor: pointer;">
+            <div>
+                <div class="icon-circle"><i class="fa-solid fa-file-invoice"></i></div>
                 <h3>면접 기출 리포트</h3>
-                <p>면접 질문 조회 및 PDF 출력</p>
-            </a>
-
-            <a href="#" class="menu-card">
-                <div class="icon-box">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <h3>채점 프로그램</h3>
-                <p>준비 중입니다</p>
-            </a>
-
-            <a href="#" class="menu-card">
-                <div class="icon-box">
-                    <i class="fas fa-keyboard"></i>
-                </div>
-                <h3>타자 연습</h3>
-                <p>준비 중입니다</p>
-            </a>
-
+                <p>전국 기관별 면접 질문을 조회하고 깔끔한 PDF 자료집으로 만들어드려요.</p>
+            </div>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
         </div>
+
     </div>
 
 </body>
