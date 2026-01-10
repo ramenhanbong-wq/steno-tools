@@ -11,7 +11,7 @@
         .container { max-width: 1200px; margin: 0 auto; display: flex; gap: 20px; align-items: flex-start; }
         .viewer-section { flex: 2; background: #525659; padding: 20px; border-radius: 8px; overflow-y: auto; max-height: 90vh; }
         
-        /* --- A4 PDF 영역 스타일 --- */
+        /* PDF A4 용지 영역 */
         #pdf-content {
             background: white;
             width: 210mm;
@@ -24,25 +24,44 @@
             flex-direction: column;
         }
 
-        /* --- 헤더/푸터 이미지 영역 --- */
-        .pdf-brand-header, .pdf-brand-footer {
-            background-color: #000;
-            text-align: center;
-            padding: 15px 0;
-            width: 100%;
-            display: block; 
+        /* --- [수정됨] 헤더/푸터 로고 스타일 --- */
+        .pdf-brand-header {
+            /* 배경색 제거, 왼쪽 정렬, 본문 라인에 맞춘 패딩 설정 */
+            background: none;
+            padding: 20px 20mm 0; /* 상단 20px, 좌우 20mm */
+            display: flex;
+            justify-content: flex-start; /* 왼쪽 정렬 */
         }
-        .pdf-brand-header img, .pdf-brand-footer img {
-            max-width: 90%;
+
+        .pdf-brand-header img {
+            /* 로고 크기 제한 (너무 크지 않게) */
+            width: auto;
+            max-width: 180px; /* 적당한 크기로 조절 */
             height: auto;
             display: block;
-            margin: 0 auto;
+        }
+
+        .pdf-brand-footer {
+            /* 배경색 제거, 오른쪽 정렬, 하단 패딩 설정 */
+            background: none;
+            padding: 0 20mm 20px; /* 좌우 20mm, 하단 20px */
+            display: flex;
+            justify-content: flex-end; /* 오른쪽 정렬 */
+            align-items: flex-end;
+        }
+
+        .pdf-brand-footer img {
+            /* 푸터 캐릭터 크기 조절 */
+            width: auto;
+            max-width: 100px; /* 캐릭터는 조금 더 작게 */
+            height: auto;
+            display: block;
         }
         
-        /* --- 본문 컨텐츠 영역 --- */
+        /* 본문 영역 스타일 */
         .report-body-container {
             flex: 1;
-            padding: 20mm;
+            padding: 10mm 20mm; /* 헤더/푸터와 간격 조절 */
         }
         
         .report-header { text-align: center; border-bottom: 2px solid #2c3e50; padding-bottom: 20px; margin-bottom: 30px; }
@@ -57,11 +76,11 @@
         .q-text { font-size: 11pt; font-weight: 600; line-height: 1.5; color: #333; }
         .q-note { font-size: 9pt; color: #666; margin-top: 4px; background: #fffbe6; padding: 5px 10px; border-radius: 4px; display: inline-block; }
 
-        /* 컨트롤 패널 스타일 */
+        /* 컨트롤 패널 */
         .control-section { flex: 1; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: sticky; top: 20px; }
         h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; color: #333; }
         label { font-weight: bold; display: block; margin-top: 10px; font-size: 0.9rem; }
-        input, textarea, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; } /* box-sizing 추가 */
+        input, textarea, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
         textarea { resize: vertical; height: 80px; }
         .btn-group { display: flex; gap: 5px; margin-top: 10px; }
         button { padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; width: 100%; }
@@ -78,7 +97,7 @@
         <div id="pdf-content">
             
             <div class="pdf-brand-header">
-                <img src="sorizava_header_logo.png" alt="SORIZAVA ACADEMY Header">
+                <img src="https://raw.githubusercontent.com/ramenhanbong-wq/steno-tools/main/sorizava_header_logo.png" alt="헤더 로고" id="headerImg">
             </div>
 
             <div class="report-body-container">
@@ -92,7 +111,7 @@
             </div>
 
             <div class="pdf-brand-footer">
-                <img src="sorizava_footer_char.png" alt="SORIZAVA ACADEMY Footer">
+                <img src="https://raw.githubusercontent.com/ramenhanbong-wq/steno-tools/main/sorizava_footer_char.png" alt="푸터 캐릭터" id="footerImg">
             </div>
 
         </div>
@@ -122,7 +141,6 @@
 </div>
 
 <script>
-    // ⚠️ 배포된 Google Apps Script URL
     const API_URL = "https://script.google.com/macros/s/AKfycbw08-tGoRXWSxRGdiT1UaoiEqtqhg7dWKynSBtkhH8gWD-sRNy4KSA5FT7GFbnjAtRU/exec"; 
 
     let allData = [];
@@ -137,8 +155,6 @@
         try {
             const response = await fetch(API_URL);
             allData = await response.json();
-            
-            // 날짜 내림차순 정렬
             allData.sort((a, b) => {
                 if (a['기관명'] < b['기관명']) return -1;
                 if (a['기관명'] > b['기관명']) return 1;
@@ -147,7 +163,7 @@
             renderReport(allData);
         } catch (error) {
             console.error(error);
-            alert("데이터 로드 중 오류가 발생했습니다. 인터넷 연결을 확인해주세요.");
+            alert("데이터 로드 중 오류가 발생했습니다.");
         }
     }
 
@@ -182,21 +198,13 @@
     }
 
     function searchData() {
-        // 검색어 안전하게 가져오기
-        const searchInput = document.getElementById('searchInput');
-        const keyword = searchInput.value.toLowerCase().trim();
-        
-        if(!allData || allData.length === 0) {
-            alert("데이터가 로딩되지 않았습니다.");
-            return;
-        }
-
+        const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+        if(!allData || allData.length === 0) return;
         const filtered = allData.filter(item => {
             const org = item['기관명'] ? String(item['기관명']).toLowerCase() : "";
             const q = item['면접질문'] ? String(item['면접질문']).toLowerCase() : "";
             return org.includes(keyword) || q.includes(keyword);
         });
-        
         renderReport(filtered);
     }
 
@@ -210,9 +218,9 @@
         const qVal = document.getElementById('inQ').value;
 
         if(!dateVal || !orgVal || !qVal) {
-            alert("날짜, 기관명, 질문은 필수 입력입니다.");
-            btn.textContent = "자료 저장하기";
+            alert("필수 항목을 입력해주세요.");
             btn.disabled = false;
+            btn.textContent = "자료 저장하기";
             return;
         }
 
@@ -223,21 +231,15 @@
             note: document.getElementById('inNote').value
         };
 
-        // POST 요청 전송 시 no-cors 모드 고려 (Apps Script 설정에 따라 다를 수 있음)
-        // 현재 코드는 표준적인 fetch 방식입니다.
-        fetch(API_URL, { 
-            method: 'POST', 
-            body: JSON.stringify(newData)
-        })
+        fetch(API_URL, { method: 'POST', body: JSON.stringify(newData) })
         .then(() => {
             alert("✅ 저장되었습니다.");
             document.getElementById('inQ').value = "";
             document.getElementById('inNote').value = "";
-            loadData(); // 저장 후 목록 새로고침
+            loadData();
         })
         .catch(err => {
-            console.error(err);
-            alert("저장에 실패했습니다. (Google Sheet 권한 등을 확인하세요)");
+            alert("저장 실패: " + err);
         })
         .finally(() => { 
             btn.textContent = "자료 저장하기"; 
@@ -248,8 +250,9 @@
     function downloadPDF() {
         const element = document.getElementById('pdf-content');
         const keyword = document.getElementById('searchInput').value || "전체";
+        
         const opt = {
-            margin: 0,
+            margin: 0, 
             filename: `${keyword}_면접자료집.pdf`,
             image: { type: 'jpeg', quality: 1 },
             html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
