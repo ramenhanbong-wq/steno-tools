@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>면접 기출 리포트</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        /* 기본 웹 스타일 */
+        body { font-family: 'Pretendard', 'Noto Sans KR', sans-serif; background: #f4f6f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; display: flex; gap: 20px; align-items: flex-start; }
+        .viewer-section { flex: 2; background: #525659; padding: 20px; border-radius: 8px; overflow-y: auto; max-height: 90vh; }
+        
+        /* --- A4 PDF 영역 스타일 --- */
+        #pdf-content {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 0; 
+            box-sizing: border-box;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- 헤더/푸터 이미지 영역 --- */
+        .pdf-brand-header, .pdf-brand-footer {
+            background-color: #000;
+            text-align: center;
+            padding: 15px 0;
+            width: 100%;
+            display: block; 
+        }
+        .pdf-brand-header img, .pdf-brand-footer img {
+            max-width: 90%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        /* --- 본문 컨텐츠 영역 --- */
+        .report-body-container {
+            flex: 1;
+            padding: 20mm;
+        }
+        
+        .report-header { text-align: center; border-bottom: 2px solid #2c3e50; padding-bottom: 20px; margin-bottom: 30px; }
+        .report-title { font-size: 24pt; font-weight: bold; color: #2c3e50; margin: 0; }
+        .report-date { font-size: 10pt; color: #7f8c8d; margin-top: 10px; }
+        .org-section { margin-bottom: 30px; page-break-inside: avoid; }
+        .org-title { font-size: 16pt; font-weight: bold; color: #1a5276; border-left: 5px solid #1a5276; padding-left: 10px; margin-bottom: 15px; background: #eaf2f8; padding-top:5px; padding-bottom: 5px; }
+        .date-block { margin-left: 15px; margin-bottom: 20px; border-left: 2px solid #ddd; padding-left: 15px; }
+        .date-label { font-size: 11pt; font-weight: bold; color: #555; margin-bottom: 10px; display: inline-block; background: #f8f9fa; padding: 2px 8px; border-radius: 4px; }
+        .q-list { list-style: none; padding: 0; margin: 0; }
+        .q-item { margin-bottom: 12px; }
+        .q-text { font-size: 11pt; font-weight: 600; line-height: 1.5; color: #333; }
+        .q-note { font-size: 9pt; color: #666; margin-top: 4px; background: #fffbe6; padding: 5px 10px; border-radius: 4px; display: inline-block; }
+
+        /* 컨트롤 패널 스타일 */
+        .control-section { flex: 1; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: sticky; top: 20px; }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; color: #333; }
+        label { font-weight: bold; display: block; margin-top: 10px; font-size: 0.9rem; }
+        input, textarea, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; } /* box-sizing 추가 */
+        textarea { resize: vertical; height: 80px; }
+        .btn-group { display: flex; gap: 5px; margin-top: 10px; }
+        button { padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; width: 100%; }
+        .btn-search { background: #3498db; color: white; flex: 1; }
+        .btn-save { background: #2c3e50; color: white; margin-top: 15px; }
+        .btn-pdf { background: #e74c3c; color: white; margin-top: 20px; font-size: 1.1rem; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        button:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="viewer-section">
+        <div id="pdf-content">
+            
+            <div class="pdf-brand-header">
+                <img src="sorizava_header_logo.png" alt="SORIZAVA ACADEMY Header">
+            </div>
+
+            <div class="report-body-container">
+                <div class="report-header">
+                    <h1 class="report-title">면접 기출 자료집</h1>
+                    <div class="report-date" id="printDate"></div>
+                </div>
+                <div id="reportBody">
+                    <p style="text-align:center; color:#999; padding-top:100px;">데이터를 불러오는 중입니다...</p>
+                </div>
+            </div>
+
+            <div class="pdf-brand-footer">
+                <img src="sorizava_footer_char.png" alt="SORIZAVA ACADEMY Footer">
+            </div>
+
+        </div>
+    </div>
+
+    <div class="control-section">
+        <h2>🔍 검색 및 필터</h2>
+        <input type="text" id="searchInput" placeholder="기관명 또는 질문 내용 검색" onkeyup="if(window.event.keyCode==13){searchData()}">
+        <div class="btn-group">
+            <button class="btn-search" onclick="searchData()">검색 적용</button>
+        </div>
+        <button class="btn-pdf" onclick="downloadPDF()">📄 PDF로 내려받기</button>
+        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+        <h2>📝 데이터 추가</h2>
+        <form id="uploadForm">
+            <label>면접 날짜</label>
+            <input type="date" id="inDate" required>
+            <label>기관명</label>
+            <input type="text" id="inOrg" placeholder="예: 한국전력공사" required>
+            <label>면접 질문</label>
+            <textarea id="inQ" placeholder="질문 내용을 입력하세요" required></textarea>
+            <label>비고 (답변 포인트 등)</label>
+            <input type="text" id="inNote" placeholder="짧은 메모">
+            <button type="button" class="btn-save" onclick="submitData()">자료 저장하기</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // ⚠️ 배포된 Google Apps Script URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbw08-tGoRXWSxRGdiT1UaoiEqtqhg7dWKynSBtkhH8gWD-sRNy4KSA5FT7GFbnjAtRU/exec"; 
+
+    let allData = [];
+
+    window.onload = function() {
+        document.getElementById('inDate').valueAsDate = new Date();
+        document.getElementById('printDate').innerText = "생성일: " + new Date().toLocaleDateString();
+        loadData();
+    };
+
+    async function loadData() {
+        try {
+            const response = await fetch(API_URL);
+            allData = await response.json();
+            
+            // 날짜 내림차순 정렬
+            allData.sort((a, b) => {
+                if (a['기관명'] < b['기관명']) return -1;
+                if (a['기관명'] > b['기관명']) return 1;
+                return new Date(b['날짜']) - new Date(a['날짜']);
+            });
+            renderReport(allData);
+        } catch (error) {
+            console.error(error);
+            alert("데이터 로드 중 오류가 발생했습니다. 인터넷 연결을 확인해주세요.");
+        }
+    }
+
+    function renderReport(data) {
+        const container = document.getElementById('reportBody');
+        if (!data || data.length === 0) {
+            container.innerHTML = "<p style='text-align:center; padding-top:50px;'>표시할 데이터가 없습니다.</p>";
+            return;
+        }
+        const grouped = {};
+        data.forEach(item => {
+            const org = item['기관명'] || '기타 기관';
+            let date = item['날짜'] ? String(item['날짜']).substring(0, 10) : '날짜 미상';
+            if (!grouped[org]) grouped[org] = {};
+            if (!grouped[org][date]) grouped[org][date] = [];
+            grouped[org][date].push(item);
+        });
+
+        let html = "";
+        for (const [org, dates] of Object.entries(grouped)) {
+            html += `<div class="org-section"><div class="org-title">${org}</div>`;
+            for (const [date, items] of Object.entries(dates)) {
+                html += `<div class="date-block"><div class="date-label">📅 ${date}</div><ul class="q-list">`;
+                items.forEach(q => {
+                    html += `<li class="q-item"><div class="q-text">Q. ${q['면접질문']}</div>${q['비고'] ? `<div class="q-note">💡 ${q['비고']}</div>` : ''}</li>`;
+                });
+                html += `</ul></div>`;
+            }
+            html += `</div>`;
+        }
+        container.innerHTML = html;
+    }
+
+    function searchData() {
+        // 검색어 안전하게 가져오기
+        const searchInput = document.getElementById('searchInput');
+        const keyword = searchInput.value.toLowerCase().trim();
+        
+        if(!allData || allData.length === 0) {
+            alert("데이터가 로딩되지 않았습니다.");
+            return;
+        }
+
+        const filtered = allData.filter(item => {
+            const org = item['기관명'] ? String(item['기관명']).toLowerCase() : "";
+            const q = item['면접질문'] ? String(item['면접질문']).toLowerCase() : "";
+            return org.includes(keyword) || q.includes(keyword);
+        });
+        
+        renderReport(filtered);
+    }
+
+    function submitData() {
+        const btn = document.querySelector('.btn-save');
+        btn.textContent = "저장 중...";
+        btn.disabled = true;
+
+        const dateVal = document.getElementById('inDate').value;
+        const orgVal = document.getElementById('inOrg').value;
+        const qVal = document.getElementById('inQ').value;
+
+        if(!dateVal || !orgVal || !qVal) {
+            alert("날짜, 기관명, 질문은 필수 입력입니다.");
+            btn.textContent = "자료 저장하기";
+            btn.disabled = false;
+            return;
+        }
+
+        const newData = {
+            date: dateVal,
+            org: orgVal,
+            question: qVal,
+            note: document.getElementById('inNote').value
+        };
+
+        // POST 요청 전송 시 no-cors 모드 고려 (Apps Script 설정에 따라 다를 수 있음)
+        // 현재 코드는 표준적인 fetch 방식입니다.
+        fetch(API_URL, { 
+            method: 'POST', 
+            body: JSON.stringify(newData)
+        })
+        .then(() => {
+            alert("✅ 저장되었습니다.");
+            document.getElementById('inQ').value = "";
+            document.getElementById('inNote').value = "";
+            loadData(); // 저장 후 목록 새로고침
+        })
+        .catch(err => {
+            console.error(err);
+            alert("저장에 실패했습니다. (Google Sheet 권한 등을 확인하세요)");
+        })
+        .finally(() => { 
+            btn.textContent = "자료 저장하기"; 
+            btn.disabled = false; 
+        });
+    }
+
+    function downloadPDF() {
+        const element = document.getElementById('pdf-content');
+        const keyword = document.getElementById('searchInput').value || "전체";
+        const opt = {
+            margin: 0,
+            filename: `${keyword}_면접자료집.pdf`,
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+</script>
+
+</body>
+</html>
