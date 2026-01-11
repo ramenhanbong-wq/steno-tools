@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>아카데미 성과 분석 프로(Pro) - 통합 완성판</title>
+    <title>아카데미 성과 분석 프로(Pro) - 통합 완성판 (+키보드 연령 패치)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -251,7 +251,7 @@
 <div class="container">
     <div class="header-box">
         <h1>🌸 아카데미 성과 분석 프로</h1>
-        <p style="color:#888; margin-top:5px;">매출 / PT / 무료 체험자 전환율 자동 분석</p>
+        <p style="color:#888; margin-top:5px;">매출 / PT / 무료 체험 / <span style="color:#ff6f91; font-weight:bold;">키보드 구매자</span> 통합 분석</p>
     </div>
 
     <div class="goal-wrapper">
@@ -333,6 +333,60 @@
                 <div class="kpi-label">전체 환불 (매출 취소)</div>
                 <div class="kpi-amount" id="kpiCancelCnt" style="font-size:1.8rem;">0건</div>
                 <div style="font-size:12px; color:#ff6f91; margin-top:5px;">* 수강 시작 전 취소 건수</div>
+            </div>
+        </div>
+
+        <div id="keyboardSection" style="display:none;">
+            <div class="section-title">⌨️ 키보드 구매자 심층 분석</div>
+            <div class="analysis-grid">
+                <div class="conversion-card" style="grid-column: span 2;">
+                    <div class="conversion-stats">
+                        <div class="conv-stat-box">
+                            <div class="conv-label">총 키보드 구매자</div>
+                            <div class="conv-val" id="kbTotal">0명</div>
+                        </div>
+                        <div class="conv-stat-box">
+                            <div class="conv-label">수강생 전환 성공</div>
+                            <div class="conv-val" id="kbSuccess" style="color:#ff6f91;">0명</div>
+                        </div>
+                        <div class="conv-stat-box">
+                            <div class="conv-label">전환율</div>
+                            <div class="conv-val conv-rate" id="kbRate" style="color:#ff6f91;">0%</div>
+                        </div>
+                         <div class="conv-stat-box">
+                            <div class="conv-label">평균 수강 등록 소요시간</div>
+                            <div class="conv-val" id="kbAvgDays" style="color:#666; font-size:1.4rem;">0일</div>
+                            <div style="font-size:0.8rem; color:#aaa;">(구매 후 첫 결제까지)</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center; margin-top:20px;">
+                        <div style="flex:1; min-width:300px; text-align:center;">
+                            <h4 style="color:#666;">⏳ 구매 후 수강 신청까지 걸린 시간</h4>
+                             <div style="height:250px;"><canvas id="chartKbTime"></canvas></div>
+                        </div>
+                        <div style="flex:1; min-width:300px; text-align:center;">
+                            <h4 style="color:#666;">🎓 첫 수강 신청 과목 선호도</h4>
+                             <div style="height:250px;"><canvas id="chartKbClass"></canvas></div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top:30px;">
+                        <h4 style="color:#666;">🎂 연령대별 수강 전환 분포</h4>
+                        <div style="height:250px;"><canvas id="chartKbAge"></canvas></div>
+                        <p style="text-align:center; color:#999; font-size:0.8rem; margin-top:5px;">* 엑셀에 생년 정보(예: 1990, 90 등)가 있는 경우에만 표시됩니다.</p>
+                    </div>
+
+                    <div style="margin-top:30px;">
+                        <h3 style="margin-top:0; color:#444;">🎉 키보드 구매 -> 수강생 전환 명단</h3>
+                        <div style="overflow-y: auto; max-height: 300px; border:1px solid #eee; border-radius:10px; padding:10px;">
+                            <table id="tableKbConversion">
+                                <thead><tr><th>이름</th><th>구매일</th><th>첫 수강일</th><th>소요기간</th><th>첫 과목</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -508,6 +562,7 @@
     // 전역 변수
     let db = [], filteredDb = [], monthList = new Set();
     let freeUserDb = []; // 무료 사용자 명단 저장
+    let keyboardDb = []; // [신규] 키보드 구매자 명단 저장
     let churnList = [], newList = [];
     let currentKpi = { amt:0, cnt:0 };
 
@@ -516,7 +571,8 @@
     function resetData() {
         if(confirm('모든 데이터를 초기화하시겠습니까?')) {
             db = [];
-            freeUserDb = []; // 초기화
+            freeUserDb = []; 
+            keyboardDb = []; // 초기화
             monthList.clear();
             document.getElementById('fileInput').value = '';
             document.getElementById('dashboard').style.display = 'none';
@@ -536,10 +592,9 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
                     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                    // 헤더 감지를 위해 raw 데이터 가져오기
                     const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
                     
-                    processData(rows); // 여기서 파일 종류 자동 감지
+                    processData(rows); // 파일 종류 자동 감지
                     
                     loadedCount++;
                     if(loadedCount === files.length) {
@@ -555,7 +610,10 @@
         populateFilter();
         updateDashboard();
         analyzeLTV();
-        alert(`데이터 로드 완료! (매출: ${db.length}건, 무료체험: ${freeUserDb.length}명)`);
+        
+        let msg = `데이터 로드 완료!\n- 매출 내역: ${db.length}건\n- 무료체험: ${freeUserDb.length}명`;
+        if(keyboardDb.length > 0) msg += `\n- 키보드 구매자: ${keyboardDb.length}명`;
+        alert(msg);
     }
 
     function processData(rows) {
@@ -564,20 +622,23 @@
         let isGeneralSales = false;
         let isPTSales = false;
         let isFreeUsers = false;
+        let isKeyboard = false; // [신규] 키보드 파일 판별
         
-        // 상위 5줄을 스캔하여 파일 종류를 자동으로 감지합니다.
+        // 파일 종류 자동 감지 로직
         for(let i = 0; i < Math.min(rows.length, 5); i++) {
             let rowStr = rows[i].map(x => String(x || '')).join(' ');
 
             if (rowStr.includes('신청정보') && rowStr.includes('선택정보')) {
-                isGeneralSales = true;
-                break;
-            } else if ((rowStr.includes('주문번호') || rowStr.includes('학생명')) && !rowStr.includes('수업 여부')) {
-                isPTSales = true;
-                break;
+                isGeneralSales = true; break;
+            } else if ((rowStr.includes('주문번호') || rowStr.includes('학생명')) && !rowStr.includes('수업 여부') && !rowStr.includes('키보드')) {
+                // PT 파일과 키보드 파일 구분이 필요할 수 있음. 키보드는 '수강' 관련 단어가 보통 없음.
+                // 여기서는 PT 파일 형식을 명확히 따름.
+                isPTSales = true; break;
             } else if (rowStr.includes('수업 여부') || rowStr.includes('쿠폰 만료일')) {
-                isFreeUsers = true;
-                break;
+                isFreeUsers = true; break;
+            } else if (rowStr.includes('주문일') || rowStr.includes('구매일') || rowStr.includes('송장번호')) {
+                 // 키보드 파일 감지 (상품명 등의 컬럼이 있을 것으로 추정)
+                 isKeyboard = true; break;
             }
         }
 
@@ -587,12 +648,49 @@
             parsePTSales(rows);
         } else if (isFreeUsers) {
             parseFreeUsers(rows);
+        } else if (isKeyboard) {
+            parseKeyboardUsers(rows); // [신규]
+        }
+    }
+
+    // [신규] D. 키보드 구매자 파싱 함수
+    function parseKeyboardUsers(rows) {
+        // 헤더 인덱스 찾기
+        let headerIdx = rows.findIndex(r => r.some(c => String(c).includes('이름') || String(c).includes('구매자')));
+        if(headerIdx === -1) return;
+
+        const headers = rows[headerIdx].map(x => String(x).trim());
+        const colIdx = {
+            name: headers.findIndex(h => h.includes('이름') || h.includes('구매자') || h.includes('주문자')),
+            phone: headers.findIndex(h => h.includes('연락처') || h.includes('전화') || h.includes('핸드폰')),
+            date: headers.findIndex(h => h.includes('주문일') || h.includes('구매일')),
+            birth: headers.findIndex(h => h.includes('생년') || h.includes('주민') || h.includes('생일')) // 수정됨
+        };
+
+        if(colIdx.name === -1 || colIdx.phone === -1) return;
+
+        for(let i = headerIdx + 1; i < rows.length; i++) {
+            let row = rows[i];
+            if(!row || !row[colIdx.name]) continue;
+
+            let name = String(row[colIdx.name]).trim();
+            let phone = cleanPhone(String(row[colIdx.phone]));
+            let dateObj = parseDate(row[colIdx.date]);
+            let birth = (colIdx.birth !== -1) ? String(row[colIdx.birth]).trim() : '';
+
+            if(name && phone && dateObj) {
+                keyboardDb.push({ 
+                    name: name, 
+                    phone: phone, 
+                    date: dateObj, // Date 객체로 저장
+                    birth: birth 
+                });
+            }
         }
     }
 
     // C. 무료 사용자 파싱
     function parseFreeUsers(rows) {
-        // 헤더 인덱스 찾기
         let headerIdx = rows.findIndex(r => r.some(c => String(c).includes('성명') || String(c).includes('이름')));
         if(headerIdx === -1) return;
 
@@ -607,10 +705,8 @@
         for(let i = headerIdx + 1; i < rows.length; i++) {
             let row = rows[i];
             if(!row || !row[colIdx.name]) continue;
-
             let name = String(row[colIdx.name]).trim();
             let phone = String(row[colIdx.phone]).trim();
-
             if(name && phone) {
                 freeUserDb.push({ name: name, phone: cleanPhone(phone) });
             }
@@ -638,7 +734,7 @@
                 if (!monthKey) { i++; continue; }
 
                 let item = {
-                    date: dateStr, month: monthKey, name: row[3], phone: '',
+                    date: dateStr, dateObj: dateObj, month: monthKey, name: row[3], phone: '',
                     product: '', price: price, status: status, option: '',
                     type: '', classInfo: '', dayInfo: '', timeInfo: '', 
                     isPartial: false, isFullCancel: false
@@ -696,7 +792,7 @@
             if(!monthKey) continue;
 
             let item = {
-                date: dateStr, month: monthKey, 
+                date: dateStr, dateObj: dateObj, month: monthKey, 
                 name: String(row[colIdx.name]).trim(), 
                 phone: cleanPhone(String(row[colIdx.phone])),
                 product: String(row[colIdx.product]).trim(), 
@@ -820,24 +916,160 @@
         analyze(filteredDb, mon);
         calculateGoal();
         
-        if(freeUserDb.length > 0) {
-            analyzeConversion();
+        if(freeUserDb.length > 0) analyzeConversion();
+        if(keyboardDb.length > 0) {
+            document.getElementById('keyboardSection').style.display = 'block';
+            analyzeKeyboardConversion(); // [신규] 키보드 분석 실행
+        } else {
+             document.getElementById('keyboardSection').style.display = 'none';
         }
     }
+
+    // [신규] 키보드 구매자 분석 로직
+    function analyzeKeyboardConversion() {
+        let totalKb = keyboardDb.length;
+        let converted = [];
+        let timeToConvert = []; // 소요 시간 (일)
+        let firstClassStats = {}; // 첫 수강 과목
+        let ageStats = {}; // 연령대
+        
+        // 결제 내역을 전화번호로 그룹화 (빠른 검색을 위해)
+        let payMap = {};
+        db.forEach(item => {
+            if(!item.isFullCancel && item.phone) {
+                if(!payMap[item.phone]) payMap[item.phone] = [];
+                payMap[item.phone].push(item);
+            }
+        });
+        
+        // 정렬: 결제 내역을 날짜순으로 정렬
+        Object.keys(payMap).forEach(key => {
+            payMap[key].sort((a,b) => a.dateObj - b.dateObj);
+        });
+
+        keyboardDb.forEach(kb => {
+            let userPays = payMap[kb.phone];
+            if(userPays && userPays.length > 0) {
+                // 구매일 이후 첫 결제 찾기
+                let firstPay = userPays.find(p => p.dateObj >= kb.date);
+                
+                if(firstPay) {
+                    let diffTime = Math.abs(firstPay.dateObj - kb.date);
+                    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                    
+                    converted.push({
+                        name: kb.name,
+                        buyDate: getDateStr(kb.date),
+                        firstClassDate: getDateStr(firstPay.dateObj),
+                        diffDays: diffDays,
+                        firstClass: firstPay.type + (firstPay.classInfo ? ` (${firstPay.classInfo})` : '')
+                    });
+
+                    timeToConvert.push(diffDays);
+                    
+                    // 첫 수강 과목 통계
+                    let cType = firstPay.type;
+                    if(cType.includes('PT')) cType = 'PT';
+                    else if(cType.includes('올패스')) cType = '올패스';
+                    else if(cType.includes('시험대비')) cType = '시험대비반';
+                    else cType = '정규 화상수업';
+                    
+                    firstClassStats[cType] = (firstClassStats[cType] || 0) + 1;
+
+                    // 연령대 통계 (생년월일이 있는 경우)
+                    if(kb.birth) {
+                        let bStr = String(kb.birth).trim().replace(/[^0-9]/g, ''); // 숫자만 추출
+                        let fullYear = 0;
+
+                        // 1. 4자리 (예: 1995)
+                        if(bStr.length === 4) {
+                            fullYear = parseInt(bStr);
+                        }
+                        // 2. 2자리 or 6자리 (예: 95, 950101) -> 앞 2자리로 판단
+                        else if(bStr.length >= 2) {
+                            let yPrefix = parseInt(bStr.substring(0,2));
+                            // 30 이상이면 1900년대, 아니면 2000년대 (학원 특성상 유연하게 적용)
+                            fullYear = (yPrefix > 30) ? 1900 + yPrefix : 2000 + yPrefix;
+                        }
+
+                        if(fullYear > 0) {
+                            let currentYear = new Date().getFullYear();
+                            let age = currentYear - fullYear + 1; // 한국나이 계산
+                            let ageGroup = Math.floor(age / 10) * 10 + '대';
+                            ageStats[ageGroup] = (ageStats[ageGroup] || 0) + 1;
+                        } else {
+                            ageStats['미확인'] = (ageStats['미확인'] || 0) + 1;
+                        }
+                    } else {
+                        ageStats['미확인'] = (ageStats['미확인'] || 0) + 1;
+                    }
+                }
+            }
+        });
+
+        // 1. KPI 카드 업데이트
+        document.getElementById('kbTotal').innerText = totalKb + "명";
+        document.getElementById('kbSuccess').innerText = converted.length + "명";
+        let rate = totalKb > 0 ? ((converted.length / totalKb) * 100).toFixed(1) : 0;
+        document.getElementById('kbRate').innerText = rate + "%";
+        
+        let avgDays = timeToConvert.length > 0 ? (timeToConvert.reduce((a,b)=>a+b,0) / timeToConvert.length).toFixed(0) : 0;
+        document.getElementById('kbAvgDays').innerText = avgDays + "일";
+
+        // 2. 차트: 소요 시간 분포
+        let timeDist = {'1주 이내':0, '1달 이내':0, '3달 이내':0, '3달 이후':0};
+        timeToConvert.forEach(d => {
+            if(d <= 7) timeDist['1주 이내']++;
+            else if(d <= 30) timeDist['1달 이내']++;
+            else if(d <= 90) timeDist['3달 이내']++;
+            else timeDist['3달 이후']++;
+        });
+        renderChart('chartKbTime', fromObjToArr(timeDist), '인원', false, ['#ffb7b2', '#ffdac1', '#e2f0cb', '#b5ead7']);
+
+        // 3. 차트: 첫 수강 과목
+        renderChart('chartKbClass', fromObjToArr(firstClassStats), '인원', false, ['#a2c2ff', '#95e1d3', '#ff9aa2', '#e0bbe4']);
+
+        // 4. 차트: 연령대 (미확인 제외하고 표시하거나 포함하거나 결정)
+        // 미확인이 너무 많으면 차트가 안 예쁘니, 데이터가 있는 경우만 그리기
+        let ageClean = {};
+        Object.keys(ageStats).forEach(k => { if(k !== '미확인') ageClean[k] = ageStats[k]; });
+        if(Object.keys(ageClean).length > 0) {
+             renderChart('chartKbAge', fromObjToArr(ageClean), '인원', true, ['#ffd700', '#ffb7b2', '#a2c2ff', '#95e1d3']);
+        } else {
+            // 데이터 없으면 빈 차트
+             renderChart('chartKbAge', [], '인원', false);
+        }
+
+        // 5. 테이블 명단
+        let tb = document.querySelector('#tableKbConversion tbody');
+        tb.innerHTML = '';
+        converted.forEach(u => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `<td>${u.name}</td><td>${u.buyDate}</td><td style="color:#ff6f91;font-weight:bold;">${u.firstClassDate}</td><td>${u.diffDays}일</td><td>${u.firstClass}</td>`;
+            tb.appendChild(tr);
+        });
+    }
+
+    // 객체를 차트용 배열로 변환하는 헬퍼
+    function fromObjToArr(obj) {
+        let res = {amt:0, cnt:0, list:[]}; // 더미 구조
+        // renderChart 함수가 기존 구조(obj[key].amt 등)를 쓰므로 이에 맞춰 변환하거나
+        // renderChart를 수정하지 않기 위해 데이터를 래핑함
+        let wrapper = {};
+        Object.keys(obj).forEach(k => {
+            wrapper[k] = { cnt: obj[k], amt: 0, list: [] };
+        });
+        return wrapper;
+    }
     
-    // [업그레이드] 상품별 상세 전환 분석 및 시각화
+    // 기존 분석 함수들 (그대로 유지)
     function analyzeConversion() {
         if (freeUserDb.length === 0) return;
 
         let convertedList = [];
         let detailStats = {
-            '올패스': 0,
-            '시대반(시험대비)': 0,
-            '퍼스널클래스(PT)': 0,
-            '화상수업(입문/중급)': 0,
-            '화상수업(고급)': 0,
-            '화상수업(심야)': 0,
-            '기타': 0
+            '올패스': 0, '시대반(시험대비)': 0, '퍼스널클래스(PT)': 0,
+            '화상수업(입문/중급)': 0, '화상수업(고급)': 0, '화상수업(심야)': 0, '기타': 0
         };
 
         let payHistory = {};
@@ -850,9 +1082,6 @@
 
         freeUserDb.forEach(freeUser => {
             if (freeUser.phone && payHistory[freeUser.phone]) {
-                // 유료 전환됨
-                
-                // 해당 유저가 구매한 상품 파악 (중복 제거)
                 let userCategories = new Set(); 
                 payHistory[freeUser.phone].forEach(payItem => {
                     let cat = '기타';
@@ -867,11 +1096,9 @@
                     userCategories.add(cat);
                 });
                 
-                // 리스트에 추가 (대표 상품 하나만 표시하기 위해 첫 번째 요소 사용)
                 let repProduct = Array.from(userCategories)[0] || '기타';
                 convertedList.push({ ...freeUser, repProduct: repProduct });
 
-                // 통계 집계
                 userCategories.forEach(c => {
                     if (detailStats[c] !== undefined) detailStats[c]++;
                     else detailStats['기타']++;
@@ -883,12 +1110,10 @@
         let convertedCount = convertedList.length;
         let rate = totalFree > 0 ? ((convertedCount / totalFree) * 100).toFixed(1) : 0;
 
-        // 2. UI 업데이트
         document.getElementById('convTotal').innerText = totalFree + '명';
         document.getElementById('convSuccess').innerText = convertedCount + '명';
         document.getElementById('convRate').innerText = rate + '%';
 
-        // 3. 차트 1: 전환 vs 미전환
         let ctx1 = document.getElementById('chartConversion').getContext('2d');
         if (Chart.getChart('chartConversion')) Chart.getChart('chartConversion').destroy();
         new Chart(ctx1, {
@@ -904,11 +1129,9 @@
             options: { responsive: true, maintainAspectRatio: false, cutout: '60%' }
         });
 
-        // 4. 차트 2: 상세 상품 비율 (신규 추가!)
         let ctx2 = document.getElementById('chartConversionDetail').getContext('2d');
         if (Chart.getChart('chartConversionDetail')) Chart.getChart('chartConversionDetail').destroy();
         
-        // 데이터 정제 (0인 항목 제외)
         let detailLabels = [];
         let detailData = [];
         Object.keys(detailStats).forEach(k => {
@@ -919,7 +1142,7 @@
         });
 
         new Chart(ctx2, {
-            type: 'pie', // 또는 'doughnut'
+            type: 'pie', 
             data: {
                 labels: detailLabels,
                 datasets: [{
@@ -937,7 +1160,6 @@
             }
         });
 
-        // 5. 명단 테이블 업데이트
         let tb = document.querySelector('#tableConversion tbody');
         tb.innerHTML = '';
         convertedList.forEach(u => {
@@ -1214,6 +1436,12 @@
             txt += `- 총 체험 인원: ${document.getElementById('convTotal').innerText}\n`;
             txt += `- 유료 전환: ${document.getElementById('convSuccess').innerText} (${document.getElementById('convRate').innerText})\n`;
         }
+        
+        if(keyboardDb.length > 0) {
+             txt += `\n5. 키보드 구매자 분석\n`;
+             txt += `- 구매자 중 수강전환: ${document.getElementById('kbRate').innerText}\n`;
+             txt += `- 평균 등록 소요: ${document.getElementById('kbAvgDays').innerText}\n`;
+        }
 
         document.getElementById('reportText').value = txt;
         document.getElementById('reportModal').style.display = 'flex';
@@ -1261,6 +1489,7 @@
     }
 
     function renderChart(id, obj, metric, isTimeSort=false, colors) {
+        // 기존 로직 대응: obj가 함수형태인 경우를 위해 keys 추출
         let keys = Object.keys(obj);
         if(isTimeSort) keys.sort((a,b) => parseInt(a) - parseInt(b));
         else keys.sort((a,b) => metric==='매출'?obj[b].amt-obj[a].amt : obj[b].cnt-obj[a].cnt);
@@ -1381,6 +1610,3 @@
 </script>
 </body>
 </html>
-
-
-
