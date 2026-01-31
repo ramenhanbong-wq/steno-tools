@@ -635,44 +635,59 @@
         badge.className = `badge ${Math.abs(len - target) <= 3 ? 'badge-len' : 'badge-warn'}`;
     }
 
-    function copyResult() {
-        const rows = Array.from(document.querySelectorAll('.card-row'));
-        const validRows = rows.filter(r => !r.classList.contains('overflow-row'));
-        if(validRows.length === 0) { alert("복사할 유효 데이터가 없습니다."); return; }
-        let fullText = "";
-        const totalValid = validRows.length;
-        validRows.forEach((row, idx) => {
-            const s1 = row.querySelector('.left-editor').value; 
-            const s2 = row.querySelector('.right-editor').value; 
-            const len = getPureLen(s2);
-            const reverseIdx = totalValid - 1 - idx; 
-            let suffix = "";
-            if (reverseIdx >= 0 && reverseIdx < 5) {
-                const symbol = CIRCLE_NUMS[4 - reverseIdx]; 
-                suffix = `\n${symbol}-${len}`;
-            }
-            fullText += s1 + suffix + "\n\n";
-        });
-        navigator.clipboard.writeText(fullText).then(() => {
-            alert("복사 완료! (마지막 5개 단락 꼬리표 포함)");
-        });
-    }
-
-    function copyFolderLink() {
-        const path = "\\\\192.168.0.63\\도깨비도깨비3\\◆◆2026년 제1회 시험대비반◆◆";
-        navigator.clipboard.writeText(path).then(() => {
-            alert("폴더 경로가 복사되었습니다! \n파일 탐색기 주소창에 붙여넣기(Ctrl+V) 하세요.\n\n" + path);
-        }).catch(err => {
-            prompt("복사가 차단되었습니다. 아래 경로를 직접 복사하세요:", path);
-        });
-    }
-
-    // 모달창 닫기 이벤트 바인딩
-    window.onclick = function(e) { if(e.target == document.getElementById('dictModal')) closeDictModal(); }
+   function copyResult() {
+    const rows = Array.from(document.querySelectorAll('.card-row'));
+    const totalLimit = parseInt(document.getElementById('totalLimit').value);
     
-    // 페이지 로드 시 단어장 로드
-    window.onload = loadDict;
+    let fullText = "";
+    let currentTotalLen = 0;
+    let validRows = [];
 
+    // 1. 실제로 totalLimit 내에 들어오는 '유효한' 행들만 먼저 선별합니다.
+    for (let row of rows) {
+        const s2 = row.querySelector('.right-editor').value;
+        const len = getPureLen(s2);
+        
+        // 이 단락을 더했을 때 전체 제한을 초과하는지 확인
+        if (currentTotalLen + len > totalLimit) {
+            break; // 제한을 넘으면 그 뒤 단락들은 쳐다보지도 않고 중단
+        }
+        
+        currentTotalLen += len;
+        validRows.push(row);
+    }
+
+    if (validRows.length === 0) {
+        alert("복사할 유효 데이터가 없습니다.");
+        return;
+    }
+
+    // 2. 선별된 validRows만 가지고 텍스트 조립
+    const totalValid = validRows.length;
+    validRows.forEach((row, idx) => {
+        const s1 = row.querySelector('.left-editor').value;
+        const s2 = row.querySelector('.right-editor').value;
+        const len = getPureLen(s2);
+        
+        // 뒤에서부터 5개 단락에 꼬리표(①~⑤) 붙이기
+        const reverseIdx = totalValid - 1 - idx;
+        let suffix = "";
+        if (reverseIdx >= 0 && reverseIdx < 5) {
+            const symbol = CIRCLE_NUMS[4 - reverseIdx];
+            suffix = `\n${symbol}-${len}`;
+        }
+        
+        fullText += s1 + suffix + "\n\n";
+    });
+
+    // 3. 클립보드 복사
+    navigator.clipboard.writeText(fullText.trim()).then(() => {
+        alert(`복사 완료! 총 ${totalValid}개 단락이 복사되었습니다.`);
+    }).catch(err => {
+        console.error("복사 실패:", err);
+    });
+}
 </script>
 </body>
 </html>
+
