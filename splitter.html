@@ -92,7 +92,6 @@
         .banner-text span { display: block; font-size: 0.75rem; color: #999; margin-bottom: 2px; }
         .banner-text strong { font-size: 1rem; color: #4a4a4a; }
 
-
         /* --- [컨트롤 패널] --- */
         .control-panel {
             background: white; border-radius: 20px; padding: 25px;
@@ -181,10 +180,6 @@
             font-size: 16px; line-height: 1.6; font-family: 'Pretendard';
             background: transparent; height: auto; overflow: hidden; flex-grow: 1;
         }
-        .right-editor:focus { background: #f0fffa; }
-
-        .overflow-row { opacity: 0.7; }
-        .overflow-row .text-card { border-style: dashed; background: #f5f5f5; }
 
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
         .modal-content { background: white; margin: 10% auto; padding: 30px; width: 400px; border-radius: 20px; }
@@ -323,25 +318,16 @@
 </div>
 
 <script>
-    /* ==================================================
-       [중요] 구글 Apps Script 배포 후 받은 URL을 아래에 입력하세요.
-       예: "https://script.google.com/macros/s/XXXXX/exec"
-       ================================================== */
     const GAS_URL = "https://script.google.com/macros/s/AKfycbytBaEXJF4UICVvqMd0WVaa1MplivbwbF0YJqQ_6Z7jx_fxyU5vD93egN858r6agoQ5/exec";
 
-    /* --- 기본 데이터 및 설정 --- */
     let myDict = JSON.parse(localStorage.getItem("stenoDict")) || { "OECD": "오이시디" };
     const alphabetMap = {'A':'에이','B':'비','C':'씨','D':'디','E':'이','F':'에프','G':'지','H':'에이치','I':'아이','J':'제이','K':'케이','L':'엘','M':'엠','N':'엔','O':'오','P':'피','Q':'큐','R':'알','S':'에스','T':'티','U':'유','V':'브이','W':'더블유','X':'엑스','Y':'와이','Z':'제트'};
     const digitMap = {'0':'영','1':'일','2':'이','3':'삼','4':'사','5':'오','6':'육','7':'칠','8':'팔','9':'구'};
     const CIRCLE_NUMS = ['①', '②', '③', '④', '⑤'];
 
-    /* --- [1] 구글 시트 연동 로직 --- */
-    
-    // 서버에서 단어장 불러오기
     async function loadDict() {
         try {
             if(!GAS_URL || GAS_URL.includes("여기에")) {
-                console.warn("GAS URL이 설정되지 않아 로컬 데이터만 사용합니다.");
                 renderDict();
                 return;
             }
@@ -349,17 +335,16 @@
             const data = await response.json();
             if (data && Object.keys(data).length > 0) {
                 myDict = data;
-                localStorage.setItem("stenoDict", JSON.stringify(myDict)); // 로컬 백업 업데이트
+                localStorage.setItem("stenoDict", JSON.stringify(myDict));
             }
         } catch (e) {
-            console.error("서버 데이터 로드 실패(오프라인 등). 로컬 데이터를 사용합니다.", e);
+            console.error("서버 데이터 로드 실패", e);
         }
         renderDict();
     }
 
-    // 서버에 단어장 저장하기
     async function saveDict() {
-        localStorage.setItem("stenoDict", JSON.stringify(myDict)); // 로컬 우선 저장
+        localStorage.setItem("stenoDict", JSON.stringify(myDict));
         try {
             if(GAS_URL && !GAS_URL.includes("여기에")) {
                 await fetch(GAS_URL, {
@@ -372,8 +357,6 @@
         }
     }
 
-    /* --- [2] 단어장 조작 로직 --- */
-    
     async function addWord() {
         const k = document.getElementById('newKey').value.trim();
         const v = document.getElementById('newVal').value.trim();
@@ -382,7 +365,7 @@
             renderDict();
             document.getElementById('newKey').value = "";
             document.getElementById('newVal').value = "";
-            await saveDict(); // 비동기 저장
+            await saveDict();
         }
     }
 
@@ -390,17 +373,14 @@
         if(!confirm(`'${key}' 항목을 삭제하시겠습니까?`)) return;
         delete myDict[key];
         renderDict();
-        await saveDict(); // 비동기 저장
+        await saveDict();
     }
 
     function renderDict() {
         const list = document.getElementById('dictList');
         if(!list) return;
         list.innerHTML = "";
-        
-        // 정렬 (긴 단어 우선 표시 - 치환 순서와 동일하게)
         const sortedKeys = Object.keys(myDict).sort((a,b) => b.length - a.length);
-
         sortedKeys.forEach(key => {
             const div = document.createElement('div');
             div.className = 'dict-item';
@@ -417,8 +397,6 @@
     function closeDictModal() { 
         document.getElementById('dictModal').style.display = "none"; 
     }
-
-    /* --- [3] 텍스트 처리 로직 (기존 유지) --- */
 
     function getPureLen(str) {
         if (!str) return 0;
@@ -460,12 +438,10 @@
     function convertStage2(text) {
         text = text.replace(/%/g, "퍼센트");
         text = text.replace(/6\.25/g, "육이오");
-        
         const sortedKeys = Object.keys(myDict).sort((a,b)=>b.length-a.length);
         for(const eng of sortedKeys) {
             text = text.replace(new RegExp(`\\b${eng}\\b`,'g'), myDict[eng]);
         }
-        
         text = text.replace(/\b[A-Z]+\b/g, (m) => /[가-힣]/.test(m)?m:[...m].map(c=>alphabetMap[c]||c).join(''));
         text = text.replace(/([0-9]+)(\.[0-9]+)?/g, (m, p1, p2) => {
             let korInt = convertNumberToKorean(p1);
@@ -474,8 +450,6 @@
         });
         return text;
     }
-
-    /* --- [4] 분할 및 UI 처리 로직 (기존 유지) --- */
 
     function resetData() {
         if(!confirm("모든 작업 내용이 삭제됩니다. 초기화하시겠습니까?")) return;
@@ -563,6 +537,7 @@
             let isOverflow = accumulatedLen >= totalLimit;
             accumulatedLen += pureLen;
             const div = document.createElement('div');
+            // 7단락부터는 시각적으로도 처리되게 유지
             div.className = `card-row ${block.locked ? 'locked' : ''} ${isOverflow ? 'overflow-row' : ''}`;
             div.innerHTML = `
                 <div class="text-card left-card">
@@ -577,7 +552,6 @@
                     </div>
                     <textarea class="card-editor left-editor" oninput="syncLeftToRight(this)">${block.s1}</textarea>
                 </div>
-
                 <div class="text-card right-card">
                     <div class="card-info">
                         <span>2차 (수정시 1차동기화)</span>
@@ -635,59 +609,45 @@
         badge.className = `badge ${Math.abs(len - target) <= 3 ? 'badge-len' : 'badge-warn'}`;
     }
 
-   function copyResult() {
-    const rows = Array.from(document.querySelectorAll('.card-row'));
-    const totalLimit = parseInt(document.getElementById('totalLimit').value);
-    
-    let fullText = "";
-    let currentTotalLen = 0;
-    let validRows = [];
+    // --- [수정된 복사 로직] ---
+    function copyResult() {
+        const rows = Array.from(document.querySelectorAll('.card-row'));
+        // 상위 6개 단락만 선택
+        const targetRows = rows.slice(0, 6);
+        
+        if(targetRows.length === 0) { alert("복사할 데이터가 없습니다."); return; }
+        
+        let fullText = "";
+        targetRows.forEach((row, idx) => {
+            const s1 = row.querySelector('.left-editor').value; 
+            const s2 = row.querySelector('.right-editor').value; 
+            const len = getPureLen(s2);
+            
+            let suffix = "";
+            // 두 번째 단락(idx 1)부터 여섯 번째 단락(idx 5)까지 번호 부여
+            if (idx >= 1 && idx <= 5) {
+                const symbol = CIRCLE_NUMS[idx - 1]; 
+                suffix = `\n${symbol}-${len}`;
+            }
+            
+            fullText += s1 + suffix + "\n\n";
+        });
 
-    // 1. 실제로 totalLimit 내에 들어오는 '유효한' 행들만 먼저 선별합니다.
-    for (let row of rows) {
-        const s2 = row.querySelector('.right-editor').value;
-        const len = getPureLen(s2);
-        
-        // 이 단락을 더했을 때 전체 제한을 초과하는지 확인
-        if (currentTotalLen + len > totalLimit) {
-            break; // 제한을 넘으면 그 뒤 단락들은 쳐다보지도 않고 중단
-        }
-        
-        currentTotalLen += len;
-        validRows.push(row);
+        navigator.clipboard.writeText(fullText.trim()).then(() => {
+            alert(`복사 완료! 총 ${targetRows.length}개 단락이 복사되었습니다.`);
+        });
     }
 
-    if (validRows.length === 0) {
-        alert("복사할 유효 데이터가 없습니다.");
-        return;
+    function copyFolderLink() {
+        const path = "\\\\192.168.0.63\\도깨비도깨비3\\◆◆2026년 제1회 시험대비반◆◆";
+        navigator.clipboard.writeText(path).then(() => {
+            alert("폴더 경로가 복사되었습니다!");
+        });
     }
 
-    // 2. 선별된 validRows만 가지고 텍스트 조립
-    const totalValid = validRows.length;
-    validRows.forEach((row, idx) => {
-        const s1 = row.querySelector('.left-editor').value;
-        const s2 = row.querySelector('.right-editor').value;
-        const len = getPureLen(s2);
-        
-        // 뒤에서부터 5개 단락에 꼬리표(①~⑤) 붙이기
-        const reverseIdx = totalValid - 1 - idx;
-        let suffix = "";
-        if (reverseIdx >= 0 && reverseIdx < 5) {
-            const symbol = CIRCLE_NUMS[4 - reverseIdx];
-            suffix = `\n${symbol}-${len}`;
-        }
-        
-        fullText += s1 + suffix + "\n\n";
-    });
+    window.onclick = function(e) { if(e.target == document.getElementById('dictModal')) closeDictModal(); }
+    window.onload = loadDict;
 
-    // 3. 클립보드 복사
-    navigator.clipboard.writeText(fullText.trim()).then(() => {
-        alert(`복사 완료! 총 ${totalValid}개 단락이 복사되었습니다.`);
-    }).catch(err => {
-        console.error("복사 실패:", err);
-    });
-}
 </script>
 </body>
 </html>
-
