@@ -262,7 +262,7 @@
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
                 const list = rows.map(row => row[0]).filter(val => val && val.toString().length > 1);
-                // 엑셀 로딩 시점에는 길이순으로만 대략 정렬 (실제 우선순위는 processData에서 결정)
+                // 엑셀 로딩 시에는 대략적인 정렬만 수행
                 list.sort((a, b) => b.toString().length - a.toString().length);
                 resolve(list);
             };
@@ -291,6 +291,7 @@
         abbreviations = await loadExcel(excelFileInput);
         let text = await loadText(textFileInput);
 
+        // 1. 빈도수 통계 (기존 로직 유지)
         const counts = {};
         abbreviations.forEach(abbr => {
             const escapedAbbr = abbr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -336,38 +337,28 @@
         document.getElementById('statsTitle').innerHTML = `<i class="fa-solid fa-list-ol"></i> 빈출 약어 리스트 (${minFreq}회 이상)`;
         document.getElementById('statsTable').innerHTML = tableHtml;
 
-        // [수정된 부분] 
-        // 1순위: 글자 길이가 긴 것 (b.length - a.length)
-        // 2순위: 글자 길이가 같다면 본문에서 먼저 나오는 것 (text.indexOf(a) - text.indexOf(b))
-        let textAbbrs = Object.keys(counts).sort((a, b) => {
-            if (b.length !== a.length) {
-                return b.length - a.length;
-            }
-            return text.indexOf(a) - text.indexOf(b);
-        });
+        // 2. 본문 하이라이트 (로직 완전 변경)
+        // 약어들을 글자 수 긴 순서로 정렬합니다. (긴 단어가 먼저 매칭되도록)
+        // 예: "국제회의" vs "국제" -> "국제회의"가 먼저 패턴에 걸림
+        let textAbbrs = Object.keys(counts).sort((a, b) => b.length - a.length);
 
-        let tempText = text;
-        let placeholders = [];
+        if (textAbbrs.length > 0) {
+            // 모든 약어를 OR(|) 조건으로 묶은 거대한 정규식 하나를 만듭니다.
+            // 정규식 엔진은 왼쪽부터 텍스트를 읽다가 매칭되는 것이 있으면 즉시 처리하고 건너뜁니다.
+            const escapedAbbrs = textAbbrs.map(abbr => abbr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+            const masterRegex = new RegExp(`(${escapedAbbrs.join('|')})`, 'g');
 
-        textAbbrs.forEach((abbr, index) => {
-            const escapedAbbr = abbr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(escapedAbbr, 'g');
-            if (tempText.match(regex)) {
-                const placeholder = `@@@ABBR_${index}@@@`;
-                placeholders.push({ 
-                    key: placeholder, 
-                    html: `<span class="highlight">${abbr}</span>` 
-                });
-                tempText = tempText.replace(regex, placeholder);
-            }
-        });
+            // 한 번의 패스로 치환을 수행합니다.
+            // "변화는"에서 "변화"가 먼저 매칭되면 치환되고, 커서는 "는"으로 이동하므로 "화는"은 매칭되지 않습니다.
+            text = text.replace(masterRegex, (match) => {
+                return `<span class="highlight">${match}</span>`;
+            });
+        }
 
-        tempText = tempText.replace(/\n/g, '<br>');
-        placeholders.forEach(item => {
-            tempText = tempText.split(item.key).join(item.html);
-        });
+        // 줄바꿈 처리
+        text = text.replace(/\n/g, '<br>');
 
-        document.getElementById('textContent').innerHTML = tempText;
+        document.getElementById('textContent').innerHTML = text;
         
         const statsSec = document.getElementById('statsSection');
         const textSec = document.getElementById('textSection');
