@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>아카데미 성과 분석 프로(Pro) - 통합 완성판 (+단일행 엑셀 지원)</title>
+    <title>아카데미 성과 분석 프로(Pro) - 통합 완성판</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -30,7 +30,6 @@
             padding-bottom: 50px;
         }
 
-        /* --- [메뉴바] --- */
         .navbar {
             position: fixed; top: 0; left: 0; width: 100%; height: 70px;
             background: rgba(255, 255, 255, 0.95);
@@ -55,12 +54,10 @@
             background-color: #fff0f5; color: #ff6f91; transform: translateY(-2px);
         }
 
-        /* --- [레이아웃] --- */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         .header-box { text-align: center; margin-bottom: 30px; }
         .header-box h1 { font-size: 2rem; color: #4a4a4a; margin-bottom: 10px; letter-spacing: -1px; }
 
-        /* 목표 달성 게이지 */
         .goal-wrapper {
             max-width: 800px; margin: 0 auto 30px auto;
             background: #fff; padding: 20px; border-radius: 20px;
@@ -83,7 +80,6 @@
         }
         .goal-confetti { position: absolute; right: 10px; top: -20px; font-size: 20px; display: none; }
 
-        /* 컨트롤 바 */
         .control-bar { 
             display: flex; justify-content: center; gap: 10px; margin-top: 15px; 
             background: white; padding: 15px 25px; border-radius: 50px;
@@ -124,7 +120,6 @@
             background: #ffb7b2; border-radius: 3px;
         }
 
-        /* --- [카드 및 그리드] --- */
         .card, .trend-card, .heatmap-container, .kpi-card, .insight-card, .conversion-card {
             background: #ffffff; border-radius: 25px; padding: 30px;
             border: 2px solid #f0ebeb; box-shadow: 0 8px 20px rgba(200, 200, 200, 0.1);
@@ -135,7 +130,6 @@
             transform: translateY(-5px);
         }
 
-        /* KPI & Insight */
         .kpi-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 20px; }
         .kpi-card { text-align: center; cursor: pointer; }
         .kpi-label { font-size: 1.1rem; color: #666; margin-bottom: 10px; }
@@ -151,7 +145,6 @@
         .insight-card.danger { border: 2px solid #ffcfce; background: #fffafa; }
         .badge-re { background: #eef2ff; color: #5874ff; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; display: inline-block; margin-top: 5px; }
 
-        /* 그리드 & 테이블 */
         .analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 30px; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin-top: 15px; }
         th { background: #fff8f8; color: #666; padding: 12px; text-align: left; border-bottom: 2px solid #ffebeb; font-weight: bold; }
@@ -160,7 +153,6 @@
         .clickable-row { cursor: pointer; color: #8cb6ff; font-weight: bold; text-decoration: none; }
         .clickable-row:hover { text-decoration: underline; }
 
-        /* 히트맵 */
         .heatmap-container { overflow-x: auto; padding: 20px; }
         .heatmap-table { width: 100%; border-collapse: separate; border-spacing: 6px; }
         .heatmap-cell { 
@@ -170,24 +162,6 @@
         }
         .heatmap-cell:hover { transform: scale(1.05); border-color: #ffb7b2 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-        /* 전환율 카드 스타일 */
-        .conversion-stats { display: flex; justify-content: space-around; margin-bottom: 20px; }
-        .conv-stat-box { text-align: center; }
-        .conv-label { font-size: 0.9rem; color: #888; margin-bottom: 5px; }
-        .conv-val { font-size: 1.4rem; font-weight: bold; color: #555; font-family: 'Pretendard'; }
-        .conv-rate { color: #8cb6ff; font-size: 2rem; }
-
-        /* 랭킹 뱃지 */
-        .rank-badge { 
-            background: #f0f0f0; color: #666; width: 26px; height: 26px; 
-            border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; 
-            font-size: 12px; font-weight: bold; margin-right: 5px;
-        }
-        .rank-1 { background: #ffd700; color: #fff; box-shadow: 0 2px 5px rgba(255, 215, 0, 0.4); } 
-        .rank-2 { background: #c0c0c0; color: #fff; } 
-        .rank-3 { background: #cd7f32; color: #fff; }
-
-        /* 모달 공통 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; backdrop-filter: blur(3px); }
         .modal-box { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
@@ -197,40 +171,17 @@
         }
         .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; align-items: center; }
         .modal-title { font-size: 1.3rem; font-weight: bold; color: #333; }
-        
         .student-item { display: flex; justify-content: space-between; padding: 15px 10px; border-bottom: 1px solid #f9f9f9; transition: 0.2s; }
-        .student-item:hover { background: #fffcfc; border-radius: 10px; }
-        .badge-partial { font-size: 11px; background: #fff3cd; color: #856404; padding: 3px 8px; border-radius: 10px; margin-left: 5px; }
-        
-        /* 비교 모달 전용 */
-        .compare-grid-modal { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px; }
-        .compare-col { background: #fafafa; padding: 15px; border-radius: 15px; text-align: center; }
-        .compare-val { font-size: 1.5rem; font-weight: bold; font-family: 'Pretendard'; margin: 10px 0; }
-        .delta-pos { color: #ff6f91; font-weight: bold; }
-        .delta-neg { color: #8cb6ff; font-weight: bold; }
 
-        /* 보고서 텍스트 영역 */
-        .report-textarea {
-            width: 100%; height: 300px; padding: 15px; border: 2px solid #eee; border-radius: 15px;
-            font-family: 'Pretendard'; font-size: 1rem; line-height: 1.6; resize: none; background: #fafafa; outline: none;
-        }
-
-        /* LTV 섹션 */
         .ltv-card {
             background: #fdfdfd; border: 2px dashed #d1d5db; padding: 25px; border-radius: 20px; text-align: center;
         }
         .ltv-stat { font-size: 2rem; font-weight: bold; color: #5874ff; font-family: 'Pretendard'; }
 
-        /* 반응형 */
         @media (max-width: 768px) {
             .navbar { padding: 0 15px; height: 60px; }
-            .logo span, .nav-item span { display: none; } 
-            .logo i, .nav-item i { font-size: 1.2rem; }
             .analysis-grid { grid-template-columns: 1fr; }
             .control-bar { flex-direction: column; width: 90%; padding: 20px; }
-            .btn-style, select { width: 100%; justify-content: center; }
-            .modal-box { width: 90%; }
-            .compare-grid-modal { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -263,7 +214,6 @@
             <div class="progress-bar" id="goalProgressBar">0%</div>
             <div class="goal-confetti" id="goalConfetti">🎉</div>
         </div>
-        <div style="font-size:0.85rem; color:#999; margin-top:5px;">목표를 입력하고 엔터를 치세요!</div>
     </div>
 
     <div class="control-bar">
@@ -302,12 +252,10 @@
                 <div class="insight-card" style="cursor:pointer;" onclick="showInsightList('신규 유입 학생', 'new')">
                     <div class="insight-label">신규 유입</div>
                     <div class="insight-value" id="insightNew">0명</div>
-                    <div class="insight-desc">이번 달 첫 등록</div>
                 </div>
                 <div class="insight-card danger" style="cursor:pointer;" onclick="showInsightList('재등록 필요 대상(이탈 위험)', 'churn')">
                     <div class="insight-label" style="color:#ff6b6b">이탈 위험(미등록)</div>
                     <div class="insight-value" id="insightChurn" style="color:#ff6b6b">0명</div>
-                    <div class="badge-re">재등록 필요 대상</div>
                 </div>
             </div>
         </div>
@@ -322,180 +270,49 @@
         <div class="section-title"><span id="kpiTitle">💰 전체 매출 현황</span></div>
         <div class="kpi-wrapper">
             <div class="kpi-card total" onclick="showList('유효 매출 전체', 'valid_sales')">
-                <div class="icon-circle" style="background:#f0f4ff; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; color:#8cb6ff;"><i class="fa-solid fa-coins"></i></div>
                 <div class="kpi-label">총 유효 매출액</div>
                 <div class="kpi-amount" id="kpiTotalAmt">0원</div>
-                <div class="kpi-count" id="kpiTotalCnt" style="color:#666; margin-top:5px;">0건</div>
-                <div style="font-size:12px; color:#999; margin-top:5px;">(강좌 + PT권 합계)</div>
+                <div class="kpi-count" id="kpiTotalCnt">0건</div>
             </div>
             <div class="kpi-card cancel" onclick="showList('전체 환불 (0원)', 'full_cancel')">
-                <div class="icon-circle" style="background:#fff0f0; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; color:#ff9aa2;"><i class="fa-solid fa-ban"></i></div>
                 <div class="kpi-label">전체 환불 (매출 취소)</div>
-                <div class="kpi-amount" id="kpiCancelCnt" style="font-size:1.8rem;">0건</div>
-                <div style="font-size:12px; color:#ff6f91; margin-top:5px;">* 수강 시작 전 취소 건수</div>
+                <div class="kpi-amount" id="kpiCancelCnt">0건</div>
             </div>
         </div>
 
-        <div id="keyboardSection" style="display:none;">
-            <div class="section-title">⌨️ 키보드 구매자 심층 분석</div>
-            <div class="analysis-grid">
-                <div class="conversion-card" style="grid-column: span 2;">
-                    <div class="conversion-stats">
-                        <div class="conv-stat-box">
-                            <div class="conv-label">총 키보드 구매자</div>
-                            <div class="conv-val" id="kbTotal">0명</div>
-                        </div>
-                        <div class="conv-stat-box">
-                            <div class="conv-label">수강생 전환 성공</div>
-                            <div class="conv-val" id="kbSuccess" style="color:#ff6f91;">0명</div>
-                        </div>
-                        <div class="conv-stat-box">
-                            <div class="conv-label">전환율</div>
-                            <div class="conv-val conv-rate" id="kbRate" style="color:#ff6f91;">0%</div>
-                        </div>
-                         <div class="conv-stat-box">
-                            <div class="conv-label">평균 수강 등록 소요시간</div>
-                            <div class="conv-val" id="kbAvgDays" style="color:#666; font-size:1.4rem;">0일</div>
-                            <div style="font-size:0.8rem; color:#aaa;">(구매 후 첫 결제까지)</div>
-                        </div>
-                    </div>
-                    
-                    <div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center; margin-top:20px;">
-                        <div style="flex:1; min-width:300px; text-align:center;">
-                            <h4 style="color:#666;">⏳ 구매 후 수강 신청까지 걸린 시간</h4>
-                             <div style="height:250px;"><canvas id="chartKbTime"></canvas></div>
-                        </div>
-                        <div style="flex:1; min-width:300px; text-align:center;">
-                            <h4 style="color:#666;">🎓 첫 수강 신청 과목 선호도</h4>
-                             <div style="height:250px;"><canvas id="chartKbClass"></canvas></div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top:30px;">
-                        <h4 style="color:#666;">🎂 연령대별 수강 전환 분포</h4>
-                        <div style="height:250px;"><canvas id="chartKbAge"></canvas></div>
-                        <p style="text-align:center; color:#999; font-size:0.8rem; margin-top:5px;">* 엑셀에 생년 정보(예: 1990, 90 등)가 있는 경우에만 표시됩니다.</p>
-                    </div>
-
-                    <div style="margin-top:30px;">
-                        <h3 style="margin-top:0; color:#444;">🎉 키보드 구매 -> 수강생 전환 명단</h3>
-                        <div style="overflow-y: auto; max-height: 300px; border:1px solid #eee; border-radius:10px; padding:10px;">
-                            <table id="tableKbConversion">
-                                <thead><tr><th>이름</th><th>구매일</th><th>첫 수강일</th><th>소요기간</th><th>첫 과목</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="section-title">🆓 무료 체험 전환율 분석</div>
-        <div class="analysis-grid">
-            <div class="conversion-card" style="grid-column: span 2;">
-                <h3 style="margin-top:0; color:#444;">무료 사용자 유료 결제 전환 분석</h3>
-                <div class="conversion-stats">
-                    <div class="conv-stat-box">
-                        <div class="conv-label">총 무료체험</div>
-                        <div class="conv-val" id="convTotal">0명</div>
-                    </div>
-                    <div class="conv-stat-box">
-                        <div class="conv-label">유료 전환 성공</div>
-                        <div class="conv-val" id="convSuccess" style="color:#10b981;">0명</div>
-                    </div>
-                    <div class="conv-stat-box">
-                        <div class="conv-label">전환율</div>
-                        <div class="conv-val conv-rate" id="convRate">0%</div>
-                    </div>
-                </div>
-                
-                <div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center; margin-top:20px;">
-                    <div style="flex:1; min-width:300px; text-align:center;">
-                        <h4 style="color:#666; margin-bottom:10px;">📊 전환 vs 미전환</h4>
-                        <div style="height:250px;"><canvas id="chartConversion"></canvas></div>
-                    </div>
-                    <div style="flex:1; min-width:300px; text-align:center;">
-                        <h4 style="color:#666; margin-bottom:10px;">🍰 전환 상품 상세 비율</h4>
-                        <div style="height:250px;"><canvas id="chartConversionDetail"></canvas></div>
-                    </div>
-                </div>
-
-                <div style="margin-top:30px;">
-                    <h3 style="margin-top:0; color:#444;">🎉 유료 전환 성공 명단</h3>
-                    <div style="overflow-y: auto; max-height: 300px; border:1px solid #eee; border-radius:10px; padding:10px;">
-                        <table id="tableConversion">
-                            <thead><tr><th>이름</th><th>전화번호</th><th>전환된 상품(대표)</th><th>확인</th></tr></thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="section-title">🔥 수업 혼잡도 히트맵 (화상수업/CLASS)</div>
+        <div class="section-title">🔥 수업 혼잡도 히트맵</div>
         <div class="heatmap-container">
             <div id="heatmapArea"></div>
-            <p style="color:#999; font-size:0.85rem; margin-top:10px; text-align:right;">* PT권 및 요일/시간 정보가 없는 건은 제외됩니다.</p>
         </div>
 
         <div class="section-title">📦 상품별 상세 분석</div>
         <div class="analysis-grid">
             <div class="card">
-                <h3 style="margin-top:0; color:#444;">유형별 매출 (PT 포함)</h3>
+                <h3>유형별 매출</h3>
                 <div style="height:250px;"><canvas id="chartType"></canvas></div>
                 <table id="tableType"><thead><tr><th>구분</th><th>매출</th><th>건수</th><th>확인</th></tr></thead><tbody></tbody></table>
             </div>
             <div class="card">
-                <h3 style="margin-top:0; color:#444;">🎓 반(Class)별 세분화 분포</h3>
+                <h3>🎓 반(Class)별 세분화</h3>
                 <div style="height:250px;"><canvas id="chartClass"></canvas></div>
                 <table id="tableClass"><thead><tr><th>반이름</th><th>매출</th><th>건수</th><th>확인</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
 
-        <div class="section-title">📆 옵션(요일/시간) 통계</div>
+        <div class="section-title">🏆 VIP 분석</div>
         <div class="analysis-grid">
             <div class="card">
-                <h3 style="margin-top:0; color:#444;">요일별 수강생(화상수업+시대반)</h3>
-                <div style="height:250px;"><canvas id="chartDay"></canvas></div>
-                <table id="tableDay"><thead><tr><th>요일</th><th>인원수</th><th>확인</th></tr></thead><tbody></tbody></table>
+                <h3>💎 결제 금액 TOP 10</h3>
+                <table id="tableVip"><thead><tr><th>순위</th><th>이름</th><th>총 결제액</th><th>확인</th></tr></thead><tbody></tbody></table>
             </div>
             <div class="card">
-                <h3 style="margin-top:0; color:#444;">⏰ 시간대별 수강생 (오름차순)</h3>
-                <div style="height:250px;"><canvas id="chartTime"></canvas></div>
-                <table id="tableTime"><thead><tr><th>시간</th><th>인원수</th><th>확인</th></tr></thead><tbody></tbody></table>
+                <h3>💎 수강생 생애주기(LTV)</h3>
+                <div class="ltv-card">
+                    <h4>평균 수강 기간</h4>
+                    <div class="ltv-stat" id="ltvAvgDuration">0개월</div>
+                </div>
             </div>
         </div>
-
-        <div class="section-title">🏆 VIP & 재등록 분석</div>
-        <div class="analysis-grid">
-            <div class="card">
-                <h3 style="margin-top:0; color:#444;">💎 결제 금액 TOP 10</h3>
-                <table id="tableVip"><thead><tr><th>순위</th><th>이름</th><th>총 결제액</th><th>건수</th><th>확인</th></tr></thead><tbody></tbody></table>
-            </div>
-            <div class="card">
-                <h3 style="margin-top:0; color:#444;">🏆 VIP 재결제 횟수 TOP 10</h3>
-                <table id="tableRevisit"><thead><tr><th>이름</th><th>연락처</th><th>결제횟수</th><th>총액</th><th>확인</th></tr></thead><tbody></tbody></table>
-            </div>
-        </div>
-
-        <div class="section-title">💎 수강생 생애주기(LTV) 분석</div>
-        <div class="analysis-grid">
-            <div class="ltv-card">
-                <h4>총 수강생 수 (Unique)</h4>
-                <div class="ltv-stat" id="ltvTotalStudents">0명</div>
-                <p style="color:#888; font-size:0.9rem;">학원을 거쳐간 모든 학생</p>
-            </div>
-            <div class="ltv-card">
-                <h4>평균 수강 개월 수</h4>
-                <div class="ltv-stat" id="ltvAvgDuration">0개월</div>
-                <p style="color:#888; font-size:0.9rem;">한 학생이 머무는 평균 기간</p>
-            </div>
-            <div class="card">
-                <h4 style="margin-top:0;">수강 기간 분포 (충성도)</h4>
-                <div style="height:200px;"><canvas id="chartLtv"></canvas></div>
-            </div>
-        </div>
-
     </div>
 </div>
 
@@ -503,165 +320,68 @@
     <div class="modal-box">
         <div class="modal-header">
             <div class="modal-title" id="modalTitle">학생 명단</div>
-            <div style="display:flex; align-items:center;">
-                <button class="btn-style upload-btn" onclick="copyList()"><i class="fa-regular fa-copy"></i> 복사</button>
-                <span style="font-size:24px; cursor:pointer; margin-left:15px; color:#aaa;" onclick="document.getElementById('studentModal').style.display='none'">&times;</span>
-            </div>
+            <span style="font-size:24px; cursor:pointer;" onclick="document.getElementById('studentModal').style.display='none'">&times;</span>
         </div>
         <div id="modalList" style="overflow-y:auto; flex:1;"></div>
     </div>
 </div>
 
-<div class="modal-overlay" id="compareModal" onclick="if(event.target.id==='compareModal') this.style.display='none'">
-    <div class="modal-box" style="width:700px;">
-        <div class="modal-header">
-            <div class="modal-title">🆚 월별 성과 비교</div>
-            <span style="font-size:24px; cursor:pointer; color:#aaa;" onclick="document.getElementById('compareModal').style.display='none'">&times;</span>
-        </div>
-        <div style="display:flex; gap:10px; justify-content:center; margin-bottom:20px;">
-            <select id="compA"></select> 
-            <span style="font-size:1.5rem; color:#ccc;">VS</span>
-            <select id="compB"></select>
-            <button class="btn-style compare-btn" onclick="doCompare()">비교 실행</button>
-        </div>
-        
-        <div id="compareResult" style="display:none; flex:1; overflow-y:auto;">
-            <div class="compare-grid-modal">
-                <div class="compare-col">
-                    <div id="compLabelA" style="color:#888; font-weight:bold;">A월</div>
-                    <div class="compare-val" id="compValA">0원</div>
-                </div>
-                <div class="compare-col">
-                    <div id="compLabelB" style="color:#888; font-weight:bold;">B월</div>
-                    <div class="compare-val" id="compValB">0원</div>
-                </div>
-            </div>
-            <div style="text-align:center; margin:15px 0; font-size:1.1rem;">
-                매출 차이: <span id="compDiff">0원</span>
-            </div>
-            <div style="height:250px;"><canvas id="chartCompare"></canvas></div>
-        </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="reportModal" onclick="if(event.target.id==='reportModal') this.style.display='none'">
-    <div class="modal-box" style="width:600px;">
-        <div class="modal-header">
-            <div class="modal-title">📝 자동 생성된 성과 보고서</div>
-            <span style="font-size:24px; cursor:pointer; color:#aaa;" onclick="document.getElementById('reportModal').style.display='none'">&times;</span>
-        </div>
-        <p style="color:#888; font-size:0.9rem; margin-top:0;">아래 내용을 복사해서 카톡이나 문서에 바로 사용하세요.</p>
-        <textarea id="reportText" class="report-textarea"></textarea>
-        <div style="text-align:center; margin-top:15px;">
-             <button class="btn-style upload-btn" onclick="copyReport()"><i class="fa-regular fa-copy"></i> 전체 복사</button>
-        </div>
-    </div>
-</div>
-
 <script>
-    // 전역 변수
     let db = [], filteredDb = [], monthList = new Set();
-    let freeUserDb = []; 
-    let keyboardDb = []; 
+    let freeUserDb = [], keyboardDb = []; 
     let churnList = [], newList = [];
     let currentKpi = { amt:0, cnt:0 };
 
-    // --- [파일 처리 및 파싱] ---
-    
     function resetData() {
         if(confirm('모든 데이터를 초기화하시겠습니까?')) {
-            db = [];
-            freeUserDb = []; 
-            keyboardDb = []; 
-            monthList.clear();
-            document.getElementById('fileInput').value = '';
+            db = []; monthList.clear();
             document.getElementById('dashboard').style.display = 'none';
-            alert('초기화되었습니다. 새로운 파일을 업로드하세요.');
+            alert('초기화되었습니다.');
         }
     }
 
     function handleFiles(input) {
         const files = input.files;
-        if (!files || files.length === 0) return;
-
+        if (!files.length) return;
         let loadedCount = 0;
         Array.from(files).forEach(file => {
             const reader = new FileReader();
             reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
-                    
-                    processData(rows); 
-                    
-                    loadedCount++;
-                    if(loadedCount === files.length) {
-                        finalizeDataProcessing();
-                    }
-                } catch (err) { alert("파일 읽기 오류 ("+file.name+"): " + err.message); }
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
+                processData(rows);
+                loadedCount++;
+                if(loadedCount === files.length) finalizeDataProcessing();
             };
             reader.readAsArrayBuffer(file);
         });
     }
 
-    function finalizeDataProcessing() {
-        populateFilter();
-        updateDashboard();
-        analyzeLTV();
-        
-        let msg = `데이터 로드 완료!\n- 매출 내역: ${db.length}건\n- 무료체험: ${freeUserDb.length}명`;
-        if(keyboardDb.length > 0) msg += `\n- 키보드 구매자: ${keyboardDb.length}명`;
-        alert(msg);
-    }
-
-    // [로직 업데이트] 파일 종류 자동 감지
     function processData(rows) {
-        if(!rows || rows.length < 2) return;
-
-        let isGeneralSales = false;
-        let isSingleRowSales = false; // [신규] 단일행 일반 매출 형식 (사용자 업로드 파일 형태)
-        let isPTSales = false;
-        let isFreeUsers = false;
-        let isKeyboard = false; 
-        
-        for(let i = 0; i < Math.min(rows.length, 5); i++) {
-            let rowStr = rows[i].map(x => String(x || '')).join(' ');
-
-            // 단일행 일반 매출 형식 (신청정보, 신청자, 결제금액이 한 줄에 모두 있는 경우)
-            if (rowStr.includes('신청정보') && rowStr.includes('신청자') && rowStr.includes('결제금액')) {
-                isSingleRowSales = true; break;
-            } else if (rowStr.includes('신청정보') && rowStr.includes('선택정보')) {
-                isGeneralSales = true; break;
-            } else if ((rowStr.includes('주문번호') || rowStr.includes('학생명')) && !rowStr.includes('수업 여부') && !rowStr.includes('키보드')) {
-                isPTSales = true; break;
-            } else if (rowStr.includes('수업 여부') || rowStr.includes('쿠폰 만료일')) {
-                isFreeUsers = true; break;
-            } else if (rowStr.includes('주문일') || rowStr.includes('구매일') || rowStr.includes('송장번호')) {
-                 isKeyboard = true; break;
-            }
+        if(!rows.length) return;
+        let headerRowIdx = -1;
+        for(let i=0; i<Math.min(rows.length, 10); i++) {
+            const rowStr = rows[i].join('|');
+            if(rowStr.includes('신청정보') || rowStr.includes('주문번호')) { headerRowIdx = i; break; }
         }
+        if(headerRowIdx === -1) return;
 
-        if (isSingleRowSales) {
-            parseSingleRowSales(rows); // [신규] 단일행 파서 호출
-        } else if (isGeneralSales) {
+        const headers = rows[headerRowIdx].map(h => String(h).trim());
+        const headerStr = headers.join('|');
+
+        // [구분 로직 핵심] '전화번호'가 헤더에 직접 있으면 단일행(새 파일), 없으면 멀티행(기존 파일)
+        if (headerStr.includes('전화번호')) {
+            parseOrderListSales(rows, headerRowIdx);
+        } else {
             parseGeneralSales(rows);
-        } else if (isPTSales) {
-            parsePTSales(rows);
-        } else if (isFreeUsers) {
-            parseFreeUsers(rows);
-        } else if (isKeyboard) {
-            parseKeyboardUsers(rows); 
         }
     }
 
-    // [신규] 단일행 일반 매출 파싱 함수 (업로드해주신 CSV 파일 형태 지원)
-    function parseSingleRowSales(rows) {
-        let headerIdx = rows.findIndex(r => r.some(c => String(c).includes('신청정보') && String(c).includes('신청자')));
-        if(headerIdx === -1) return;
-
-        const headers = rows[headerIdx].map(x => String(x).trim());
+    // 1. 단일행 파서 (새 형식: 2026...order_lists.xlsx)
+    function parseOrderListSales(rows, headerIdx) {
+        const headers = rows[headerIdx].map(h => String(h).trim());
         const colIdx = {
             date: headers.findIndex(h => h.includes('신청정보')),
             product: headers.findIndex(h => h.includes('선택정보')),
@@ -673,32 +393,21 @@
 
         for (let i = headerIdx + 1; i < rows.length; i++) {
             let row = rows[i];
-            if (!row || row.length <= colIdx.status || !row[colIdx.date]) continue;
-
-            let status = String(row[colIdx.status]).trim();
-            if (status === '결제완료' || status.includes('취소')) {
-                let priceRaw = row[colIdx.price];
-                let price = parseInt(String(priceRaw).replace(/[^\d]/g, '')) || 0;
+            if (!row[colIdx.date]) continue;
+            let status = String(row[colIdx.status] || '').trim();
+            if (status.includes('완료') || status.includes('취소')) {
+                let price = parseInt(String(row[colIdx.price]).replace(/[^\d]/g, '')) || 0;
                 let dateObj = parseDate(row[colIdx.date]);
                 let monthKey = getMonthKey(dateObj);
-                
                 if (!monthKey) continue;
 
-                let productFull = String(row[colIdx.product]);
+                let productFull = String(row[colIdx.product] || '').replace(/\n/g, " ");
                 let item = {
-                    date: getDateStr(dateObj),
-                    dateObj: dateObj,
-                    month: monthKey,
-                    name: String(row[colIdx.name]).trim(),
-                    phone: cleanPhone(String(row[colIdx.phone])),
-                    product: productFull,
-                    price: price,
-                    status: status,
-                    option: productFull, // 단일행에서는 선택정보에 옵션이 이미 포함되어 있음
-                    type: '', classInfo: '', dayInfo: '', timeInfo: '',
-                    isPartial: false, isFullCancel: false
+                    date: getDateStr(dateObj), dateObj: dateObj, month: monthKey,
+                    name: String(row[colIdx.name]).trim(), phone: cleanPhone(row[colIdx.phone]),
+                    product: productFull, price: price, status: status, option: productFull,
+                    type: '', classInfo: '', dayInfo: '', timeInfo: '', isPartial: false, isFullCancel: false
                 };
-
                 processItemType(item);
                 db.push(item);
                 monthList.add(monthKey);
@@ -706,855 +415,123 @@
         }
     }
 
-    // 키보드 구매자 파싱 함수
-    function parseKeyboardUsers(rows) {
-        let headerIdx = rows.findIndex(r => r.some(c => String(c).includes('이름') || String(c).includes('구매자')));
-        if(headerIdx === -1) return;
-
-        const headers = rows[headerIdx].map(x => String(x).trim());
-        const colIdx = {
-            name: headers.findIndex(h => h.includes('이름') || h.includes('구매자') || h.includes('주문자')),
-            phone: headers.findIndex(h => h.includes('연락처') || h.includes('전화') || h.includes('핸드폰')),
-            date: headers.findIndex(h => h.includes('주문일') || h.includes('구매일')),
-            birth: headers.findIndex(h => h.includes('생년') || h.includes('주민') || h.includes('생일')) 
-        };
-
-        if(colIdx.name === -1 || colIdx.phone === -1) return;
-
-        for(let i = headerIdx + 1; i < rows.length; i++) {
-            let row = rows[i];
-            if(!row || !row[colIdx.name]) continue;
-
-            let name = String(row[colIdx.name]).trim();
-            let phone = cleanPhone(String(row[colIdx.phone]));
-            let dateObj = parseDate(row[colIdx.date]);
-            let birth = (colIdx.birth !== -1) ? String(row[colIdx.birth]).trim() : '';
-
-            if(name && phone && dateObj) {
-                keyboardDb.push({ 
-                    name: name, 
-                    phone: phone, 
-                    date: dateObj, 
-                    birth: birth 
-                });
-            }
-        }
-    }
-
-    // 무료 사용자 파싱
-    function parseFreeUsers(rows) {
-        let headerIdx = rows.findIndex(r => r.some(c => String(c).includes('성명') || String(c).includes('이름')));
-        if(headerIdx === -1) return;
-
-        const headers = rows[headerIdx].map(x => String(x).trim());
-        const colIdx = {
-            name: headers.findIndex(h => h === '성명' || h === '이름'),
-            phone: headers.findIndex(h => h === '핸드폰' || h === '연락처' || h === '전화번호')
-        };
-
-        if(colIdx.name === -1 || colIdx.phone === -1) return;
-
-        for(let i = headerIdx + 1; i < rows.length; i++) {
-            let row = rows[i];
-            if(!row || !row[colIdx.name]) continue;
-            let name = String(row[colIdx.name]).trim();
-            let phone = String(row[colIdx.phone]).trim();
-            if(name && phone) {
-                freeUserDb.push({ name: name, phone: cleanPhone(phone) });
-            }
-        }
-    }
-
-    // 일반 다중행 매출 파싱
+    // 2. 멀티행 파서 (기존 형식: 1211221.xlsx)
     function parseGeneralSales(rows) {
-        let statusIdx = findStatusCol(rows);
+        let statusIdx = -1;
+        for(let r=0; r<rows.length; r++) {
+            for(let c=0; c<rows[r].length; c++) {
+                if(String(rows[r][c]).includes('결제상태')) { statusIdx = c; break; }
+            }
+            if(statusIdx !== -1) break;
+        }
         if(statusIdx === -1) return;
 
         let i = 0;
         while(i < rows.length) {
             let row = rows[i];
-            if (!row || row.length < statusIdx) { i++; continue; }
-            
             let status = String(row[statusIdx]).trim();
-            if(status === '결제완료' || status.includes('취소')) {
-                let priceRaw = row[statusIdx-1] || row[4]; 
-                let price = parseInt(String(priceRaw).replace(/[^\d]/g, '')) || 0;
+            if(status.includes('완료') || status.includes('취소')) {
                 let dateObj = parseDate(row[0]);
-                let dateStr = getDateStr(dateObj); 
                 let monthKey = getMonthKey(dateObj);
-                
-                if (!monthKey) { i++; continue; }
+                if(!monthKey) { i++; continue; }
 
                 let item = {
-                    date: dateStr, dateObj: dateObj, month: monthKey, name: row[3], phone: '',
-                    product: '', price: price, status: status, option: '',
-                    type: '', classInfo: '', dayInfo: '', timeInfo: '', 
+                    date: getDateStr(dateObj), dateObj: dateObj, month: monthKey, name: row[3],
+                    phone: '', product: '', price: parseInt(String(row[statusIdx-1]).replace(/[^\d]/g, '')) || 0,
+                    status: status, option: '', type: '', classInfo: '', dayInfo: '', timeInfo: '',
                     isPartial: false, isFullCancel: false
                 };
 
                 if(i+1 < rows.length) {
-                    let rowB = rows[i+1];
-                    item.product = String(rowB[1]);
-                    item.phone = cleanPhone(String(rowB[3])); 
-                    
-                    let increment = 2;
-                    if(i+2 < rows.length) {
-                        let optInfo = String(rows[i+2][1]);
-                        if(optInfo.includes('옵션')) {
-                            item.option = optInfo;
-                            increment = 3;
-                        }
+                    item.product = String(rows[i+1][1]);
+                    item.phone = cleanPhone(rows[i+1][3]);
+                    let inc = 2;
+                    if(i+2 < rows.length && String(rows[i+2][1]).includes('옵션')) {
+                        item.option = String(rows[i+2][1]);
+                        inc = 3;
                     }
                     processItemType(item);
                     db.push(item);
-                    if (monthKey) monthList.add(monthKey);
-                    i += increment;
-                } else { i++; }
-            } else { i++; }
-        }
-    }
-
-    // PT 매출 파싱
-    function parsePTSales(rows) {
-        let headerIdx = rows.findIndex(r => r.some(c => String(c).includes('주문번호') || String(c).includes('학생명')));
-        if(headerIdx === -1) return;
-
-        const headers = rows[headerIdx].map(x => String(x).trim());
-        const colIdx = {
-            date: headers.findIndex(h => h.includes('신청일') || h.includes('결제일')),
-            name: headers.findIndex(h => h === '학생명'),
-            phone: headers.findIndex(h => h === '연락처'),
-            product: headers.findIndex(h => h === '상품명'),
-            price: headers.findIndex(h => h === '결제금액'),
-            status: headers.findIndex(h => h === '결제상태')
-        };
-
-        for(let i = headerIdx + 1; i < rows.length; i++) {
-            let row = rows[i];
-            if(!row || !row[colIdx.price]) continue;
-
-            let status = String(row[colIdx.status]).trim();
-            if (status !== '결제완료' && !status.includes('취소')) continue;
-
-            let price = parseInt(String(row[colIdx.price]).replace(/[^\d]/g, '')) || 0;
-            let dateObj = parseDate(row[colIdx.date]);
-            let dateStr = getDateStr(dateObj);
-            let monthKey = getMonthKey(dateObj);
-
-            if(!monthKey) continue;
-
-            let item = {
-                date: dateStr, dateObj: dateObj, month: monthKey, 
-                name: String(row[colIdx.name]).trim(), 
-                phone: cleanPhone(String(row[colIdx.phone])),
-                product: String(row[colIdx.product]).trim(), 
-                price: price, status: status, option: '',
-                type: 'PT 이용권', classInfo: '', dayInfo: '', timeInfo: '',
-                isPartial: false, isFullCancel: false
-            };
-            
-            if(item.product.includes('회권')) item.type = 'PT 이용권';
-            
-            if(status.includes('취소')) {
-                 if (price >= 10000) item.isPartial = true;
-                 else item.isFullCancel = true;
-            }
-
-            db.push(item);
-            monthList.add(monthKey);
+                    monthList.add(monthKey);
+                    i += inc;
+                } else i++;
+            } else i++;
         }
     }
 
     function processItemType(item) {
-        let isValid = false;
-        if (item.status === '결제완료') isValid = true;
-        else if (item.status.includes('취소') && item.price >= 10000) {
-            isValid = true;
-            item.isPartial = true;
-        } else if (item.status.includes('취소')) {
-            item.isFullCancel = true;
-        }
+        if (item.status.includes('완료')) { /* OK */ }
+        else if (item.status.includes('취소') && item.price >= 10000) { item.isPartial = true; }
+        else { item.isFullCancel = true; }
 
-        if (isValid || item.isFullCancel) {
-            if (item.type === 'PT 이용권') return;
+        if (item.product.includes('올패스')) item.type = '올패스';
+        else if (item.product.includes('시험대비') && item.product.includes('자료')) item.type = '시험대비 자료';
+        else if (item.product.includes('시험대비')) item.type = '시험대비 CLASS';
+        else item.type = '화상수업';
 
-            if (item.product.includes('올패스')) item.type = '올패스';
-            else if (item.product.includes('시험대비') && item.product.includes('자료')) item.type = '시험대비반 자료이용';
-            else if (item.product.includes('시험대비')) item.type = '시험대비 CLASS';
-            else item.type = '화상수업';
+        if (item.product.includes('입문')) item.classInfo = '입문/중급';
+        else if (item.product.includes('고급')) item.classInfo = '고급';
+        else if (item.product.includes('심야')) item.classInfo = '심야';
 
-            if (item.product.includes('시험대비') && !item.product.includes('자료')) item.classInfo = '시험대비 CLASS';
-            else if (item.product.includes('입문')) item.classInfo = '입문/중급 CLASS';
-            else if (item.product.includes('고급')) item.classInfo = '고급 CLASS';
-            else if (item.product.includes('심야')) item.classInfo = '심야 CLASS';
-            else item.classInfo = '';
-
-            let dM = item.option.match(/\[요일\]\s*([^,\]\n]+)/);
-            if(dM) item.dayInfo = dM[1].trim();
-            let tM = item.option.match(/\[시간\]\s*([^,\]\n]+)/);
-            if(tM) {
-                let tStr = tM[1].trim().replace(/[:시분]/g, '').substring(0,2);
-                if(!isNaN(parseInt(tStr))) item.timeInfo = parseInt(tStr);
-            }
+        let dM = item.option.match(/\[요일\]\s*([^,\]\s]+)/);
+        if(dM) item.dayInfo = dM[1].trim();
+        let tM = item.option.match(/\[시간\]\s*([^,\]\s]+)/);
+        if(tM) {
+            let tStr = tM[1].trim().replace(/[:시분]/g, '').substring(0,2);
+            item.timeInfo = parseInt(tStr);
         }
     }
 
-    function findStatusCol(rows) {
-        for(let r=0; r<Math.min(rows.length, 50); r++) {
-            for(let c=0; c<rows[r].length; c++) {
-                if(String(rows[r][c]).includes('결제상태')) return c;
-            }
-        }
-        return 5;
+    function finalizeDataProcessing() {
+        populateFilter();
+        updateDashboard();
+        alert('데이터 로드 완료: ' + db.length + '건');
     }
-
-    function parseDate(raw) {
-        if (!raw) return null;
-        let str = String(raw).trim();
-        if (!isNaN(str) && str.length < 6 && str.length > 4) {
-            let date = new Date((Number(str) - (25567 + 2)) * 86400 * 1000);
-            return date;
-        }
-        let cleanStr = str.replace(/[./]/g, '-').split(' ')[0];
-        let date = new Date(cleanStr);
-        if (!isNaN(date.getTime())) return date;
-        return null;
-    }
-
-    function getMonthKey(dateObj) {
-        if (!dateObj) return "";
-        let y = dateObj.getFullYear();
-        let m = String(dateObj.getMonth() + 1).padStart(2, '0');
-        if(isNaN(y) || isNaN(m)) return "";
-        return `${y}-${m}`;
-    }
-
-    function getDateStr(dateObj) {
-        if (!dateObj) return "";
-        let y = dateObj.getFullYear();
-        let m = String(dateObj.getMonth() + 1).padStart(2, '0');
-        let d = String(dateObj.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-    }
-    
-    function cleanPhone(str) {
-        if(!str) return "";
-        return str.replace(/[^\d]/g, '');
-    }
-
-    function populateFilter() {
-        const sel = document.getElementById('monthFilter');
-        sel.innerHTML = '<option value="all">📅 전체 기간 보기</option>';
-        let list = Array.from(monthList).sort().reverse();
-        list.forEach(m => { if(m) sel.innerHTML += `<option value="${m}">${m}월 매출</option>`; });
-    }
-
-    // --- [대시보드 업데이트 & 분석 로직] ---
 
     function updateDashboard() {
         const mon = document.getElementById('monthFilter').value;
         document.getElementById('dashboard').style.display = 'block';
-        document.getElementById('trendSection').style.display = (mon === 'all') ? 'block' : 'none';
-        document.getElementById('insightSection').style.display = (mon === 'all') ? 'none' : 'block';
-
-        if(mon === 'all') {
-            filteredDb = db;
-            document.getElementById('kpiTitle').innerText = '💰 전체 누적 매출 현황';
-            renderTrend(); 
-        } else {
-            filteredDb = db.filter(i => i.month === mon);
-            document.getElementById('kpiTitle').innerText = `💰 ${mon}월 매출 현황`;
-        }
+        filteredDb = (mon === 'all') ? db : db.filter(i => i.month === mon);
         analyze(filteredDb, mon);
-        calculateGoal();
-        
-        if(freeUserDb.length > 0) analyzeConversion();
-        if(keyboardDb.length > 0) {
-            document.getElementById('keyboardSection').style.display = 'block';
-            analyzeKeyboardConversion(); 
-        } else {
-             document.getElementById('keyboardSection').style.display = 'none';
-        }
     }
 
-    function analyzeKeyboardConversion() {
-        let totalKb = keyboardDb.length;
-        let converted = [];
-        let timeToConvert = []; 
-        let firstClassStats = {}; 
-        let ageStats = {}; 
-        
-        let payMap = {};
-        db.forEach(item => {
-            if(!item.isFullCancel && item.phone) {
-                if(!payMap[item.phone]) payMap[item.phone] = [];
-                payMap[item.phone].push(item);
-            }
-        });
-        
-        Object.keys(payMap).forEach(key => {
-            payMap[key].sort((a,b) => a.dateObj - b.dateObj);
-        });
-
-        keyboardDb.forEach(kb => {
-            let userPays = payMap[kb.phone];
-            if(userPays && userPays.length > 0) {
-                let firstPay = userPays.find(p => p.dateObj >= kb.date);
-                
-                if(firstPay) {
-                    let diffTime = Math.abs(firstPay.dateObj - kb.date);
-                    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                    
-                    converted.push({
-                        name: kb.name,
-                        buyDate: getDateStr(kb.date),
-                        firstClassDate: getDateStr(firstPay.dateObj),
-                        diffDays: diffDays,
-                        firstClass: firstPay.type + (firstPay.classInfo ? ` (${firstPay.classInfo})` : '')
-                    });
-
-                    timeToConvert.push(diffDays);
-                    
-                    let cType = firstPay.type;
-                    if(cType.includes('PT')) cType = 'PT';
-                    else if(cType.includes('올패스')) cType = '올패스';
-                    else if(cType.includes('시험대비')) cType = '시험대비반';
-                    else cType = '정규 화상수업';
-                    
-                    firstClassStats[cType] = (firstClassStats[cType] || 0) + 1;
-
-                    if(kb.birth) {
-                        let bStr = String(kb.birth).trim().replace(/[^0-9]/g, ''); 
-                        let fullYear = 0;
-
-                        if(bStr.length === 4) {
-                            fullYear = parseInt(bStr);
-                        }
-                        else if(bStr.length >= 2) {
-                            let yPrefix = parseInt(bStr.substring(0,2));
-                            fullYear = (yPrefix > 30) ? 1900 + yPrefix : 2000 + yPrefix;
-                        }
-
-                        if(fullYear > 0) {
-                            let currentYear = new Date().getFullYear();
-                            let age = currentYear - fullYear + 1; 
-                            let ageGroup = Math.floor(age / 10) * 10 + '대';
-                            ageStats[ageGroup] = (ageStats[ageGroup] || 0) + 1;
-                        } else {
-                            ageStats['미확인'] = (ageStats['미확인'] || 0) + 1;
-                        }
-                    } else {
-                        ageStats['미확인'] = (ageStats['미확인'] || 0) + 1;
-                    }
-                }
-            }
-        });
-
-        document.getElementById('kbTotal').innerText = totalKb + "명";
-        document.getElementById('kbSuccess').innerText = converted.length + "명";
-        let rate = totalKb > 0 ? ((converted.length / totalKb) * 100).toFixed(1) : 0;
-        document.getElementById('kbRate').innerText = rate + "%";
-        
-        let avgDays = timeToConvert.length > 0 ? (timeToConvert.reduce((a,b)=>a+b,0) / timeToConvert.length).toFixed(0) : 0;
-        document.getElementById('kbAvgDays').innerText = avgDays + "일";
-
-        let timeDist = {'1주 이내':0, '1달 이내':0, '3달 이내':0, '3달 이후':0};
-        timeToConvert.forEach(d => {
-            if(d <= 7) timeDist['1주 이내']++;
-            else if(d <= 30) timeDist['1달 이내']++;
-            else if(d <= 90) timeDist['3달 이내']++;
-            else timeDist['3달 이후']++;
-        });
-        renderChart('chartKbTime', fromObjToArr(timeDist), '인원', false, ['#ffb7b2', '#ffdac1', '#e2f0cb', '#b5ead7']);
-        renderChart('chartKbClass', fromObjToArr(firstClassStats), '인원', false, ['#a2c2ff', '#95e1d3', '#ff9aa2', '#e0bbe4']);
-
-        let ageClean = {};
-        Object.keys(ageStats).forEach(k => { if(k !== '미확인') ageClean[k] = ageStats[k]; });
-        if(Object.keys(ageClean).length > 0) {
-             renderChart('chartKbAge', fromObjToArr(ageClean), '인원', true, ['#ffd700', '#ffb7b2', '#a2c2ff', '#95e1d3']);
-        } else {
-             renderChart('chartKbAge', [], '인원', false);
-        }
-
-        let tb = document.querySelector('#tableKbConversion tbody');
-        tb.innerHTML = '';
-        converted.forEach(u => {
-            let tr = document.createElement('tr');
-            tr.innerHTML = `<td>${u.name}</td><td>${u.buyDate}</td><td style="color:#ff6f91;font-weight:bold;">${u.firstClassDate}</td><td>${u.diffDays}일</td><td>${u.firstClass}</td>`;
-            tb.appendChild(tr);
-        });
-    }
-
-    function fromObjToArr(obj) {
-        let wrapper = {};
-        Object.keys(obj).forEach(k => {
-            wrapper[k] = { cnt: obj[k], amt: 0, list: [] };
-        });
-        return wrapper;
-    }
-    
-    function analyzeConversion() {
-        if (freeUserDb.length === 0) return;
-
-        let convertedList = [];
-        let detailStats = {
-            '올패스': 0, '시대반(시험대비)': 0, '퍼스널클래스(PT)': 0,
-            '화상수업(입문/중급)': 0, '화상수업(고급)': 0, '화상수업(심야)': 0, '기타': 0
-        };
-
-        let payHistory = {};
-        db.forEach(item => {
-            if (!item.isFullCancel && item.phone) {
-                if (!payHistory[item.phone]) payHistory[item.phone] = [];
-                payHistory[item.phone].push(item);
-            }
-        });
-
-        freeUserDb.forEach(freeUser => {
-            if (freeUser.phone && payHistory[freeUser.phone]) {
-                let userCategories = new Set(); 
-                payHistory[freeUser.phone].forEach(payItem => {
-                    let cat = '기타';
-                    if (payItem.type === '올패스') cat = '올패스';
-                    else if (payItem.type === 'PT 이용권') cat = '퍼스널클래스(PT)';
-                    else if (payItem.type.includes('시험대비')) cat = '시대반(시험대비)';
-                    else if (payItem.type === '화상수업') {
-                        if (payItem.classInfo.includes('입문') || payItem.classInfo.includes('중급')) cat = '화상수업(입문/중급)';
-                        else if (payItem.classInfo.includes('고급')) cat = '화상수업(고급)';
-                        else if (payItem.classInfo.includes('심야')) cat = '화상수업(심야)';
-                    }
-                    userCategories.add(cat);
-                });
-                
-                let repProduct = Array.from(userCategories)[0] || '기타';
-                convertedList.push({ ...freeUser, repProduct: repProduct });
-
-                userCategories.forEach(c => {
-                    if (detailStats[c] !== undefined) detailStats[c]++;
-                    else detailStats['기타']++;
-                });
-            }
-        });
-
-        let totalFree = freeUserDb.length;
-        let convertedCount = convertedList.length;
-        let rate = totalFree > 0 ? ((convertedCount / totalFree) * 100).toFixed(1) : 0;
-
-        document.getElementById('convTotal').innerText = totalFree + '명';
-        document.getElementById('convSuccess').innerText = convertedCount + '명';
-        document.getElementById('convRate').innerText = rate + '%';
-
-        let ctx1 = document.getElementById('chartConversion').getContext('2d');
-        if (Chart.getChart('chartConversion')) Chart.getChart('chartConversion').destroy();
-        new Chart(ctx1, {
-            type: 'doughnut',
-            data: {
-                labels: ['미전환', '유료 전환'],
-                datasets: [{
-                    data: [totalFree - convertedCount, convertedCount],
-                    backgroundColor: ['#f0f0f0', '#10b981'],
-                    borderWidth: 0
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '60%' }
-        });
-
-        let ctx2 = document.getElementById('chartConversionDetail').getContext('2d');
-        if (Chart.getChart('chartConversionDetail')) Chart.getChart('chartConversionDetail').destroy();
-        
-        let detailLabels = [];
-        let detailData = [];
-        Object.keys(detailStats).forEach(k => {
-            if(detailStats[k] > 0) {
-                detailLabels.push(k);
-                detailData.push(detailStats[k]);
-            }
-        });
-
-        new Chart(ctx2, {
-            type: 'pie', 
-            data: {
-                labels: detailLabels,
-                datasets: [{
-                    data: detailData,
-                    backgroundColor: ['#ffb7b2', '#ffd700', '#a2c2ff', '#95e1d3', '#e0bbe4', '#ffdac1', '#c7ceea'],
-                    borderWidth: 1
-                }]
-            },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } }
-                }
-            }
-        });
-
-        let tb = document.querySelector('#tableConversion tbody');
-        tb.innerHTML = '';
-        convertedList.forEach(u => {
-            let tr = document.createElement('tr');
-            let fmtPhone = u.phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-            tr.innerHTML = `<td>${u.name}</td><td>${fmtPhone}</td><td>${u.repProduct}</td><td class="clickable-row">확인</td>`;
-            tr.onclick = () => {
-                let userPayList = db.filter(p => p.phone === u.phone);
-                showList(`${u.name}님의 전환 내역`, 'list', userPayList);
-            };
-            tb.appendChild(tr);
-        });
-    }
-
-    function analyze(data, currentMon) {
-        let kpi = { amt:0, cnt:0, cancelCnt:0 };
-        let cats = { type:{}, class:{}, day:{}, time:{} };
-        let hm = { '월':{}, '화':{}, '수':{}, '목':{}, '금':{}, '토':{}, '일':{} };
-        let stu = {};
+    function analyze(data, mon) {
+        let kpi = { amt:0, cnt:0, cancel:0 };
+        let cats = { type:{}, class:{} }, stu = {}, hm = {};
+        const days = ['월','화','수','목','금','토','일'];
+        days.forEach(d => hm[d] = {});
 
         data.forEach(i => {
-            if(i.isFullCancel) { kpi.cancelCnt++; return; }
-            kpi.amt += i.price;
-            kpi.cnt++;
+            if(i.isFullCancel) { kpi.cancel++; return; }
+            kpi.amt += i.price; kpi.cnt++;
+            
+            if(!cats.type[i.type]) cats.type[i.type] = {amt:0, cnt:0, list:[]};
+            cats.type[i.type].amt += i.price; cats.type[i.type].cnt++; cats.type[i.type].list.push(i);
 
-            addCnt(cats.type, i.type, i);
-
-            if(i.type !== '올패스' && i.type !== 'PT 이용권') {
-                addCnt(cats.class, i.classInfo, i);
-                addCnt(cats.day, i.dayInfo, i);
-                if(i.timeInfo !== '') addCnt(cats.time, i.timeInfo + '시', i);
-                if(i.dayInfo && i.timeInfo !== '') {
-                    i.dayInfo.split('').forEach(d => {
-                        if(hm[d]) {
-                            let t = i.timeInfo;
-                            if(!hm[d][t]) hm[d][t] = {cnt:0, list:[]};
-                            hm[d][t].cnt++;
-                            hm[d][t].list.push(i);
-                        }
-                    });
-                }
+            if(i.classInfo) {
+                if(!cats.class[i.classInfo]) cats.class[i.classInfo] = {amt:0, cnt:0, list:[]};
+                cats.class[i.classInfo].amt += i.price; cats.class[i.classInfo].cnt++; cats.class[i.classInfo].list.push(i);
             }
-            
+
+            if(i.dayInfo && i.timeInfo) {
+                i.dayInfo.split('').forEach(d => { if(hm[d]) hm[d][i.timeInfo] = (hm[d][i.timeInfo]||0)+1; });
+            }
+
             let key = i.phone || i.name;
-            if(!stu[key]) stu[key] = {name:i.name, phone:i.phone, amt:0, cnt:0, list:[]};
-            stu[key].amt += i.price;
-            stu[key].cnt++;
-            stu[key].list.push(i);
+            if(!stu[key]) stu[key] = {name:i.name, amt:0, list:[]};
+            stu[key].amt += i.price; stu[key].list.push(i);
         });
-
-        currentKpi = kpi; 
-
-        if (currentMon !== 'all') {
-            const uniqueStudents = Object.keys(stu);
-            const uniqueCount = uniqueStudents.length;
-
-            const arpu = uniqueCount > 0 ? Math.round(kpi.amt / uniqueCount) : 0;
-            document.getElementById('insightArpu').innerText = arpu.toLocaleString() + '원';
-
-            let [y, m] = currentMon.split('-').map(Number);
-            let prevDate = new Date(y, m - 2, 1);
-            let prevMon = getMonthKey(prevDate);
-            
-            let prevMonthStudents = new Set();
-            db.filter(i => i.month === prevMon && !i.isFullCancel)
-              .forEach(i => prevMonthStudents.add(i.phone || i.name));
-            
-            let reRegCount = 0;
-            uniqueStudents.forEach(k => { if(prevMonthStudents.has(k)) reRegCount++; });
-            const retentionRate = prevMonthStudents.size > 0 ? Math.round((reRegCount / prevMonthStudents.size) * 100) : 0;
-            document.getElementById('insightRetention').innerText = retentionRate + '%';
-
-            let totalPastStudents = new Set();
-            db.filter(i => i.month < currentMon && !i.isFullCancel)
-              .forEach(i => totalPastStudents.add(i.phone || i.name));
-            
-            newList = uniqueStudents.filter(k => !totalPastStudents.has(k)).map(k => stu[k]);
-            document.getElementById('insightNew').innerText = newList.length + '명';
-            
-            let churnKeys = Array.from(prevMonthStudents).filter(k => !stu[k]);
-            churnList = churnKeys.map(k => {
-                let lastInfo = db.filter(i => (i.phone || i.name) === k).pop();
-                return { name: lastInfo.name, phone: lastInfo.phone, product: '전월 수강생(미등록)', price: 0, date: lastInfo.date };
-            });
-            document.getElementById('insightChurn').innerText = churnList.length + '명';
-        }
 
         document.getElementById('kpiTotalAmt').innerText = kpi.amt.toLocaleString() + '원';
         document.getElementById('kpiTotalCnt').innerText = kpi.cnt + '건';
-        document.getElementById('kpiCancelCnt').innerText = kpi.cancelCnt + '건';
-        
-        const pastelColors = ['#a2c2ff', '#95e1d3', '#ffb7b2', '#e2f0cb', '#b5ead7', '#c7ceea', '#ffdac1', '#e0bbe4', '#f9f9f9'];
-        renderChart('chartType', cats.type, '매출', false, pastelColors);
-        renderChart('chartClass', cats.class, '매출', false, pastelColors);
-        renderChart('chartDay', cats.day, '인원', false, pastelColors);
-        renderChart('chartTime', cats.time, '인원', true, pastelColors);
-        renderTable('tableType', cats.type, '매출');
-        renderTable('tableClass', cats.class, '매출');
-        renderTable('tableDay', cats.day, '인원');
-        renderTable('tableTime', cats.time, '인원', true); 
-        renderHeatmap(hm);
+        document.getElementById('kpiCancelCnt').innerText = kpi.cancel + '건';
+
+        renderChart('chartType', cats.type, '매출');
+        renderChart('chartClass', cats.class, '매출');
+        renderTable('tableType', cats.type);
+        renderTable('tableClass', cats.class);
         renderVip(stu);
-    }
-
-    function analyzeLTV() {
-        if(db.length === 0) return;
-        
-        let stuMap = {};
-        db.forEach(i => {
-            if(i.isFullCancel) return;
-            let key = i.phone || i.name;
-            if(!stuMap[key]) stuMap[key] = { months: new Set() };
-            stuMap[key].months.add(i.month);
-        });
-
-        let counts = { '1개월(신규/단발)': 0, '2~3개월(유지)': 0, '4~6개월(장기)': 0, '7개월 이상(VIP)': 0 };
-        let totalMonths = 0;
-        let totalStudents = 0;
-
-        Object.values(stuMap).forEach(s => {
-            let n = s.months.size;
-            totalMonths += n;
-            totalStudents++;
-            if(n === 1) counts['1개월(신규/단발)']++;
-            else if(n <= 3) counts['2~3개월(유지)']++;
-            else if(n <= 6) counts['4~6개월(장기)']++;
-            else counts['7개월 이상(VIP)']++;
-        });
-
-        let avg = totalStudents > 0 ? (totalMonths / totalStudents).toFixed(1) : 0;
-        document.getElementById('ltvTotalStudents').innerText = totalStudents.toLocaleString() + '명';
-        document.getElementById('ltvAvgDuration').innerText = avg + '개월';
-
-        let ctx = document.getElementById('chartLtv').getContext('2d');
-        if(Chart.getChart('chartLtv')) Chart.getChart('chartLtv').destroy();
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: Object.keys(counts),
-                datasets: [{
-                    data: Object.values(counts),
-                    backgroundColor: ['#ffb7b2', '#ffd700', '#95e1d3', '#a2c2ff']
-                }]
-            },
-            options: { responsive:true, maintainAspectRatio:false }
-        });
-    }
-
-    function inputNumberFormat(obj) {
-        obj.value = comma(uncomma(obj.value));
-    }
-    function comma(str) {
-        str = String(str);
-        return str.replace(/(\d)(?=(?:\d{3})+(?!\d))/g, '$1,');
-    }
-    function uncomma(str) {
-        str = String(str);
-        return str.replace(/[^\d]+/g, '');
-    }
-
-    function calculateGoal() {
-        const input = document.getElementById('targetInput').value;
-        const target = parseInt(uncomma(input));
-        const current = currentKpi.amt;
-        const bar = document.getElementById('goalProgressBar');
-        const confetti = document.getElementById('goalConfetti');
-
-        if (!target || target === 0) {
-            bar.style.width = '0%';
-            bar.innerText = '목표를 입력하세요';
-            return;
-        }
-
-        let percent = Math.min(100, Math.round((current / target) * 100));
-        bar.style.width = percent + '%';
-        bar.innerText = percent + '% 달성';
-
-        if (percent >= 100) {
-            bar.style.background = 'linear-gradient(90deg, #10b981, #6ee7b7)';
-            confetti.style.display = 'block';
-        } else {
-            bar.style.background = 'linear-gradient(90deg, #a2c2ff, #95e1d3)';
-            confetti.style.display = 'none';
-        }
-    }
-
-    function openCompareModal() {
-        if(monthList.size < 2) { alert("비교할 데이터가 충분하지 않습니다 (2개월 이상 필요)"); return; }
-        
-        const selA = document.getElementById('compA');
-        const selB = document.getElementById('compB');
-        selA.innerHTML = ''; selB.innerHTML = '';
-        
-        let list = Array.from(monthList).sort().reverse();
-        list.forEach(m => {
-            selA.innerHTML += `<option value="${m}">${m}</option>`;
-            selB.innerHTML += `<option value="${m}">${m}</option>`;
-        });
-        if(list.length >= 2) selB.selectedIndex = 1; 
-
-        document.getElementById('compareModal').style.display = 'flex';
-        document.getElementById('compareResult').style.display = 'none';
-    }
-
-    function doCompare() {
-        const mA = document.getElementById('compA').value;
-        const mB = document.getElementById('compB').value;
-        
-        if(mA === mB) { alert("서로 다른 달을 선택해주세요."); return; }
-
-        const dataA = db.filter(i => i.month === mA && !i.isFullCancel);
-        const dataB = db.filter(i => i.month === mB && !i.isFullCancel);
-
-        const sumA = dataA.reduce((sum, i) => sum + i.price, 0);
-        const sumB = dataB.reduce((sum, i) => sum + i.price, 0);
-        const diff = sumA - sumB;
-
-        document.getElementById('compLabelA').innerText = mA + '월 매출';
-        document.getElementById('compLabelB').innerText = mB + '월 매출';
-        document.getElementById('compValA').innerText = sumA.toLocaleString() + '원';
-        document.getElementById('compValB').innerText = sumB.toLocaleString() + '원';
-        
-        const diffEl = document.getElementById('compDiff');
-        diffEl.innerText = (diff > 0 ? '▲ ' : '▼ ') + Math.abs(diff).toLocaleString() + '원';
-        diffEl.className = diff > 0 ? 'delta-pos' : 'delta-neg';
-
-        document.getElementById('compareResult').style.display = 'block';
-
-        let ctx = document.getElementById('chartCompare').getContext('2d');
-        if(Chart.getChart('chartCompare')) Chart.getChart('chartCompare').destroy();
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['매출액'],
-                datasets: [
-                    { label: mA, data: [sumA], backgroundColor: '#a2c2ff' },
-                    { label: mB, data: [sumB], backgroundColor: '#ffb7b2' }
-                ]
-            },
-            options: { responsive:true, maintainAspectRatio:false, scales: { y: { beginAtZero: true } } }
-        });
-    }
-
-    function generateReport() {
-        const mon = document.getElementById('monthFilter').value;
-        if(mon === 'all') { alert("특정 월을 선택한 후 보고서를 생성해주세요."); return; }
-
-        let txt = `[ 📢 ${mon}월 아카데미 운영 성과 보고 ]\n\n`;
-        
-        txt += `1. 매출 요약\n`;
-        txt += `- 총 매출액: ${currentKpi.amt.toLocaleString()}원\n`;
-        txt += `- 결제 건수: ${currentKpi.cnt}건\n`;
-        txt += `- 객단가: ${document.getElementById('insightArpu').innerText}\n\n`;
-
-        txt += `2. 수강생 현황\n`;
-        txt += `- 신규 유입: ${document.getElementById('insightNew').innerText}\n`;
-        txt += `- 재등록률: ${document.getElementById('insightRetention').innerText}\n`;
-        txt += `- 이탈 의심: ${document.getElementById('insightChurn').innerText} (재등록 독려 필요)\n\n`;
-
-        let classSums = {};
-        filteredDb.forEach(i => { if(!i.isFullCancel && i.type) classSums[i.type] = (classSums[i.type]||0)+i.price; });
-        let topClass = Object.keys(classSums).sort((a,b) => classSums[b]-classSums[a])[0] || '없음';
-        
-        txt += `3. 주요 사항\n`;
-        txt += `- 이번 달 효자 상품(유형)은 '${topClass}' 입니다.\n`;
-        txt += `- 환불 건수는 총 ${currentKpi.cancelCnt}건 발생했습니다.\n`;
-
-        if(freeUserDb.length > 0) {
-            txt += `\n4. 무료체험 전환율\n`;
-            txt += `- 총 체험 인원: ${document.getElementById('convTotal').innerText}\n`;
-            txt += `- 유료 전환: ${document.getElementById('convSuccess').innerText} (${document.getElementById('convRate').innerText})\n`;
-        }
-        
-        if(keyboardDb.length > 0) {
-             txt += `\n5. 키보드 구매자 분석\n`;
-             txt += `- 구매자 중 수강전환: ${document.getElementById('kbRate').innerText}\n`;
-             txt += `- 평균 등록 소요: ${document.getElementById('kbAvgDays').innerText}\n`;
-        }
-
-        document.getElementById('reportText').value = txt;
-        document.getElementById('reportModal').style.display = 'flex';
-    }
-
-    function copyReport() {
-        const el = document.getElementById('reportText');
-        el.select();
-        document.execCommand('copy');
-        alert("보고서 내용이 복사되었습니다.");
-    }
-
-    function addCnt(obj, key, item) {
-        if(!key) return;
-        if(!obj[key]) obj[key] = {amt:0, cnt:0, list:[]};
-        obj[key].amt += item.price;
-        obj[key].cnt++;
-        obj[key].list.push(item);
-    }
-
-    function renderTrend() {
-        let monthly = {};
-        db.forEach(i => { if(!i.isFullCancel) monthly[i.month] = (monthly[i.month]||0) + i.price; });
-        let keys = Object.keys(monthly).sort();
-        let vals = keys.map(k => monthly[k]);
-        let ctx = document.getElementById('chartTrend').getContext('2d');
-        if(Chart.getChart('chartTrend')) Chart.getChart('chartTrend').destroy();
-        new Chart(ctx, {
-            type: 'line',
-            data: { labels: keys, datasets: [{ 
-                label:'월매출', data:vals, 
-                borderColor:'#8cb6ff', backgroundColor:'rgba(162, 194, 255, 0.2)',
-                pointBackgroundColor: '#fff', pointBorderColor: '#8cb6ff', pointRadius: 5,
-                fill:true, tension: 0.3 
-            }] },
-            options: { 
-                responsive:true, maintainAspectRatio:false,
-                scales: {
-                    x: { grid: { display: false } },
-                    y: { grid: { borderDash: [5, 5], color: '#f0f0f0' } }
-                }
-            }
-        });
-    }
-
-    function renderChart(id, obj, metric, isTimeSort=false, colors) {
-        let keys = Object.keys(obj);
-        if(isTimeSort) keys.sort((a,b) => parseInt(a) - parseInt(b));
-        else keys.sort((a,b) => metric==='매출'?obj[b].amt-obj[a].amt : obj[b].cnt-obj[a].cnt);
-
-        let vals = keys.map(k => metric==='매출'?obj[k].amt : obj[k].cnt);
-        let ctx = document.getElementById(id).getContext('2d');
-        if(Chart.getChart(id)) Chart.getChart(id).destroy();
-        new Chart(ctx, {
-            type: metric==='매출'?'doughnut':'bar',
-            data: { 
-                labels: keys, 
-                datasets: [{ 
-                    label:metric, data:vals, 
-                    backgroundColor: colors || ['#3b82f6','#10b981'],
-                    borderRadius: 5, borderWidth: 0
-                }] 
-            },
-            options: { 
-                responsive:true, maintainAspectRatio:false,
-                onClick: (e, els) => { if(els.length>0) showList(keys[els[0].index], 'list', obj[keys[els[0].index]].list); },
-                scales: metric==='매출' ? {} : {
-                    x: { grid: { display: false } },
-                    y: { grid: { borderDash: [5, 5], color: '#f0f0f0' } }
-                }
-            }
-        });
-    }
-
-    function renderTable(id, obj, metric, isTimeSort=false) {
-        let tb = document.querySelector(`#${id} tbody`);
-        tb.innerHTML = '';
-        let keys = Object.keys(obj);
-        if(isTimeSort) keys.sort((a,b) => parseInt(a) - parseInt(b));
-        else keys.sort((a,b) => metric==='매출'?obj[b].amt-obj[a].amt : obj[b].cnt-obj[a].cnt);
-        keys.forEach(k => {
-            let tr = document.createElement('tr');
-            let val = metric==='매출'?obj[k].amt.toLocaleString()+'원' : obj[k].cnt+'명';
-            tr.innerHTML = metric==='매출' ? `<td>${k}</td><td>${val}</td><td>${obj[k].cnt}건</td><td class="clickable-row">확인</td>` : `<td>${k}</td><td>${val}</td><td class="clickable-row">확인</td>`;
-            tr.onclick = () => showList(k, 'list', obj[k].list);
-            tb.appendChild(tr);
-        });
+        renderHeatmap(hm);
     }
 
     function renderHeatmap(hm) {
@@ -1563,21 +540,38 @@
         let html = '<table class="heatmap-table"><thead><tr><th></th>';
         times.forEach(t=>html+=`<th>${t}</th>`);
         html+='</tr></thead><tbody>';
-        let max = 0;
-        days.forEach(d=>times.forEach(t=>{ if(hm[d][t] && hm[d][t].cnt>max) max = hm[d][t].cnt; }));
         days.forEach(d=>{
             html+=`<tr><th>${d}</th>`;
             times.forEach(t=>{
-                let cnt = hm[d][t] ? hm[d][t].cnt : 0;
-                let alpha = max > 0 ? cnt/max : 0;
-                let bg = cnt>0 ? `rgba(255, 183, 178, ${Math.max(0.15, alpha)})` : '#fdfdfd';
-                let col = (alpha > 0.6) ? '#fff' : '#666';
-                let border = cnt>0 ? 'border:1px solid #ffdeda;' : '';
-                html+=`<td class="heatmap-cell" style="background:${bg};color:${col};${border}" onclick='showList("${d} ${t}시","list", ${JSON.stringify(hm[d][t]?hm[d][t].list:[])})'>${cnt||'-'}</td>`;
+                let cnt = hm[d][t] || 0;
+                let bg = cnt > 0 ? `rgba(255, 183, 178, ${Math.min(1, cnt/10 + 0.2)})` : '#fdfdfd';
+                html+=`<td class="heatmap-cell" style="background:${bg}">${cnt||'-'}</td>`;
             });
             html+='</tr>';
         });
         document.getElementById('heatmapArea').innerHTML = html+'</tbody></table>';
+    }
+
+    function renderChart(id, obj, label) {
+        let keys = Object.keys(obj);
+        let vals = keys.map(k => obj[k].amt);
+        let ctx = document.getElementById(id).getContext('2d');
+        if(Chart.getChart(id)) Chart.getChart(id).destroy();
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: keys, datasets: [{ data: vals, backgroundColor: ['#ffb7b2', '#a2c2ff', '#95e1d3', '#ffd700'] }] },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    function renderTable(id, obj) {
+        let tb = document.querySelector(`#${id} tbody`);
+        tb.innerHTML = '';
+        Object.keys(obj).forEach(k => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `<td>${k}</td><td>${obj[k].amt.toLocaleString()}원</td><td>${obj[k].cnt}건</td><td class="clickable-row" onclick='showList("${k}", "list", ${JSON.stringify(obj[k].list)})'>확인</td>`;
+            tb.appendChild(tr);
+        });
     }
 
     function renderVip(stu) {
@@ -1586,50 +580,45 @@
         tb.innerHTML = '';
         list.forEach((s,i)=>{
             let tr = document.createElement('tr');
-            tr.innerHTML = `<td><span class="rank-badge ${i<3?'rank-'+(i+1):''}">${i+1}</span></td><td style="font-weight:bold;">${s.name}</td><td>${s.amt.toLocaleString()}</td><td>${s.cnt}</td><td class="clickable-row">확인</td>`;
-            tr.onclick = () => showList(s.name, 'list', s.list);
+            tr.innerHTML = `<td>${i+1}</td><td>${s.name}</td><td>${s.amt.toLocaleString()}원</td><td class="clickable-row" onclick='showList("${s.name}", "list", ${JSON.stringify(s.list)})'>확인</td>`;
             tb.appendChild(tr);
-        });
-        let rev = Object.values(stu).filter(s=>s.cnt>=2).sort((a,b)=>b.cnt-a.cnt).slice(0,10);
-        let tb2 = document.querySelector('#tableRevisit tbody');
-        tb2.innerHTML = '';
-        rev.forEach(s=>{
-            let tr = document.createElement('tr');
-            tr.innerHTML = `<td>${s.name}</td><td>${s.phone}</td><td>${s.cnt}회</td><td>${s.amt.toLocaleString()}</td><td class="clickable-row">확인</td>`;
-            tr.onclick = () => showList(s.name, 'list', s.list);
-            tb2.appendChild(tr);
         });
     }
 
-    function showList(title, type, list=[]) {
-        let tList = list;
-        if(type==='valid_sales') tList = filteredDb.filter(i=>!i.isFullCancel);
-        if(type==='full_cancel') tList = filteredDb.filter(i=>i.isFullCancel);
-        
-        document.getElementById('modalTitle').innerText = `${title} (${tList.length}명)`;
+    function showList(title, type, list) {
+        document.getElementById('modalTitle').innerText = title;
         let html = '';
-        tList.forEach(i=>{
-            let badge = i.isPartial ? '<span class="badge-partial">중도환불</span>' : '';
+        list.forEach(i => {
             html += `<div class="student-item">
-                <div><b>${i.name}</b> ${badge} <span style="color:#888;font-size:12px">${i.product} (${i.price.toLocaleString()}원)</span></div>
-                <div>${i.phone} <span style="font-size:11px;color:#aaa">${i.date}</span></div>
+                <div><b>${i.name}</b> <span style="font-size:12px; color:#888;">${i.product}</span></div>
+                <div>${i.price.toLocaleString()}원</div>
             </div>`;
         });
         document.getElementById('modalList').innerHTML = html;
         document.getElementById('studentModal').style.display = 'flex';
     }
-    
-    function showInsightList(title, type) {
-        let list = (type === 'new') ? newList : churnList;
-        showList(title, 'list', list);
-    }
 
-    function copyList() {
-        let txt = "";
-        document.querySelectorAll('.student-item').forEach(div=>{
-            txt += `${div.children[0].innerText}\t${div.children[1].innerText}\n`;
-        });
-        navigator.clipboard.writeText(txt).then(()=>alert('명단이 복사되었습니다. 엑셀에 붙여넣기 하세요!'));
+    function parseDate(raw) {
+        if(!raw) return null;
+        let str = String(raw).trim();
+        if(!isNaN(str) && str.length > 4 && str.length < 6) return new Date((Number(str)-25569)*86400*1000);
+        return new Date(str.replace(/[./]/g, '-').split(' ')[0]);
+    }
+    function getMonthKey(d) { return d && !isNaN(d) ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` : ""; }
+    function getDateStr(d) { return d ? d.toISOString().split('T')[0] : ""; }
+    function cleanPhone(s) { return String(s||"").replace(/[^\d]/g, ''); }
+    function populateFilter() {
+        const sel = document.getElementById('monthFilter');
+        sel.innerHTML = '<option value="all">📅 전체 기간 보기</option>';
+        Array.from(monthList).sort().reverse().forEach(m => sel.innerHTML += `<option value="${m}">${m}월 매출</option>`);
+    }
+    function inputNumberFormat(obj) { obj.value = obj.value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+    function calculateGoal() {
+        let target = parseInt(document.getElementById('targetInput').value.replace(/,/g, '')) || 0;
+        let current = currentKpi.amt;
+        let pct = target ? Math.min(100, Math.round(current/target*100)) : 0;
+        document.getElementById('goalProgressBar').style.width = pct + '%';
+        document.getElementById('goalProgressBar').innerText = pct + '%';
     }
 </script>
 </body>
