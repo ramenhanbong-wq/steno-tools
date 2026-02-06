@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>아카데미 성과 분석 프로(Pro) - 통합 완성판 (+키보드 연령 패치)</title>
+    <title>아카데미 성과 분석 프로(Pro) - 통합 완성판 (+단일행 엑셀 지원)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -561,8 +561,8 @@
 <script>
     // 전역 변수
     let db = [], filteredDb = [], monthList = new Set();
-    let freeUserDb = []; // 무료 사용자 명단 저장
-    let keyboardDb = []; // [신규] 키보드 구매자 명단 저장
+    let freeUserDb = []; 
+    let keyboardDb = []; 
     let churnList = [], newList = [];
     let currentKpi = { amt:0, cnt:0 };
 
@@ -572,7 +572,7 @@
         if(confirm('모든 데이터를 초기화하시겠습니까?')) {
             db = [];
             freeUserDb = []; 
-            keyboardDb = []; // 초기화
+            keyboardDb = []; 
             monthList.clear();
             document.getElementById('fileInput').value = '';
             document.getElementById('dashboard').style.display = 'none';
@@ -594,7 +594,7 @@
                     const sheet = workbook.Sheets[workbook.SheetNames[0]];
                     const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
                     
-                    processData(rows); // 파일 종류 자동 감지
+                    processData(rows); 
                     
                     loadedCount++;
                     if(loadedCount === files.length) {
@@ -616,46 +616,98 @@
         alert(msg);
     }
 
+    // [로직 업데이트] 파일 종류 자동 감지
     function processData(rows) {
         if(!rows || rows.length < 2) return;
 
         let isGeneralSales = false;
+        let isSingleRowSales = false; // [신규] 단일행 일반 매출 형식 (사용자 업로드 파일 형태)
         let isPTSales = false;
         let isFreeUsers = false;
-        let isKeyboard = false; // [신규] 키보드 파일 판별
+        let isKeyboard = false; 
         
-        // 파일 종류 자동 감지 로직
         for(let i = 0; i < Math.min(rows.length, 5); i++) {
             let rowStr = rows[i].map(x => String(x || '')).join(' ');
 
-            if (rowStr.includes('신청정보') && rowStr.includes('선택정보')) {
+            // 단일행 일반 매출 형식 (신청정보, 신청자, 결제금액이 한 줄에 모두 있는 경우)
+            if (rowStr.includes('신청정보') && rowStr.includes('신청자') && rowStr.includes('결제금액')) {
+                isSingleRowSales = true; break;
+            } else if (rowStr.includes('신청정보') && rowStr.includes('선택정보')) {
                 isGeneralSales = true; break;
             } else if ((rowStr.includes('주문번호') || rowStr.includes('학생명')) && !rowStr.includes('수업 여부') && !rowStr.includes('키보드')) {
-                // PT 파일과 키보드 파일 구분이 필요할 수 있음. 키보드는 '수강' 관련 단어가 보통 없음.
-                // 여기서는 PT 파일 형식을 명확히 따름.
                 isPTSales = true; break;
             } else if (rowStr.includes('수업 여부') || rowStr.includes('쿠폰 만료일')) {
                 isFreeUsers = true; break;
             } else if (rowStr.includes('주문일') || rowStr.includes('구매일') || rowStr.includes('송장번호')) {
-                 // 키보드 파일 감지 (상품명 등의 컬럼이 있을 것으로 추정)
                  isKeyboard = true; break;
             }
         }
 
-        if (isGeneralSales) {
+        if (isSingleRowSales) {
+            parseSingleRowSales(rows); // [신규] 단일행 파서 호출
+        } else if (isGeneralSales) {
             parseGeneralSales(rows);
         } else if (isPTSales) {
             parsePTSales(rows);
         } else if (isFreeUsers) {
             parseFreeUsers(rows);
         } else if (isKeyboard) {
-            parseKeyboardUsers(rows); // [신규]
+            parseKeyboardUsers(rows); 
         }
     }
 
-    // [신규] D. 키보드 구매자 파싱 함수
+    // [신규] 단일행 일반 매출 파싱 함수 (업로드해주신 CSV 파일 형태 지원)
+    function parseSingleRowSales(rows) {
+        let headerIdx = rows.findIndex(r => r.some(c => String(c).includes('신청정보') && String(c).includes('신청자')));
+        if(headerIdx === -1) return;
+
+        const headers = rows[headerIdx].map(x => String(x).trim());
+        const colIdx = {
+            date: headers.findIndex(h => h.includes('신청정보')),
+            product: headers.findIndex(h => h.includes('선택정보')),
+            name: headers.findIndex(h => h.includes('신청자')),
+            phone: headers.findIndex(h => h.includes('전화번호')),
+            price: headers.findIndex(h => h.includes('결제금액')),
+            status: headers.findIndex(h => h.includes('결제상태'))
+        };
+
+        for (let i = headerIdx + 1; i < rows.length; i++) {
+            let row = rows[i];
+            if (!row || row.length <= colIdx.status || !row[colIdx.date]) continue;
+
+            let status = String(row[colIdx.status]).trim();
+            if (status === '결제완료' || status.includes('취소')) {
+                let priceRaw = row[colIdx.price];
+                let price = parseInt(String(priceRaw).replace(/[^\d]/g, '')) || 0;
+                let dateObj = parseDate(row[colIdx.date]);
+                let monthKey = getMonthKey(dateObj);
+                
+                if (!monthKey) continue;
+
+                let productFull = String(row[colIdx.product]);
+                let item = {
+                    date: getDateStr(dateObj),
+                    dateObj: dateObj,
+                    month: monthKey,
+                    name: String(row[colIdx.name]).trim(),
+                    phone: cleanPhone(String(row[colIdx.phone])),
+                    product: productFull,
+                    price: price,
+                    status: status,
+                    option: productFull, // 단일행에서는 선택정보에 옵션이 이미 포함되어 있음
+                    type: '', classInfo: '', dayInfo: '', timeInfo: '',
+                    isPartial: false, isFullCancel: false
+                };
+
+                processItemType(item);
+                db.push(item);
+                monthList.add(monthKey);
+            }
+        }
+    }
+
+    // 키보드 구매자 파싱 함수
     function parseKeyboardUsers(rows) {
-        // 헤더 인덱스 찾기
         let headerIdx = rows.findIndex(r => r.some(c => String(c).includes('이름') || String(c).includes('구매자')));
         if(headerIdx === -1) return;
 
@@ -664,7 +716,7 @@
             name: headers.findIndex(h => h.includes('이름') || h.includes('구매자') || h.includes('주문자')),
             phone: headers.findIndex(h => h.includes('연락처') || h.includes('전화') || h.includes('핸드폰')),
             date: headers.findIndex(h => h.includes('주문일') || h.includes('구매일')),
-            birth: headers.findIndex(h => h.includes('생년') || h.includes('주민') || h.includes('생일')) // 수정됨
+            birth: headers.findIndex(h => h.includes('생년') || h.includes('주민') || h.includes('생일')) 
         };
 
         if(colIdx.name === -1 || colIdx.phone === -1) return;
@@ -682,14 +734,14 @@
                 keyboardDb.push({ 
                     name: name, 
                     phone: phone, 
-                    date: dateObj, // Date 객체로 저장
+                    date: dateObj, 
                     birth: birth 
                 });
             }
         }
     }
 
-    // C. 무료 사용자 파싱
+    // 무료 사용자 파싱
     function parseFreeUsers(rows) {
         let headerIdx = rows.findIndex(r => r.some(c => String(c).includes('성명') || String(c).includes('이름')));
         if(headerIdx === -1) return;
@@ -713,7 +765,7 @@
         }
     }
 
-    // A. 일반 매출 파싱
+    // 일반 다중행 매출 파싱
     function parseGeneralSales(rows) {
         let statusIdx = findStatusCol(rows);
         if(statusIdx === -1) return;
@@ -743,7 +795,7 @@
                 if(i+1 < rows.length) {
                     let rowB = rows[i+1];
                     item.product = String(rowB[1]);
-                    item.phone = cleanPhone(String(rowB[3])); // 전화번호 정제
+                    item.phone = cleanPhone(String(rowB[3])); 
                     
                     let increment = 2;
                     if(i+2 < rows.length) {
@@ -762,7 +814,7 @@
         }
     }
 
-    // B. PT 매출 파싱
+    // PT 매출 파싱
     function parsePTSales(rows) {
         let headerIdx = rows.findIndex(r => r.some(c => String(c).includes('주문번호') || String(c).includes('학생명')));
         if(headerIdx === -1) return;
@@ -837,9 +889,9 @@
             else if (item.product.includes('심야')) item.classInfo = '심야 CLASS';
             else item.classInfo = '';
 
-            let dM = item.option.match(/\[요일\]\s*([^,]+)/);
+            let dM = item.option.match(/\[요일\]\s*([^,\]\n]+)/);
             if(dM) item.dayInfo = dM[1].trim();
-            let tM = item.option.match(/\[시간\]\s*([^,]+)/);
+            let tM = item.option.match(/\[시간\]\s*([^,\]\n]+)/);
             if(tM) {
                 let tStr = tM[1].trim().replace(/[:시분]/g, '').substring(0,2);
                 if(!isNaN(parseInt(tStr))) item.timeInfo = parseInt(tStr);
@@ -919,21 +971,19 @@
         if(freeUserDb.length > 0) analyzeConversion();
         if(keyboardDb.length > 0) {
             document.getElementById('keyboardSection').style.display = 'block';
-            analyzeKeyboardConversion(); // [신규] 키보드 분석 실행
+            analyzeKeyboardConversion(); 
         } else {
              document.getElementById('keyboardSection').style.display = 'none';
         }
     }
 
-    // [신규] 키보드 구매자 분석 로직
     function analyzeKeyboardConversion() {
         let totalKb = keyboardDb.length;
         let converted = [];
-        let timeToConvert = []; // 소요 시간 (일)
-        let firstClassStats = {}; // 첫 수강 과목
-        let ageStats = {}; // 연령대
+        let timeToConvert = []; 
+        let firstClassStats = {}; 
+        let ageStats = {}; 
         
-        // 결제 내역을 전화번호로 그룹화 (빠른 검색을 위해)
         let payMap = {};
         db.forEach(item => {
             if(!item.isFullCancel && item.phone) {
@@ -942,7 +992,6 @@
             }
         });
         
-        // 정렬: 결제 내역을 날짜순으로 정렬
         Object.keys(payMap).forEach(key => {
             payMap[key].sort((a,b) => a.dateObj - b.dateObj);
         });
@@ -950,7 +999,6 @@
         keyboardDb.forEach(kb => {
             let userPays = payMap[kb.phone];
             if(userPays && userPays.length > 0) {
-                // 구매일 이후 첫 결제 찾기
                 let firstPay = userPays.find(p => p.dateObj >= kb.date);
                 
                 if(firstPay) {
@@ -967,7 +1015,6 @@
 
                     timeToConvert.push(diffDays);
                     
-                    // 첫 수강 과목 통계
                     let cType = firstPay.type;
                     if(cType.includes('PT')) cType = 'PT';
                     else if(cType.includes('올패스')) cType = '올패스';
@@ -976,25 +1023,21 @@
                     
                     firstClassStats[cType] = (firstClassStats[cType] || 0) + 1;
 
-                    // 연령대 통계 (생년월일이 있는 경우)
                     if(kb.birth) {
-                        let bStr = String(kb.birth).trim().replace(/[^0-9]/g, ''); // 숫자만 추출
+                        let bStr = String(kb.birth).trim().replace(/[^0-9]/g, ''); 
                         let fullYear = 0;
 
-                        // 1. 4자리 (예: 1995)
                         if(bStr.length === 4) {
                             fullYear = parseInt(bStr);
                         }
-                        // 2. 2자리 or 6자리 (예: 95, 950101) -> 앞 2자리로 판단
                         else if(bStr.length >= 2) {
                             let yPrefix = parseInt(bStr.substring(0,2));
-                            // 30 이상이면 1900년대, 아니면 2000년대 (학원 특성상 유연하게 적용)
                             fullYear = (yPrefix > 30) ? 1900 + yPrefix : 2000 + yPrefix;
                         }
 
                         if(fullYear > 0) {
                             let currentYear = new Date().getFullYear();
-                            let age = currentYear - fullYear + 1; // 한국나이 계산
+                            let age = currentYear - fullYear + 1; 
                             let ageGroup = Math.floor(age / 10) * 10 + '대';
                             ageStats[ageGroup] = (ageStats[ageGroup] || 0) + 1;
                         } else {
@@ -1007,7 +1050,6 @@
             }
         });
 
-        // 1. KPI 카드 업데이트
         document.getElementById('kbTotal').innerText = totalKb + "명";
         document.getElementById('kbSuccess').innerText = converted.length + "명";
         let rate = totalKb > 0 ? ((converted.length / totalKb) * 100).toFixed(1) : 0;
@@ -1016,7 +1058,6 @@
         let avgDays = timeToConvert.length > 0 ? (timeToConvert.reduce((a,b)=>a+b,0) / timeToConvert.length).toFixed(0) : 0;
         document.getElementById('kbAvgDays').innerText = avgDays + "일";
 
-        // 2. 차트: 소요 시간 분포
         let timeDist = {'1주 이내':0, '1달 이내':0, '3달 이내':0, '3달 이후':0};
         timeToConvert.forEach(d => {
             if(d <= 7) timeDist['1주 이내']++;
@@ -1025,22 +1066,16 @@
             else timeDist['3달 이후']++;
         });
         renderChart('chartKbTime', fromObjToArr(timeDist), '인원', false, ['#ffb7b2', '#ffdac1', '#e2f0cb', '#b5ead7']);
-
-        // 3. 차트: 첫 수강 과목
         renderChart('chartKbClass', fromObjToArr(firstClassStats), '인원', false, ['#a2c2ff', '#95e1d3', '#ff9aa2', '#e0bbe4']);
 
-        // 4. 차트: 연령대 (미확인 제외하고 표시하거나 포함하거나 결정)
-        // 미확인이 너무 많으면 차트가 안 예쁘니, 데이터가 있는 경우만 그리기
         let ageClean = {};
         Object.keys(ageStats).forEach(k => { if(k !== '미확인') ageClean[k] = ageStats[k]; });
         if(Object.keys(ageClean).length > 0) {
              renderChart('chartKbAge', fromObjToArr(ageClean), '인원', true, ['#ffd700', '#ffb7b2', '#a2c2ff', '#95e1d3']);
         } else {
-            // 데이터 없으면 빈 차트
              renderChart('chartKbAge', [], '인원', false);
         }
 
-        // 5. 테이블 명단
         let tb = document.querySelector('#tableKbConversion tbody');
         tb.innerHTML = '';
         converted.forEach(u => {
@@ -1050,11 +1085,7 @@
         });
     }
 
-    // 객체를 차트용 배열로 변환하는 헬퍼
     function fromObjToArr(obj) {
-        let res = {amt:0, cnt:0, list:[]}; // 더미 구조
-        // renderChart 함수가 기존 구조(obj[key].amt 등)를 쓰므로 이에 맞춰 변환하거나
-        // renderChart를 수정하지 않기 위해 데이터를 래핑함
         let wrapper = {};
         Object.keys(obj).forEach(k => {
             wrapper[k] = { cnt: obj[k], amt: 0, list: [] };
@@ -1062,7 +1093,6 @@
         return wrapper;
     }
     
-    // 기존 분석 함수들 (그대로 유지)
     function analyzeConversion() {
         if (freeUserDb.length === 0) return;
 
@@ -1264,7 +1294,6 @@
         renderVip(stu);
     }
 
-    // --- [LTV 분석 기능] ---
     function analyzeLTV() {
         if(db.length === 0) return;
         
@@ -1309,7 +1338,6 @@
         });
     }
 
-    // --- [목표 매출 기능] ---
     function inputNumberFormat(obj) {
         obj.value = comma(uncomma(obj.value));
     }
@@ -1348,7 +1376,6 @@
         }
     }
 
-    // --- [성과 비교 기능] ---
     function openCompareModal() {
         if(monthList.size < 2) { alert("비교할 데이터가 충분하지 않습니다 (2개월 이상 필요)"); return; }
         
@@ -1406,7 +1433,6 @@
         });
     }
 
-    // --- [자동 보고서 생성 기능] ---
     function generateReport() {
         const mon = document.getElementById('monthFilter').value;
         if(mon === 'all') { alert("특정 월을 선택한 후 보고서를 생성해주세요."); return; }
@@ -1454,7 +1480,6 @@
         alert("보고서 내용이 복사되었습니다.");
     }
 
-    // --- [기존 차트 렌더링 함수들] ---
     function addCnt(obj, key, item) {
         if(!key) return;
         if(!obj[key]) obj[key] = {amt:0, cnt:0, list:[]};
@@ -1489,7 +1514,6 @@
     }
 
     function renderChart(id, obj, metric, isTimeSort=false, colors) {
-        // 기존 로직 대응: obj가 함수형태인 경우를 위해 keys 추출
         let keys = Object.keys(obj);
         if(isTimeSort) keys.sort((a,b) => parseInt(a) - parseInt(b));
         else keys.sort((a,b) => metric==='매출'?obj[b].amt-obj[a].amt : obj[b].cnt-obj[a].cnt);
