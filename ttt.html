@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHORTHAND PRO - 통합 채점판</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        :root {
+            --bg-body: #F0F4F8;
+            --primary: #6C5CE7; 
+            --text-dark: #2D3436; 
+            --white: #FFFFFF;
+            --shadow-card: 0 4px 20px rgba(0,0,0,0.03);
+            --radius-card: 24px;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-dark); margin: 0; padding: 40px;
+            display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box;
+        }
+
+        .container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 20px; }
+
+        .page-header { text-align: center; margin-bottom: 20px; }
+        .page-header h2 { font-size: 2rem; font-weight: 800; margin: 0; color: var(--primary); }
+        .page-header p { color: #636E72; margin: 10px 0 0 0; }
+
+        .card-box {
+            background: var(--white); border-radius: var(--radius-card); padding: 30px;
+            box-shadow: var(--shadow-card); border: 1px solid #DCE0E5;
+        }
+
+        .label-badge { 
+            display: inline-block; background: #EEEBFF; color: var(--primary); 
+            padding: 6px 14px; border-radius: 8px; font-weight: 800; font-size: 0.95rem; 
+            border: 1px solid #D1C4E9; margin-bottom: 10px;
+        }
+
+        .styled-textarea {
+            width: 100%; height: 200px; padding: 20px; 
+            border: 2px solid #E1E4E8; border-radius: 16px;
+            resize: vertical; font-size: 1.1rem; line-height: 1.8; box-sizing: border-box; outline: none;
+            transition: 0.2s; font-family: 'Pretendard', sans-serif; background: #FFFEFC; margin-bottom: 20px;
+        }
+        .styled-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1); background: white; }
+
+        .btn-primary {
+            background: var(--primary); color: white; border: none; padding: 18px 30px;
+            border-radius: 16px; font-size: 1.2rem; font-weight: 800; cursor: pointer;
+            width: 100%; transition: 0.2s; box-shadow: 0 10px 20px rgba(108, 92, 231, 0.2);
+        }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(108, 92, 231, 0.3); }
+
+        /* 결과 화면 스타일 */
+        .result-header {
+            display: flex; justify-content: space-between; align-items: center; 
+            background: #F8F9FA; border-radius: 16px; padding: 20px; margin-bottom: 20px;
+        }
+        .score-display { font-size: 3rem; font-weight: 900; color: var(--primary); line-height: 1; }
+        
+        .stat-badge {
+            display: inline-flex; align-items: center; padding: 5px 10px; border-radius: 8px; 
+            font-weight: bold; font-size: 0.9rem; margin-right: 5px; color: white;
+        }
+
+        .diff-view { 
+            background: #fff; padding: 30px; border: 2px solid #E1E4E8; border-radius: 16px; 
+            font-size: 1.2rem; line-height: 2.2; white-space: pre-wrap; word-break: break-all;
+        }
+        
+        /* 에러 스타일 */
+        .d-missing { background: #FFEBEE; color: #FF7675; padding: 2px 5px; border-radius: 4px; font-weight: bold; }
+        .d-added { color: #00B894; font-weight: bold; text-decoration: underline; }
+        .d-wrong { border-bottom: 2px solid var(--primary); position: relative; font-weight: bold; color: var(--primary); cursor: help; }
+        .correction { 
+            position: absolute; top: -1.4em; left: 0; font-size: 0.7em; line-height: 1;
+            color: white; background: var(--primary); padding: 3px 6px; border-radius: 5px; white-space: nowrap;
+        }
+        
+        /* 띄어쓰기 에러 스타일 */
+        .space-missed {
+            color: #ff0000; font-weight: 900; font-size: 0.8em; 
+            margin: 0 2px; vertical-align: middle;
+        }
+        .space-added {
+            background-color: #ffcccc; border-bottom: 2px solid #ff0000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="page-header">
+        <h2>⚡ SHORTHAND PRO</h2>
+        <p>띄어쓰기도 점수(%)에 정확히 반영됩니다.</p>
+    </div>
+
+    <div class="card-box">
+        <div>
+            <span class="label-badge">📄 정답(원본) 텍스트</span>
+            <textarea id="original" class="styled-textarea" placeholder="여기에 정답 내용을 붙여넣으세요."></textarea>
+        </div>
+        <div>
+            <span class="label-badge" style="background:#FFF3E0; color:#FF9800; border-color:#FFE0B2;">✍️ 내 입력 (타이핑)</span>
+            <textarea id="student" class="styled-textarea" placeholder="여기에 작성한 내용을 붙여넣으세요."></textarea>
+        </div>
+        <button onclick="analyze()" class="btn-primary">💯 채점하기</button>
+    </div>
+
+    <div id="resultArea" class="card-box" style="display:none;">
+        <div class="result-header">
+            <div>
+                <div style="font-size:0.9rem; color:#888; margin-bottom:5px;">통합 정확도</div>
+                <div id="scoreVal" class="score-display">0%</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="margin-bottom: 10px;">
+                    <span class="stat-badge" style="background:#FF7675;">오자 <span id="wCnt">0</span></span>
+                    <span class="stat-badge" style="background:#B2BEC3;">탈자 <span id="mCnt">0</span></span>
+                    <span class="stat-badge" style="background:#00B894;">첨자 <span id="aCnt">0</span></span>
+                </div>
+                <div>
+                    <span class="stat-badge" style="background:#636E72; border:1px solid #ddd;">띄어쓰기 오류 <span id="sCnt">0</span>개</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 style="margin:0 0 15px 0; color:#555;">📝 상세 분석 결과</h3>
+        <div style="font-size:0.9rem; color:#666; margin-bottom:10px;">
+            범례: <span style="color:red; font-weight:bold;">∨</span> (띄어쓰기 안함), <span style="background:#ffcccc; border-bottom:1px solid red;">&nbsp;&nbsp;</span> (불필요한 띄어쓰기)
+        </div>
+        <div id="diffOutput" class="diff-view"></div>
+    </div>
+</div>
+
+<script>
+function toHtmlChar(ch) {
+    if (ch === " ") return "&nbsp;";
+    if (ch === "\n") return "<br>";
+    return ch.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function analyze() {
+    const rawO = document.getElementById('original').value;
+    const rawS = document.getElementById('student').value;
+
+    if(!rawO.trim()) { alert("정답 텍스트를 입력해주세요!"); return; }
+    if(!rawS.trim()) { alert("내 입력 텍스트를 입력해주세요!"); return; }
+
+    const isSpecial = (char) => /[^0-9a-zA-Z\uAC00-\uD7A3]/.test(char);
+    
+    // 1. 순수 글자수 계산 (공백 제외한 한글/영어/숫자 개수) -> 분모
+    let pureLength = rawO.replace(/[^0-9a-zA-Z\uAC00-\uD7A3]/g, '').length;
+    if(pureLength === 0) pureLength = 1;
+
+    let oArr = rawO.split(''); 
+    let sArr = rawS.split('');
+    let n = oArr.length;
+    let m = sArr.length;
+    
+    // 2. LCS 알고리즘
+    let dp = Array.from(Array(n + 1), () => Array(m + 1).fill(0));
+    for (let i = 1; i <= n; i++) {
+        for (let j = 1; j <= m; j++) {
+            if (oArr[i-1] === sArr[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+            else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+        }
+    }
+
+    let i = n, j = m, diffs = [];
+    while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && oArr[i-1] === sArr[j-1]) { diffs.push({ t: 'same', c: oArr[i-1] }); i--; j--; } 
+        else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) { diffs.push({ t: 'added', c: sArr[j-1] }); j--; } 
+        else { diffs.push({ t: 'missing', c: oArr[i-1] }); i--; }
+    }
+    diffs.reverse();
+
+    // 3. 비교 분석 및 오답 카운팅
+    let html = "";
+    let w=0, mi=0, ad=0, spErr=0;
+    let mBuffer = [], aBuffer = []; 
+
+    function flushBuffer() {
+        let mIdx = 0, aIdx = 0;
+        while (mIdx < mBuffer.length || aIdx < aBuffer.length) {
+            let mChar = (mIdx < mBuffer.length) ? mBuffer[mIdx] : null;
+            let aChar = (aIdx < aBuffer.length) ? aBuffer[aIdx] : null;
+
+            // [띄어쓰기 채점 로직]
+            // Case 1: 띄어쓰기 안함 (탈자)
+            if (mChar === ' ' && (aChar === null || aChar !== ' ')) {
+                html += `<span class="space-missed" title="띄어쓰기 필요">∨</span>`;
+                spErr++; mIdx++; continue;
+            }
+            // Case 2: 불필요한 띄어쓰기 (첨자)
+            if (aChar === ' ' && (mChar === null || mChar !== ' ')) {
+                html += `<span class="space-added" title="불필요한 공백">&nbsp;</span>`;
+                spErr++; aIdx++; continue;
+            }
+
+            // 특수문자 건너뛰기
+            if (mChar && isSpecial(mChar)) { html += `<span>${toHtmlChar(mChar)}</span>`; mIdx++; continue; }
+            if (aChar && isSpecial(aChar)) { html += `<span style="color:#ccc;">${toHtmlChar(aChar)}</span>`; aIdx++; continue; }
+
+            // 오자 (Wrong)
+            if (mChar && aChar) { 
+                html += `<span class="d-wrong">${toHtmlChar(aChar)}<span class="correction">${toHtmlChar(mChar)}</span></span>`;
+                w++; mIdx++; aIdx++; continue;
+            }
+            // 탈자 (Missing)
+            if (mChar) { 
+                html += `<span class="d-missing">${toHtmlChar(mChar)}</span>`;
+                mi++; mIdx++; continue;
+            }
+            // 첨자 (Added)
+            if (aChar) { 
+                html += `<span class="d-added">${toHtmlChar(aChar)}</span>`;
+                ad++; aIdx++; continue;
+            }
+        }
+        mBuffer = []; aBuffer = [];
+    }
+
+    for (let k = 0; k < diffs.length; k++) {
+        let item = diffs[k];
+        if (item.t === 'same') { 
+            flushBuffer();
+            html += (item.c === '\n') ? '<br>' : `<span>${toHtmlChar(item.c)}</span>`;
+        } 
+        else if (item.t === 'missing') { mBuffer.push(item.c); } 
+        else if (item.t === 'added') { aBuffer.push(item.c); }
+    }
+    flushBuffer(); 
+
+    // 4. [수정됨] 최종 점수 계산 (비율 방식)
+    // 총 감점 = 오자 + 탈자 + (첨자/3) + 띄어쓰기오류
+    let adPenalty = Math.floor(ad / 3);
+    let totalDeduction = w + mi + adPenalty + spErr;
+    
+    let finalScore = 0;
+    if (pureLength > 0) {
+        finalScore = ((pureLength - totalDeduction) / pureLength) * 100;
+    }
+    
+    if (finalScore < 0) finalScore = 0;
+
+    // UI 업데이트
+    document.getElementById('scoreVal').innerText = finalScore.toFixed(1) + "%";
+    document.getElementById('wCnt').innerText = w + "개";
+    document.getElementById('mCnt').innerText = mi + "개";
+    document.getElementById('aCnt').innerText = ad + "개";
+    document.getElementById('sCnt').innerText = spErr + "개"; // 횟수가 아닌 개수로 표기
+    
+    document.getElementById('diffOutput').innerHTML = html;
+    document.getElementById('resultArea').style.display = 'block';
+    document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
