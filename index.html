@@ -15,7 +15,8 @@
             --pastel-blue: #a2c2ff;
             --pastel-mint: #95e1d3;
             --pastel-purple: #c7ceea;
-            --pastel-orange: #ffccbc; /* 면접 도구용 신규 색상 */
+            --pastel-orange: #ffccbc;
+            --pastel-red: #ef9a9a; /* 채점 도구용 신규 색상 */
             --text-main: #4a4a4a;
             --text-sub: #666666; 
             --border-line: #f0ebeb; 
@@ -107,7 +108,8 @@
         .marker-theme .icon-circle { background-color: #f0f4ff; color: #a2c2ff; }
         .splitter-theme .icon-circle { background-color: #f0fff4; color: #95e1d3; }
         .analysis-theme .icon-circle { background-color: #f5f3ff; color: #c7ceea; }
-        .interview-theme .icon-circle { background-color: #fff3e0; color: #ffab91; } /* 면접용 신규 */
+        .interview-theme .icon-circle { background-color: #fff3e0; color: #ffab91; }
+        .grading-theme .icon-circle { background-color: #ffebee; color: #ef5350; } /* 채점용 신규 (파스텔 레드) */
 
         .tool-card h3 { margin: 0 0 10px 0; font-size: 1.35rem; color: #333; font-weight: bold; }
         .tool-card p { margin: 0; color: #666; font-size: 0.95rem; line-height: 1.55; word-break: keep-all; }
@@ -127,7 +129,8 @@
         .marker-theme .launch-btn { background: #f0f4ff; color: #8cb6ff; }
         .splitter-theme .launch-btn { background: #f0fff4; color: #71d8c4; }
         .analysis-theme .launch-btn { background: #f5f3ff; color: #a59ad1; }
-        .interview-theme .launch-btn { background: #fff3e0; color: #ff8a65; } /* 면접용 신규 */
+        .interview-theme .launch-btn { background: #fff3e0; color: #ff8a65; }
+        .grading-theme .launch-btn { background: #ffebee; color: #ef5350; } /* 채점용 신규 */
 
         .tool-card:hover .launch-btn { font-weight: bold; opacity: 0.8; }
 
@@ -148,6 +151,7 @@
         </a>
         <div class="nav-links">
             <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>홈</span></a>
+            <a href="ttt.html" class="nav-item"><i class="fa-solid fa-check-double"></i><span>채점기</span></a>
             <a href="marker.html" class="nav-item"><i class="fa-solid fa-highlighter"></i><span>약어표시</span></a>
             <a href="splitter.html" class="nav-item"><i class="fa-solid fa-align-left"></i><span>분할</span></a>
             <a href="money.html" class="nav-item"><i class="fa-solid fa-chart-line"></i><span>매출분석</span></a>
@@ -161,6 +165,15 @@
 
     <div class="grid-container">
         
+        <div class="tool-card grading-theme" onclick="location.href='ttt.html'" style="cursor: pointer;">
+            <div>
+                <div class="icon-circle"><i class="fa-solid fa-check-double"></i></div>
+                <h3>똑소리 채점</h3>
+                <p>정답과 내 기록을 비교하여 정확도(%)를 계산하고 띄어쓰기까지 꼼꼼하게 채점해요.</p>
+            </div>
+            <span class="launch-btn">도구 열기 <i class="fa-solid fa-chevron-right" style="font-size:0.8em;"></i></span>
+        </div>
+
         <div class="tool-card marker-theme" onclick="location.href='marker.html'" style="cursor: pointer;">
             <div>
                 <div class="icon-circle"><i class="fa-solid fa-highlighter"></i></div>
