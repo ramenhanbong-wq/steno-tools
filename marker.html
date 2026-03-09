@@ -8,6 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
@@ -126,7 +127,8 @@
 
         .btn-blue { background-color: var(--theme-deep); }
         .btn-gray { background-color: #999; }
-        .btn-green { background-color: #67b0d1; } /* HTML 저장용 포인트 컬러 */
+        .btn-green { background-color: #67b0d1; }
+        .btn-red { background-color: #e63946; }
 
         h3 {
             font-size: 1.2rem; color: var(--theme-deep);
@@ -233,6 +235,9 @@
             <button class="btn btn-green" onclick="saveAsHTML()">
                 <i class="fa-solid fa-download"></i> 결과 HTML 저장
             </button>
+            <button class="btn btn-red" onclick="saveAsPDF()">
+                <i class="fa-solid fa-file-pdf"></i> 본문 PDF 저장
+            </button>
             <button class="btn btn-gray" onclick="window.print()">
                 <i class="fa-solid fa-print"></i> PDF / 인쇄
             </button>
@@ -262,7 +267,6 @@
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
                 const list = rows.map(row => row[0]).filter(val => val && val.toString().length > 1);
-                // 엑셀 로딩 시에는 대략적인 정렬만 수행
                 list.sort((a, b) => b.toString().length - a.toString().length);
                 resolve(list);
             };
@@ -291,7 +295,6 @@
         abbreviations = await loadExcel(excelFileInput);
         let text = await loadText(textFileInput);
 
-        // 1. 빈도수 통계 (기존 로직 유지)
         const counts = {};
         abbreviations.forEach(abbr => {
             const escapedAbbr = abbr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -337,25 +340,17 @@
         document.getElementById('statsTitle').innerHTML = `<i class="fa-solid fa-list-ol"></i> 빈출 약어 리스트 (${minFreq}회 이상)`;
         document.getElementById('statsTable').innerHTML = tableHtml;
 
-        // 2. 본문 하이라이트 (로직 완전 변경)
-        // 약어들을 글자 수 긴 순서로 정렬합니다. (긴 단어가 먼저 매칭되도록)
-        // 예: "국제회의" vs "국제" -> "국제회의"가 먼저 패턴에 걸림
         let textAbbrs = Object.keys(counts).sort((a, b) => b.length - a.length);
 
         if (textAbbrs.length > 0) {
-            // 모든 약어를 OR(|) 조건으로 묶은 거대한 정규식 하나를 만듭니다.
-            // 정규식 엔진은 왼쪽부터 텍스트를 읽다가 매칭되는 것이 있으면 즉시 처리하고 건너뜁니다.
             const escapedAbbrs = textAbbrs.map(abbr => abbr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
             const masterRegex = new RegExp(`(${escapedAbbrs.join('|')})`, 'g');
 
-            // 한 번의 패스로 치환을 수행합니다.
-            // "변화는"에서 "변화"가 먼저 매칭되면 치환되고, 커서는 "는"으로 이동하므로 "화는"은 매칭되지 않습니다.
             text = text.replace(masterRegex, (match) => {
                 return `<span class="highlight">${match}</span>`;
             });
         }
 
-        // 줄바꿈 처리
         text = text.replace(/\n/g, '<br>');
 
         document.getElementById('textContent').innerHTML = text;
@@ -367,7 +362,6 @@
         statsSec.scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 결과 HTML 저장 함수
     function saveAsHTML() {
         const statsTable = document.getElementById('statsTable').innerHTML;
         const textContent = document.getElementById('textContent').innerHTML;
@@ -419,6 +413,44 @@
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    function saveAsPDF() {
+        const textContent = document.getElementById('textContent').innerHTML;
+
+        if (!textContent) {
+            alert("⚠️ 먼저 '분석 및 자료 생성' 버튼을 눌러 데이터를 처리해 주세요.");
+            return;
+        }
+
+        const printDiv = document.createElement('div');
+        printDiv.innerHTML = textContent;
+        
+        printDiv.style.lineHeight = "1.6"; 
+        printDiv.style.fontSize = "11pt";
+        printDiv.style.fontFamily = "'Pretendard', 'Gowun Dodum', 'Noto Sans KR', sans-serif";
+        printDiv.style.padding = "20px";
+        printDiv.style.whiteSpace = "pre-wrap";
+        printDiv.style.wordBreak = "break-all";
+        printDiv.style.color = "#333";
+
+        const highlights = printDiv.querySelectorAll('.highlight');
+        highlights.forEach(el => {
+            el.style.color = "#e63946";
+            el.style.backgroundColor = "#fff3cd";
+            el.style.fontWeight = "700";
+            el.style.padding = "0 2px";
+        });
+
+        const opt = {
+            margin:       15,
+            filename:     `약어표시_본문_${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(printDiv).save();
     }
 </script>
 
