@@ -128,7 +128,7 @@
         .btn-blue { background-color: var(--theme-deep); }
         .btn-gray { background-color: #999; }
         .btn-green { background-color: #67b0d1; }
-        .btn-red { background-color: #e63946; }
+        .btn-red { background-color: #e63946; } /* PDF 버튼용 컬러 */
 
         h3 {
             font-size: 1.2rem; color: var(--theme-deep);
@@ -426,27 +426,39 @@
         const printDiv = document.createElement('div');
         printDiv.innerHTML = textContent;
         
-        printDiv.style.lineHeight = "1.6"; 
+        // 🚨 핵심 수정: html2canvas 렌더링 버그의 주범인 양쪽 정렬(justify) 완벽 차단
+        printDiv.style.textAlign = "left"; 
+        
+        // 텍스트 서식 안정화
+        printDiv.style.lineHeight = "1.8"; 
         printDiv.style.fontSize = "11pt";
         printDiv.style.fontFamily = "'Pretendard', 'Gowun Dodum', 'Noto Sans KR', sans-serif";
         printDiv.style.padding = "20px";
         printDiv.style.whiteSpace = "pre-wrap";
-        printDiv.style.wordBreak = "break-all";
+        printDiv.style.wordBreak = "keep-all"; // 단어 단위 줄바꿈
         printDiv.style.color = "#333";
 
+        // 형광펜 서식 강제 고정 (인라인 요소 흩뿌림 방지)
         const highlights = printDiv.querySelectorAll('.highlight');
         highlights.forEach(el => {
             el.style.color = "#e63946";
             el.style.backgroundColor = "#fff3cd";
             el.style.fontWeight = "700";
-            el.style.padding = "0 2px";
+            el.style.display = "inline"; 
+            el.style.padding = "0";
+            el.style.boxDecorationBreak = "clone";
+            el.style.WebkitBoxDecorationBreak = "clone";
         });
 
         const opt = {
             margin:       15,
             filename:     `약어표시_본문_${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
+            html2canvas:  { 
+                scale: 2, 
+                letterRendering: true, // 글자 렌더링 품질 향상
+                useCORS: true 
+            },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
